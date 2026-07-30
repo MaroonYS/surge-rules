@@ -1,0 +1,62 @@
+{
+  "repository": "MaroonYS/surge-rules",
+  "branch": "main",
+  "main": "surge-main.conf",
+  "active": [
+    {
+      "file": "apple-ai.conf",
+      "policy": "Apple-AI",
+      "description": "Apple Intelligence, Siri and Private Cloud Compute"
+    },
+    {
+      "file": "direct-cn.conf",
+      "policy": "DIRECT",
+      "description": "Mainland China banks and UnionPay"
+    },
+    {
+      "file": "hk-finance.conf",
+      "policy": "HK-FINANCE",
+      "description": "Hong Kong financial services"
+    },
+    {
+      "file": "sg-finance.conf",
+      "policy": "SG-FINANCE",
+      "description": "Singapore financial services"
+    },
+    {
+      "file": "jp-finance.conf",
+      "policy": "JP-FINANCE",
+      "description": "Japan financial services"
+    },
+    {
+      "file": "kr-finance.conf",
+      "policy": "KR-FINANCE",
+      "description": "Korea financial services"
+    },
+    {
+      "file": "uk-finance.conf",
+      "policy": "UK-FINANCE",
+      "description": "United Kingdom financial services"
+    },
+    {
+      "file": "us-residential.conf",
+      "policy": "Res-Frontier",
+      "description": "United States first-party financial services"
+    },
+    {
+      "file": "finance-context.conf",
+      "policy": "Finance",
+      "description": "Financial services whose region cannot be inferred from the domain"
+    },
+    {
+      "file": "crypto.conf",
+      "policy": "Crypto",
+      "description": "Centralized cryptocurrency exchanges"
+    },
+    {
+      "file": "web3.conf",
+      "policy": "Web3",
+      "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
+    }
+  ]
+}

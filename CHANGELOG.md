@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 - 2026-07-30
+
+- Replaced the broad Polymarket keyword with the official `.com` and `.us` suffixes.
+- Added six exact Private Relay endpoints before the updateable remote set.
+- Moved specific service, platform and download rules before broad rejection lists.
+- Moved Telegram and streaming IP rules before the general IP rejection list.
+- Added CI guards against broad shared suffixes and unapproved keyword rules.
+- Added a requirement-by-requirement implementation matrix.
+
 ## 1.0.0 - 2026-07-30
 
 - Split the monolithic Surge rule section into 11 policy-oriented DOMAIN-SET files.

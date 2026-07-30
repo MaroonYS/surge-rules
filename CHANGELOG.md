@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.4.0 - 2026-07-30
+
+- Added separate `Identity` and `Risk` DOMAIN-SET layers with copy-ready stable policy groups.
+- Added four selected US identity and clearing services to the residential set and narrowed ICBC to its mainland domain.
+- Kept GitHub API traffic out of the generic AI policy and removed the broad cr18 keyword.
+- Removed reject-drop pre-matching so explicit financial and identity rules retain priority.
+- Removed invalid or already-covered Adblock entries and added a second SKK baseline.
+- Added immutable commit Raw checks, production deployment checks and live Adblock validation to PR CI.
+- Added a secret-safe full-profile policy and stability checker.
+
+## 1.3.0 - 2026-07-30
+
+- Replaced broad Polymarket keyword matching with three precise DOMAIN-SET entries.
+- Corrected the SukkaW reject stack order and per-resource matching parameters.
+- Replaced the deprecated Apple CDN resource and removed empty or redundant Streaming resources.
+- Restored upstream-controlled IP resolution semantics, including China IP hostname resolution.
+- Added high-confidence first-party regional financial domains and removed shared risk infrastructure from the US residential set.
+- Added a policy-free, deduplicated Adblock4limbo supplement with MIT attribution and source hashes.
+- Upgraded upstream checks from a one-byte probe to full payload, format, sentinel, deprecation and embedded-policy validation.
+
 ## 1.2.0 - 2026-07-30
 
 - Restored the exact requested 17-section rule order and policy names.

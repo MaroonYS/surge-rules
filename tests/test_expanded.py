@@ -29,8 +29,8 @@ class ExpandedRuleTests(unittest.TestCase):
             f"{expected} DOMAIN-SET entries expanded inline",
             rendered,
         )
-        self.assertEqual(11, rendered.count("# BEGIN "))
-        self.assertEqual(11, rendered.count("# END "))
+        self.assertEqual(len(bindings), rendered.count("# BEGIN "))
+        self.assertEqual(len(bindings), rendered.count("# END "))
         self.assertNotIn(
             "raw.githubusercontent.com/MaroonYS/surge-rules/main/",
             rendered,

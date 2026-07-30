@@ -6,6 +6,11 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "polymarket.conf",
+      "policy": "Res-Frontier",
+      "description": "Polymarket first-party domains and exact authentication tenant"
+    },
+    {
       "file": "apple-ai.conf",
       "policy": "AIGC",
       "description": "Apple Intelligence, Siri and Private Cloud Compute"
@@ -51,6 +56,16 @@
       "description": "Financial services whose region cannot be inferred from the domain"
     },
     {
+      "file": "identity-context.conf",
+      "policy": "Identity",
+      "description": "Shared KYC and identity verification services"
+    },
+    {
+      "file": "risk-context.conf",
+      "policy": "Identity",
+      "description": "Shared device fingerprinting and fraud prevention services"
+    },
+    {
       "file": "crypto.conf",
       "policy": "Crypto",
       "description": "Centralized cryptocurrency exchanges"
@@ -59,6 +74,11 @@
       "file": "web3.conf",
       "policy": "Web3",
       "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
+    },
+    {
+      "file": "adblock4limbo-supplement.conf",
+      "policy": "REJECT",
+      "description": "Precise Adblock4limbo domains not already covered by the SKK reject DOMAIN-SET"
     }
   ]
 }

@@ -30,9 +30,116 @@ FORBIDDEN_SUFFIXES = {
     "icloud.com",
     "microsoft.com",
 }
-ALLOWED_KEYWORD_RULES = {
-    "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
-    "DOMAIN-KEYWORD,polymarket,Res-Frontier,extended-matching",
+ALLOWED_KEYWORD_RULES: set[str] = set()
+SENSITIVE_POLICIES = {"Finance", "Identity", "Res-Frontier"}
+ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
+    ("us-residential.conf", "Res-Frontier", "apexclearing.com"),
+    ("us-residential.conf", "Res-Frontier", "earlywarning.com"),
+    ("us-residential.conf", "Res-Frontier", "id.me"),
+    ("us-residential.conf", "Res-Frontier", "login.gov"),
+    ("identity-context.conf", "Identity", "socure.com"),
+    ("identity-context.conf", "Identity", "socure.co"),
+    ("identity-context.conf", "Identity", "withpersona.com"),
+    ("identity-context.conf", "Identity", "persona.com"),
+    ("identity-context.conf", "Identity", "jumio.com"),
+    ("identity-context.conf", "Identity", "netverify.com"),
+    ("identity-context.conf", "Identity", "onfido.com"),
+    ("identity-context.conf", "Identity", "trulioo.com"),
+    ("identity-context.conf", "Identity", "idology.com"),
+    ("identity-context.conf", "Identity", "au10tix.com"),
+    ("identity-context.conf", "Identity", "alloy.com"),
+    ("identity-context.conf", "Identity", "sentilink.com"),
+    ("identity-context.conf", "Identity", "middesk.com"),
+    ("identity-context.conf", "Identity", "prove.com"),
+    ("identity-context.conf", "Identity", "proveidentity.com"),
+    ("identity-context.conf", "Identity", "miteksystems.com"),
+    ("identity-context.conf", "Identity", "mitekcloud.com"),
+    ("identity-context.conf", "Identity", "veriff.com"),
+    ("identity-context.conf", "Identity", "sumsub.com"),
+    ("identity-context.conf", "Identity", "vouched.id"),
+    ("identity-context.conf", "Identity", "ekata.com"),
+    ("risk-context.conf", "Identity", "sardine.ai"),
+    ("risk-context.conf", "Identity", "sift.com"),
+    ("risk-context.conf", "Identity", "siftcdn.net"),
+    ("risk-context.conf", "Identity", "online-metrix.net"),
+    ("risk-context.conf", "Identity", "threatmetrix.com"),
+    ("risk-context.conf", "Identity", "iovation.com"),
+    ("risk-context.conf", "Identity", "iovation.io"),
+    ("risk-context.conf", "Identity", "biocatch.com"),
+    ("risk-context.conf", "Identity", "fingerprint.com"),
+    ("risk-context.conf", "Identity", "fingerprintjs.com"),
+    ("risk-context.conf", "Identity", "riskified.com"),
+    ("risk-context.conf", "Identity", "forter.com"),
+    ("risk-context.conf", "Identity", "castle.io"),
+    ("risk-context.conf", "Identity", "seon.io"),
+    ("risk-context.conf", "Identity", "incognia.com"),
+}
+SHARED_INFRASTRUCTURE_SUFFIXES = {
+    "akoya.com",
+    "alloy.com",
+    "apexclearing.com",
+    "argyle.com",
+    "arkoselabs.com",
+    "au10tix.com",
+    "biocatch.com",
+    "castle.io",
+    "clarityservices.com",
+    "consumerdebit.com",
+    "corelogic.com",
+    "datadome.co",
+    "dataxltd.com",
+    "earlywarning.com",
+    "ekata.com",
+    "factortrust.com",
+    "fingerprint.com",
+    "fingerprintjs.com",
+    "finicity.com",
+    "forter.com",
+    "funcaptcha.com",
+    "hcaptcha.com",
+    "humansecurity.com",
+    "id.me",
+    "idology.com",
+    "incognia.com",
+    "iovation.com",
+    "iovation.io",
+    "jumio.com",
+    "lexisnexisrisk.com",
+    "login.gov",
+    "microbilt.com",
+    "middesk.com",
+    "mitekcloud.com",
+    "miteksystems.com",
+    "mx.com",
+    "netverify.com",
+    "onfido.com",
+    "online-metrix.net",
+    "perimeterx.net",
+    "persona.com",
+    "plaid.com",
+    "plaidcdn.com",
+    "prove.com",
+    "proveidentity.com",
+    "riskified.com",
+    "sagestreamllc.com",
+    "sardine.ai",
+    "seon.io",
+    "sentilink.com",
+    "sift.com",
+    "siftcdn.net",
+    "socure.co",
+    "socure.com",
+    "squareup.com",
+    "stripe.com",
+    "stripe.network",
+    "sumsub.com",
+    "teletrack.com",
+    "threatmetrix.com",
+    "trulioo.com",
+    "veriff.com",
+    "vouched.id",
+    "withpersona.com",
+    "yodlee.com",
 }
 
 
@@ -448,6 +555,35 @@ def detect_active_overlaps(
                 report(owner, entry, "CROSS_FILE_OVERLAP")
 
 
+def detect_shared_infrastructure(
+    entries: Sequence[DomainEntry], diagnostics: list[Diagnostic]
+) -> None:
+    for entry in entries:
+        if (
+            entry.policy in SENSITIVE_POLICIES
+            and entry.suffix
+            and entry.domain in SHARED_INFRASTRUCTURE_SUFFIXES
+            and (
+                entry.path,
+                entry.policy,
+                entry.domain,
+            )
+            not in ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES
+        ):
+            _diag(
+                diagnostics,
+                "error",
+                "SHARED_INFRASTRUCTURE",
+                entry.path,
+                entry.line,
+                (
+                    f"{entry.raw} is shared infrastructure and must not be "
+                    f"globally pinned to {entry.policy}; add only an observed "
+                    "first-party host if a narrow exception is required"
+                ),
+            )
+
+
 def _read_main_rules(
     root: Path, relative: str, diagnostics: list[Diagnostic]
 ) -> list[tuple[int, str]]:
@@ -722,21 +858,6 @@ def validate_main_rules(
                 line_number,
                 "DOMAIN-KEYWORD is too broad; use DOMAIN, DOMAIN-SUFFIX or DOMAIN-SET",
             )
-        if (
-            len(fields) >= 2
-            and fields[0] == "RULE-SET"
-            and "/ip/" in fields[1]
-            and "no-resolve" not in fields[3:]
-        ):
-            _diag(
-                diagnostics,
-                "error",
-                "IP_NO_RESOLVE",
-                relative,
-                line_number,
-                "IP RULE-SET must include no-resolve",
-            )
-
     by_file: dict[str, list[tuple[int, str]]] = {}
     for line_number, file_name, policy in references:
         by_file.setdefault(file_name, []).append((line_number, policy))
@@ -789,14 +910,14 @@ def validate_main_rules(
         ("STUN", lambda value: value == "PROTOCOL,STUN,REJECT"),
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
         ("LAN", lambda value: value.startswith("RULE-SET,LAN,")),
-        ("Polymarket", lambda value: value.startswith("DOMAIN-KEYWORD,polymarket,")),
+        ("Polymarket", lambda value: "polymarket.conf" in value),
         ("Private Relay", lambda value: "icloud_private_relay.conf" in value),
         ("Apple AI", lambda value: "apple-ai.conf" in value),
         ("DIRECT CN", lambda value: "direct-cn.conf" in value),
         ("SYSTEM", lambda value: value == "RULE-SET,SYSTEM,DIRECT"),
         ("Reject", lambda value: "/domainset/reject.conf" in value),
         ("Dedicated services", lambda value: "Emby.list" in value),
-        ("Platform", lambda value: "/non_ip/apple_cdn.conf" in value),
+        ("Platform", lambda value: "/domainset/apple_cdn.conf" in value),
         ("Download", lambda value: "/domainset/speedtest.conf" in value),
         ("Domestic", lambda value: "/non_ip/domestic.conf" in value),
         ("IP", lambda value: "/ip/reject.conf" in value),
@@ -908,6 +1029,7 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
             )
 
     detect_active_overlaps(active_entries, diagnostics)
+    detect_shared_infrastructure(active_entries, diagnostics)
     main_rule_count, references = validate_main_rules(
         root,
         main,

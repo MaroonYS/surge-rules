@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0 - 2026-07-30
+
+- Restored the exact requested 17-section rule order and policy names.
+- Added a machine-readable contract that rejects any missing, extra, reordered or changed rule.
+- Restored STUN rejection and both required keyword rules.
+- Routed Private Relay through `Apple` and Apple Intelligence through `AIGC`.
+- Moved Apple Cash/Pay and PayPal into the United States DOMAIN-SET.
+
+## 1.1.1 - 2026-07-30
+
+- Added a generated `surge-expanded.conf` with every active DOMAIN-SET entry restored inline.
+- Added a deterministic generator and CI equivalence check for compact and expanded rules.
+
 ## 1.1.0 - 2026-07-30
 
 - Replaced the broad Polymarket keyword with the official `.com` and `.us` suffixes.

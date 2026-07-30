@@ -1,0 +1,155 @@
+{
+  "sections": [
+    {
+      "number": 1,
+      "title": "协议和局域网",
+      "rules": [
+        "PROTOCOL,STUN,REJECT",
+        "PROTOCOL,MTProto,Telegram",
+        "RULE-SET,LAN,DIRECT,no-resolve"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "必须最优先匹配的特殊服务",
+      "rules": [
+        "DOMAIN-KEYWORD,polymarket,Res-Frontier,extended-matching"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "iCloud Private Relay",
+      "rules": [
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,Apple,extended-matching"
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Apple Intelligence / Siri / PCC",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-ai.conf,AIGC,extended-matching"
+      ]
+    },
+    {
+      "number": 5,
+      "title": "中国大陆银行",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/direct-cn.conf,DIRECT,extended-matching"
+      ]
+    },
+    {
+      "number": 6,
+      "title": "分地区金融",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,HK-FINANCE,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/sg-finance.conf,SG-FINANCE,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,JP-FINANCE,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,KR-FINANCE,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/uk-finance.conf,UK-FINANCE,extended-matching"
+      ]
+    },
+    {
+      "number": 7,
+      "title": "美国住宅出口",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/us-residential.conf,Res-Frontier,extended-matching"
+      ]
+    },
+    {
+      "number": 8,
+      "title": "跨地区金融、支付、KYC、验证码、设备指纹",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Finance,extended-matching"
+      ]
+    },
+    {
+      "number": 9,
+      "title": "中心化交易所",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
+      ]
+    },
+    {
+      "number": 10,
+      "title": "钱包、RPC、DeFi、NFT、区块浏览器",
+      "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/web3.conf,Web3,extended-matching"
+      ]
+    },
+    {
+      "number": 11,
+      "title": "剩余系统服务",
+      "rules": [
+        "RULE-SET,SYSTEM,DIRECT"
+      ]
+    },
+    {
+      "number": 12,
+      "title": "广告和恶意域名",
+      "rules": [
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject.conf,REJECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,extended-matching",
+        "RULE-SET,https://raw.githubusercontent.com/limbopro/Adblock4limbo/main/Adblock4limbo_surge.list,REJECT"
+      ]
+    },
+    {
+      "number": 13,
+      "title": "服务专用",
+      "rules": [
+        "RULE-SET,https://github.com/ddgksf2013/Filter/raw/master/Emby.list,Emby,extended-matching",
+        "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Telegram,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream_us.conf,Streaming,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,Streaming,extended-matching"
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Apple / Microsoft",
+      "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cdn.conf,DIRECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft_cdn.conf,DIRECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,Apple,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft.conf,Microsoft,extended-matching"
+      ]
+    },
+    {
+      "number": 15,
+      "title": "下载和 CDN",
+      "rules": [
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/speedtest.conf,PROXY,extended-matching",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,Download,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/download.conf,Download,extended-matching",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/cdn.conf,PROXY,extended-matching"
+      ]
+    },
+    {
+      "number": 16,
+      "title": "国内和海外基础规则",
+      "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/domestic.conf,DIRECT,extended-matching",
+        "RULE-SET,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/WeChat/WeChat.list,DIRECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/direct.conf,DIRECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,PROXY,extended-matching"
+      ]
+    },
+    {
+      "number": 17,
+      "title": "IP 类规则",
+      "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Telegram,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/stream_us.conf,Streaming,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,Streaming,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT,no-resolve",
+        "FINAL,PROXY,dns-failed"
+      ]
+    }
+  ]
+}

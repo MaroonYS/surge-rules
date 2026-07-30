@@ -6,7 +6,6 @@
 ## 设计目标
 
 - 保留地区第一方金融域名的既有分流语义。
-- 将 Apple Private Relay、Apple Intelligence 与普通 Apple 服务解耦。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
 - 不全局接管共享支付、KYC、验证码、设备指纹和反欺诈供应商，避免不同站点的会话被拆到不同出口。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
@@ -23,14 +22,14 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
-| `apple-ai.conf` | `Apple-AI` | Apple Intelligence、Siri、PCC |
+| `apple-ai.conf` | `AIGC` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `hk-finance.conf` | `HK-FINANCE` | 香港金融 |
 | `sg-finance.conf` | `SG-FINANCE` | 新加坡金融 |
 | `jp-finance.conf` | `JP-FINANCE` | 日本金融 |
 | `kr-finance.conf` | `KR-FINANCE` | 韩国金融 |
 | `uk-finance.conf` | `UK-FINANCE` | 英国金融 |
-| `us-residential.conf` | `Res-Frontier` | 美国第一方金融服务 |
+| `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `finance-context.conf` | `Finance` | 无法仅按域名判断地区的金融服务 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
@@ -39,14 +38,25 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 ## 接入
 
-1. 将 [policy-groups.example.conf](policy-groups.example.conf) 中的两个策略组条目合并到现有 `[Proxy Group]`。
-2. 确认现有配置已经定义表格中的其他策略名。
-3. 用 [surge-main.conf](surge-main.conf) 的 `[Rule]` 段替换现有规则段。
+1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
+2. 确认 `Apple`、`AIGC`、`Res-Frontier` 和各地区金融组已选中所需出口。
+3. 在以下两种 Rule 中选择一种，不要同时加载：
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 11 个远程 DOMAIN-SET 加载 420 条域名；
+   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 420 条域名全部写回 `[Rule]`，可整段复制。
 4. 在 Surge 的外部资源页面刷新，确认 11 个本仓库规则集均成功加载。
+
+展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
+它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
+
+```bash
+python3 scripts/build_expanded.py --write
+```
 
 原始 Rule 到各文件的覆盖和有意调整记录在
 [docs/migration-notes.md](docs/migration-notes.md)。
 逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
+原始 471 条域名到最终 420 条活动规则的数量对账见
+[docs/source-parity.md](docs/source-parity.md)。
 
 主规则使用以下公开 Raw 基址：
 
@@ -54,10 +64,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 ```
 
-Private Relay 使用独立的 `Private-Relay` 组，不再复用普通 `Apple` 组。
-六个当前已知端点直接写入主 Rule 作为精确兜底，SKK 远程集仅用于跟进新增端点。
-Apple Intelligence 使用独立的 `Apple-AI` 组，不再随通用 `AIGC` 组切换。
-Apple Cash/Pay 的三个 Apple 域名保持 `DIRECT`，避免与 Wallet、APNs、证书验证及发卡行请求形成出口分裂。
+Private Relay 严格按 17 段契约使用 `Apple`。
+Apple Intelligence 严格使用 `AIGC`。
+Apple Cash/Pay 与 PayPal 收录在 `us-residential.conf`，命中 `Res-Frontier`。
 
 ## 维护
 
@@ -72,6 +81,7 @@ Apple Cash/Pay 的三个 Apple 域名保持 `DIRECT`，避免与 Wallet、APNs�
 
 ```bash
 python3 scripts/validate.py --strict
+python3 scripts/build_expanded.py --check
 python3 -m unittest discover -s tests -v
 ```
 

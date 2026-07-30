@@ -1,43 +1,317 @@
 #!/usr/bin/env python3
-"""Check HTTP availability of remote rule resources in surge-main.conf."""
+"""Download and validate every remote rule resource in surge-main.conf."""
 
 from __future__ import annotations
 
 import argparse
+import http.client
+import ipaddress
+import json
 import re
 import sys
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
+from urllib.parse import urlsplit
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-URL_RE = re.compile(r"https://[^,\s]+")
+SKK_SENTINEL = "7h1s_rul35et_i5_mad3_by_5ukk4w-ruleset.skk.moe"
+SKK_SENTINEL_ALIASES = (
+    "7h1s_rul35et_i5_mad3_by_5ukk4w",
+    "this_rule_set_is_made_by_sukkaw",
+)
+POLICY_TOKENS = {
+    "direct",
+    "proxy",
+    "reject",
+    "reject-drop",
+    "reject-no-drop",
+    "reject-tinygif",
+}
+DOMAIN_RULE_TYPES = {
+    "DOMAIN",
+    "DOMAIN-KEYWORD",
+    "DOMAIN-SUFFIX",
+    "DOMAIN-WILDCARD",
+}
+IP_RULE_TYPES = {"GEOIP", "IP-ASN", "IP-CIDR", "IP-CIDR6"}
+ALLOWED_CONTENT_TYPES = {
+    "",
+    "application/octet-stream",
+    "binary/octet-stream",
+    "text/plain",
+}
 
 
-def collect_urls(path: Path) -> list[str]:
-    text = path.read_text(encoding="utf-8")
-    return sorted(set(URL_RE.findall(text)))
+@dataclass(frozen=True, order=True)
+class Resource:
+    url: str
+    rule_type: str
+    line: int
 
 
-def probe(url: str, timeout: float) -> tuple[str, int | None, str]:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "surge-rules-upstream-check/1.0",
-            "Range": "bytes=0-0",
-        },
-    )
+@dataclass(frozen=True)
+class Result:
+    resource: Resource
+    status: int | None
+    source: str
+    effective_rules: int
+    message: str
+    final_url: str = ""
+
+    @property
+    def passed(self) -> bool:
+        return self.status is not None and 200 <= self.status < 300 and not self.message
+
+
+def collect_resources(path: Path) -> list[Resource]:
+    resources: dict[tuple[str, str], Resource] = {}
+    for line_number, raw_line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(),
+        1,
+    ):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        fields = [field.strip() for field in line.split(",")]
+        if (
+            len(fields) >= 2
+            and fields[0] in {"DOMAIN-SET", "RULE-SET"}
+            and fields[1].startswith("https://")
+        ):
+            resource = Resource(fields[1], fields[0], line_number)
+            key = (resource.url, resource.rule_type)
+            resources.setdefault(key, resource)
+    return sorted(resources.values())
+
+
+def local_raw_base(root: Path) -> str | None:
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            response.read(1)
-            return url, response.status, "ok"
+        manifest = json.loads(
+            (root / "rules-manifest.json").read_text(encoding="utf-8")
+        )
+        return (
+            "https://raw.githubusercontent.com/"
+            f"{manifest['repository']}/{manifest['branch']}/"
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError):
+        return None
+
+
+def effective_lines(text: str) -> list[str]:
+    return [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def is_skk_sentinel(line: str) -> bool:
+    normalized = line.casefold()
+    return any(alias in normalized for alias in SKK_SENTINEL_ALIASES)
+
+
+def validate_upstream_domain(raw: str) -> str | None:
+    if raw != raw.casefold():
+        return "domain must be lowercase"
+    domain = raw[1:] if raw.startswith(".") else raw
+    if not domain or raw.startswith("..") or domain.endswith("."):
+        return "invalid leading or trailing dot"
+    if len(domain) > 253:
+        return "domain exceeds 253 characters"
+    try:
+        ipaddress.ip_address(domain)
+    except ValueError:
+        pass
+    else:
+        return "IP address is not a DOMAIN-SET record"
+    labels = domain.split(".")
+    if any(not label for label in labels):
+        return "domain must contain non-empty labels"
+    for label in labels:
+        if (
+            len(label) > 63
+            or label[0] not in "abcdefghijklmnopqrstuvwxyz0123456789_"
+            or label[-1] not in "abcdefghijklmnopqrstuvwxyz0123456789_"
+            or any(
+                character not in "abcdefghijklmnopqrstuvwxyz0123456789-_"
+                for character in label
+            )
+        ):
+            return f"invalid domain label {label!r}"
+    return None
+
+
+def validate_domain_set(lines: Sequence[str]) -> str | None:
+    for line_number, line in enumerate(lines, 1):
+        if (
+            "," in line
+            or "://" in line
+            or any(character.isspace() for character in line)
+        ):
+            return f"invalid DOMAIN-SET record {line_number}: {line!r}"
+        problem = validate_upstream_domain(line)
+        if problem:
+            return f"invalid DOMAIN-SET record {line_number}: {problem}: {line!r}"
+    return None
+
+
+def validate_rule_set(lines: Sequence[str]) -> str | None:
+    for line_number, line in enumerate(lines, 1):
+        fields = [field.strip() for field in line.split(",")]
+        if len(fields) < 2 or not fields[0]:
+            return f"invalid RULE-SET record {line_number}: {line!r}"
+        rule_type = fields[0].upper()
+        if len(fields) >= 3 and fields[-1].casefold() in POLICY_TOKENS:
+            return (
+                f"RULE-SET record {line_number} contains an embedded policy "
+                f"{fields[-1]!r}"
+            )
+        if rule_type in DOMAIN_RULE_TYPES and len(fields) != 2:
+            return (
+                f"RULE-SET record {line_number} has unsupported DOMAIN options: "
+                f"{line!r}"
+            )
+        if rule_type in IP_RULE_TYPES and (
+            len(fields) not in {2, 3}
+            or (len(fields) == 3 and fields[2].casefold() != "no-resolve")
+        ):
+            return (
+                f"RULE-SET record {line_number} has unsupported IP options: "
+                f"{line!r}"
+            )
+    return None
+
+
+def validate_payload(resource: Resource, text: str) -> tuple[int, str]:
+    if text.startswith("\ufeff"):
+        return 0, "resource contains a UTF-8 BOM"
+    beginning = text.lstrip()[:256].casefold()
+    if beginning.startswith(("<!doctype html", "<html")):
+        return 0, "resource returned an HTML document"
+
+    header = "\n".join(text.splitlines()[:40])
+    if re.search(r"^#.*\bdeprecated\b", header, flags=re.IGNORECASE | re.MULTILINE):
+        return 0, "resource is marked Deprecated"
+
+    lines = effective_lines(text)
+    if not lines:
+        return 0, "resource contains no effective rules"
+    business_lines = [line for line in lines if not is_skk_sentinel(line)]
+    if not business_lines:
+        return 0, "resource contains only the SKK sentinel rule"
+
+    if resource.rule_type == "DOMAIN-SET":
+        problem = validate_domain_set(business_lines)
+    else:
+        problem = validate_rule_set(business_lines)
+    return len(business_lines), problem or ""
+
+
+def read_http(
+    url: str,
+    timeout: float,
+    max_bytes: int,
+    retries: int,
+) -> tuple[int, str, str, str]:
+    last_error: Exception | None = None
+    for _ in range(retries + 1):
+        request = urllib.request.Request(
+            url,
+            headers={
+                "Accept-Encoding": "identity",
+                "User-Agent": "surge-rules-upstream-check/2.0",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                final_url = response.geturl()
+                if urlsplit(final_url).scheme != "https":
+                    raise ValueError(f"redirected to a non-HTTPS URL: {final_url}")
+                declared_size = response.headers.get("Content-Length")
+                if declared_size is not None:
+                    try:
+                        expected_size = int(declared_size)
+                    except ValueError as exc:
+                        raise ValueError(
+                            f"invalid Content-Length: {declared_size!r}"
+                        ) from exc
+                    if expected_size > max_bytes:
+                        raise ValueError(f"resource exceeds {max_bytes} bytes")
+                payload = response.read(max_bytes + 1)
+                if len(payload) > max_bytes:
+                    raise ValueError(f"resource exceeds {max_bytes} bytes")
+                if declared_size is not None and len(payload) != expected_size:
+                    raise ValueError(
+                        "Content-Length mismatch: "
+                        f"expected {expected_size}, received {len(payload)}"
+                    )
+                content_type = response.headers.get_content_type().lower()
+                if content_type not in ALLOWED_CONTENT_TYPES:
+                    raise ValueError(f"unexpected content type: {content_type}")
+                return (
+                    response.status,
+                    final_url,
+                    content_type,
+                    payload.decode("utf-8"),
+                )
+        except (
+            http.client.HTTPException,
+            urllib.error.URLError,
+            TimeoutError,
+            OSError,
+        ) as exc:
+            last_error = exc
+    assert last_error is not None
+    raise last_error
+
+
+def probe(
+    resource: Resource,
+    timeout: float,
+    max_bytes: int,
+    root: Path,
+    raw_base: str | None,
+    fetch_local: bool,
+    retries: int,
+) -> Result:
+    try:
+        if (
+            not fetch_local
+            and raw_base is not None
+            and resource.url.startswith(raw_base)
+        ):
+            relative = resource.url[len(raw_base) :]
+            if "/" in relative or not relative:
+                raise ValueError(f"unsafe local repository path: {relative!r}")
+            text = (root / relative).read_text(encoding="utf-8")
+            status = 200
+            final_url = resource.url
+            source = "LOCAL"
+        else:
+            status, final_url, _, text = read_http(
+                resource.url,
+                timeout,
+                max_bytes,
+                retries,
+            )
+            source = "HTTP"
+        count, problem = validate_payload(resource, text)
+        return Result(resource, status, source, count, problem, final_url)
     except urllib.error.HTTPError as exc:
-        return url, exc.code, str(exc.reason)
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        return url, None, str(exc)
+        return Result(resource, exc.code, "HTTP", 0, str(exc.reason))
+    except (
+        UnicodeError,
+        urllib.error.URLError,
+        TimeoutError,
+        OSError,
+        ValueError,
+    ) as exc:
+        return Result(resource, None, "ERR", 0, str(exc))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -48,37 +322,76 @@ def build_parser() -> argparse.ArgumentParser:
         default=REPOSITORY_ROOT / "surge-main.conf",
         help="Surge file containing remote rule URLs",
     )
-    parser.add_argument("--timeout", type=float, default=10.0)
+    parser.add_argument("--timeout", type=float, default=15.0)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--retries", type=int, default=1)
+    parser.add_argument("--max-bytes", type=int, default=16 * 1024 * 1024)
+    parser.add_argument(
+        "--fetch-local",
+        action="store_true",
+        help="fetch this repository's Raw URLs instead of validating local files",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.timeout <= 0 or args.workers < 1:
-        print("timeout and workers must be positive", file=sys.stderr)
+    if (
+        args.timeout <= 0
+        or args.workers < 1
+        or args.retries < 0
+        or args.max_bytes < 1
+    ):
+        print(
+            "timeout, workers and max-bytes must be positive; retries cannot be negative",
+            file=sys.stderr,
+        )
         return 2
     try:
-        urls = collect_urls(args.main)
+        main_path = args.main.resolve()
+        root = main_path.parent
+        resources = collect_resources(main_path)
     except (OSError, UnicodeError) as exc:
         print(f"cannot read {args.main}: {exc}", file=sys.stderr)
         return 2
 
-    failures = 0
-    results: list[tuple[str, int | None, str]] = []
+    raw_base = local_raw_base(root)
+    results: list[Result] = []
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        pending = {executor.submit(probe, url, args.timeout): url for url in urls}
+        pending = {
+            executor.submit(
+                probe,
+                resource,
+                args.timeout,
+                args.max_bytes,
+                root,
+                raw_base,
+                args.fetch_local,
+                args.retries,
+            ): resource
+            for resource in resources
+        }
         for future in as_completed(pending):
             results.append(future.result())
 
-    for url, status, message in sorted(results):
-        passed = status is not None and 200 <= status < 400
-        failures += not passed
-        label = str(status) if status is not None else "ERR"
-        print(f"{'PASS' if passed else 'FAIL'} {label:>3} {url}")
-        if not passed:
-            print(f"         {message}")
-    print(f"Checked {len(urls)} URLs: {len(urls) - failures} passed, {failures} failed")
+    failures = 0
+    for result in sorted(results, key=lambda item: item.resource):
+        failures += not result.passed
+        status = str(result.status) if result.status is not None else "ERR"
+        print(
+            f"{'PASS' if result.passed else 'FAIL'} {status:>3} "
+            f"{result.resource.rule_type:<10} {result.effective_rules:>6} "
+            f"{result.source:<5} {result.resource.url}"
+        )
+        if result.final_url and result.final_url != result.resource.url:
+            print(f"         redirected to {result.final_url}")
+        if result.message:
+            print(f"         {result.message}")
+
+    print(
+        f"Checked {len(resources)} resources: "
+        f"{len(resources) - failures} passed, {failures} failed"
+    )
     return 1 if failures else 0
 
 

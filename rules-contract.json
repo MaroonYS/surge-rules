@@ -6,6 +6,7 @@
       "rules": [
         "PROTOCOL,STUN,REJECT",
         "PROTOCOL,MTProto,Telegram",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/lan.conf,DIRECT",
         "RULE-SET,LAN,DIRECT,no-resolve"
       ]
     },
@@ -13,7 +14,7 @@
       "number": 2,
       "title": "必须最优先匹配的特殊服务",
       "rules": [
-        "DOMAIN-KEYWORD,polymarket,Res-Frontier,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket.conf,Res-Frontier,extended-matching"
       ]
     },
     {
@@ -57,7 +58,7 @@
     },
     {
       "number": 8,
-      "title": "跨地区金融、支付、KYC、验证码、设备指纹",
+      "title": "跨地区第一方金融与支付",
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Finance,extended-matching"
       ]
@@ -87,34 +88,33 @@
       "number": 12,
       "title": "广告和恶意域名",
       "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,pre-matching",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/adblock4limbo-supplement.conf,REJECT,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject.conf,REJECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,extended-matching",
-        "RULE-SET,https://raw.githubusercontent.com/limbopro/Adblock4limbo/main/Adblock4limbo_surge.list,REJECT"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching"
       ]
     },
     {
       "number": 13,
       "title": "服务专用",
       "rules": [
-        "RULE-SET,https://github.com/ddgksf2013/Filter/raw/master/Emby.list,Emby,extended-matching",
+        "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/Filter/master/Emby.list,Emby",
         "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Telegram,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream_us.conf,Streaming,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,Streaming,extended-matching"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Telegram",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,Streaming"
       ]
     },
     {
       "number": 14,
       "title": "Apple / Microsoft",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cdn.conf,DIRECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft_cdn.conf,DIRECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,Apple,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft.conf,Microsoft,extended-matching"
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft_cdn.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,Apple",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft.conf,Microsoft"
       ]
     },
     {
@@ -122,32 +122,31 @@
       "title": "下载和 CDN",
       "rules": [
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/speedtest.conf,PROXY,extended-matching",
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,Download,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/download.conf,Download,extended-matching",
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/cdn.conf,PROXY,extended-matching"
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,Download",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/download.conf,Download",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/cdn.conf,PROXY"
       ]
     },
     {
       "number": 16,
       "title": "国内和海外基础规则",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/domestic.conf,DIRECT,extended-matching",
-        "RULE-SET,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/WeChat/WeChat.list,DIRECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/direct.conf,DIRECT,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,PROXY,extended-matching"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/domestic.conf,DIRECT",
+        "RULE-SET,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/WeChat/WeChat.list,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/direct.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,PROXY"
       ]
     },
     {
       "number": 17,
       "title": "IP 类规则",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP,no-resolve",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Telegram,no-resolve",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/stream_us.conf,Streaming,no-resolve",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,Streaming,no-resolve",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT,no-resolve",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Telegram",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,Streaming",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT",
         "FINAL,PROXY,dns-failed"
       ]
     }

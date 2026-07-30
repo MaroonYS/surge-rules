@@ -42,6 +42,39 @@ class RuleContractTests(unittest.TestCase):
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
 
+    def test_deprecated_and_empty_upstreams_are_not_reintroduced(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        self.assertNotIn("/non_ip/apple_cdn.conf", main)
+        self.assertNotIn("/ip/stream_us.conf", main)
+        self.assertNotIn("/non_ip/stream_us.conf", main)
+
+    def test_polymarket_uses_precise_domain_set(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        self.assertIn("/polymarket.conf,Res-Frontier,extended-matching", main)
+        self.assertNotIn("DOMAIN-KEYWORD,polymarket", main)
+
+    def test_sukkaw_reject_stack_uses_documented_order(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        expected = [
+            "/non_ip/reject-drop.conf,REJECT-DROP,pre-matching",
+            "/domainset/reject.conf,REJECT,extended-matching",
+            "/adblock4limbo-supplement.conf,REJECT,extended-matching",
+            "/non_ip/reject.conf,REJECT,extended-matching",
+            "/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching",
+        ]
+        positions = [main.index(fragment) for fragment in expected]
+        self.assertEqual(sorted(positions), positions)
+
+    def test_sukkaw_ip_resolution_semantics_are_not_overridden(self) -> None:
+        lines = (ROOT / "surge-main.conf").read_text(encoding="utf-8").splitlines()
+        ip_rules = [
+            line
+            for line in lines
+            if "ruleset.skk.moe/List/ip/" in line and not line.startswith("#")
+        ]
+        self.assertTrue(ip_rules)
+        self.assertTrue(all(",no-resolve" not in line for line in ip_rules))
+
 
 if __name__ == "__main__":
     unittest.main()

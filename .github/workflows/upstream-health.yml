@@ -27,4 +27,14 @@ jobs:
           python-version: "3.12"
 
       - name: Check all remote rule URLs
-        run: python scripts/check_upstreams.py --timeout 15
+        run: >
+          python scripts/check_upstreams.py
+          --timeout 15
+          --retries 2
+          --fetch-local
+
+      - name: Check the Adblock4limbo supplement
+        run: >
+          python scripts/sync_adblock4limbo.py
+          --check
+          --timeout 30

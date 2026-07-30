@@ -97,14 +97,33 @@ class SemanticTests(unittest.TestCase):
         validate.detect_active_overlaps(active, diagnostics)
         self.assertEqual([], diagnostics)
 
+    def test_shared_provider_suffix_is_rejected_in_sensitive_policy(self) -> None:
+        diagnostics: list[validate.Diagnostic] = []
+        validate.detect_shared_infrastructure(
+            [self.entry("finance.conf", 1, ".stripe.com", "Finance")],
+            diagnostics,
+        )
+        self.assertEqual(
+            ["SHARED_INFRASTRUCTURE"],
+            [item.code for item in diagnostics],
+        )
+
+    def test_narrow_shared_provider_host_can_be_log_driven(self) -> None:
+        diagnostics: list[validate.Diagnostic] = []
+        validate.detect_shared_infrastructure(
+            [self.entry("finance.conf", 1, "tenant.auth0.com", "Finance")],
+            diagnostics,
+        )
+        self.assertEqual([], diagnostics)
+
 
 class RepositoryTests(unittest.TestCase):
     def test_repository_passes_strict_validation(self) -> None:
         result = validate.validate_repository(ROOT)
         report = result.report(strict=True)
         self.assertTrue(report["ok"], result.diagnostics)
-        self.assertEqual(11, report["files"]["active"])
-        self.assertEqual(11, report["references"]["found"])
+        self.assertEqual(len(result.bindings), report["files"]["active"])
+        self.assertEqual(len(result.bindings), report["references"]["found"])
 
     def test_parser_rejects_bom_and_duplicate(self) -> None:
         diagnostics: list[validate.Diagnostic] = []

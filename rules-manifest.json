@@ -2,10 +2,12 @@
   "repository": "MaroonYS/surge-rules",
   "branch": "main",
   "main": "surge-main.conf",
+  "expanded": "surge-expanded.conf",
+  "contract": "rules-contract.json",
   "active": [
     {
       "file": "apple-ai.conf",
-      "policy": "Apple-AI",
+      "policy": "AIGC",
       "description": "Apple Intelligence, Siri and Private Cloud Compute"
     },
     {

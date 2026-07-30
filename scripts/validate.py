@@ -32,6 +32,7 @@ FORBIDDEN_SUFFIXES = {
 }
 ALLOWED_KEYWORD_RULES = {
     "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
+    "DOMAIN-KEYWORD,polymarket,Res-Frontier,extended-matching",
 }
 
 
@@ -153,7 +154,7 @@ def _diag(
     diagnostics.append(Diagnostic(severity, code, path, line, message))
 
 
-def load_manifest(root: Path) -> tuple[str, str, str, list[Binding]]:
+def load_manifest(root: Path) -> tuple[str, str, str, str, list[Binding]]:
     path = root / "rules-manifest.json"
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -164,6 +165,7 @@ def load_manifest(root: Path) -> tuple[str, str, str, list[Binding]]:
         repository = str(data["repository"])
         branch = str(data["branch"])
         main = str(data["main"])
+        contract = str(data["contract"])
         raw_bindings = data["active"]
     except (KeyError, TypeError) as exc:
         raise ConfigurationError(f"invalid manifest structure: {exc}") from exc
@@ -173,6 +175,8 @@ def load_manifest(root: Path) -> tuple[str, str, str, list[Binding]]:
         or not branch
         or Path(main).is_absolute()
         or ".." in Path(main).parts
+        or Path(contract).is_absolute()
+        or ".." in Path(contract).parts
     ):
         raise ConfigurationError("manifest repository, branch, or main path is invalid")
 
@@ -201,7 +205,7 @@ def load_manifest(root: Path) -> tuple[str, str, str, list[Binding]]:
 
     if not bindings:
         raise ConfigurationError("manifest contains no active bindings")
-    return repository, branch, main, bindings
+    return repository, branch, main, contract, bindings
 
 
 def _safe_repository_path(root: Path, relative: str) -> Path:
@@ -490,17 +494,150 @@ def _read_main_rules(
     ]
 
 
+def validate_rule_contract(
+    root: Path,
+    main_relative: str,
+    contract_relative: str,
+    rules: Sequence[tuple[int, str]],
+    diagnostics: list[Diagnostic],
+) -> None:
+    try:
+        contract_path = _safe_repository_path(root, contract_relative)
+        main_path = _safe_repository_path(root, main_relative)
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        main_text = main_path.read_text(encoding="utf-8")
+        sections = contract["sections"]
+    except (
+        ConfigurationError,
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        KeyError,
+        TypeError,
+    ) as exc:
+        _diag(
+            diagnostics,
+            "error",
+            "RULE_CONTRACT_READ",
+            contract_relative,
+            0,
+            str(exc),
+        )
+        return
+
+    expected_numbers = list(range(1, 18))
+    actual_numbers = [section.get("number") for section in sections]
+    if actual_numbers != expected_numbers:
+        _diag(
+            diagnostics,
+            "error",
+            "RULE_CONTRACT_SECTIONS",
+            contract_relative,
+            0,
+            f"expected section numbers 1..17, found {actual_numbers}",
+        )
+        return
+
+    header_positions: list[int] = []
+    main_lines = main_text.splitlines()
+    expected_rules: list[str] = []
+    for section in sections:
+        number = section["number"]
+        title = section["title"]
+        header = f"# {number}. {title}"
+        positions = [
+            line_number
+            for line_number, line in enumerate(main_lines, 1)
+            if line.strip() == header
+        ]
+        if len(positions) != 1:
+            _diag(
+                diagnostics,
+                "error",
+                "RULE_SECTION_HEADER",
+                main_relative,
+                positions[0] if positions else 0,
+                f"expected exactly one header {header!r}, found {len(positions)}",
+            )
+        else:
+            header_positions.append(positions[0])
+        section_rules = section.get("rules")
+        if not isinstance(section_rules, list) or not all(
+            isinstance(rule, str) and rule for rule in section_rules
+        ):
+            _diag(
+                diagnostics,
+                "error",
+                "RULE_CONTRACT_CONTENT",
+                contract_relative,
+                0,
+                f"section {number} has invalid rules",
+            )
+            return
+        expected_rules.extend(section_rules)
+
+    if header_positions != sorted(header_positions):
+        _diag(
+            diagnostics,
+            "error",
+            "RULE_SECTION_ORDER",
+            main_relative,
+            0,
+            "numbered section headers are not in ascending order",
+        )
+
+    actual_rules = [rule for _, rule in rules]
+    if actual_rules != expected_rules:
+        mismatch = next(
+            (
+                index
+                for index, (actual, expected) in enumerate(
+                    zip(actual_rules, expected_rules)
+                )
+                if actual != expected
+            ),
+            min(len(actual_rules), len(expected_rules)),
+        )
+        line_number = rules[mismatch][0] if mismatch < len(rules) else 0
+        actual = actual_rules[mismatch] if mismatch < len(actual_rules) else "<missing>"
+        expected = (
+            expected_rules[mismatch]
+            if mismatch < len(expected_rules)
+            else "<no additional rule>"
+        )
+        _diag(
+            diagnostics,
+            "error",
+            "RULE_CONTRACT_MISMATCH",
+            main_relative,
+            line_number,
+            (
+                f"rule {mismatch + 1} differs from the 17-section contract; "
+                f"expected {expected!r}, found {actual!r}"
+            ),
+        )
+
+
 def validate_main_rules(
     root: Path,
     relative: str,
     repository: str,
     branch: str,
+    contract_relative: str,
     bindings: Sequence[Binding],
     diagnostics: list[Diagnostic],
 ) -> tuple[int, int]:
     rules = _read_main_rules(root, relative, diagnostics)
     if not rules:
         return 0, 0
+
+    validate_rule_contract(
+        root,
+        relative,
+        contract_relative,
+        rules,
+        diagnostics,
+    )
 
     canonical_base = f"https://raw.githubusercontent.com/{repository}/{branch}/"
     expected = {binding.file: binding for binding in bindings}
@@ -585,15 +722,6 @@ def validate_main_rules(
                 line_number,
                 "DOMAIN-KEYWORD is too broad; use DOMAIN, DOMAIN-SUFFIX or DOMAIN-SET",
             )
-        if rule == "PROTOCOL,STUN,REJECT":
-            _diag(
-                diagnostics,
-                "error",
-                "GLOBAL_STUN_REJECT",
-                relative,
-                line_number,
-                "global STUN rejection breaks WebRTC and video verification",
-            )
         if (
             len(fields) >= 2
             and fields[0] == "RULE-SET"
@@ -658,21 +786,20 @@ def validate_main_rules(
         )
 
     anchors = [
+        ("STUN", lambda value: value == "PROTOCOL,STUN,REJECT"),
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
         ("LAN", lambda value: value.startswith("RULE-SET,LAN,")),
-        ("Private Relay fallback", lambda value: value.startswith("DOMAIN,mask.icloud.com,")),
-        ("Private Relay upstream", lambda value: "icloud_private_relay.conf" in value),
+        ("Polymarket", lambda value: value.startswith("DOMAIN-KEYWORD,polymarket,")),
+        ("Private Relay", lambda value: "icloud_private_relay.conf" in value),
         ("Apple AI", lambda value: "apple-ai.conf" in value),
-        ("Apple Cash", lambda value: "applecash.apple.com" in value),
         ("DIRECT CN", lambda value: "direct-cn.conf" in value),
         ("SYSTEM", lambda value: value == "RULE-SET,SYSTEM,DIRECT"),
+        ("Reject", lambda value: "/domainset/reject.conf" in value),
         ("Dedicated services", lambda value: "Emby.list" in value),
         ("Platform", lambda value: "/non_ip/apple_cdn.conf" in value),
         ("Download", lambda value: "/domainset/speedtest.conf" in value),
-        ("Reject", lambda value: "/domainset/reject.conf" in value),
-        ("Domestic", lambda value: "WeChat/WeChat.list" in value),
-        ("IP services", lambda value: "/ip/telegram.conf" in value),
-        ("IP reject", lambda value: "/ip/reject.conf" in value),
+        ("Domestic", lambda value: "/non_ip/domestic.conf" in value),
+        ("IP", lambda value: "/ip/reject.conf" in value),
         ("FINAL", lambda value: value.startswith("FINAL,")),
     ]
     positions: list[tuple[str, int]] = []
@@ -738,7 +865,7 @@ def validate_main_rules(
 
 def validate_repository(root: Path, main_override: str | None = None) -> ValidationResult:
     root = root.resolve()
-    repository, branch, manifest_main, bindings = load_manifest(root)
+    repository, branch, manifest_main, contract, bindings = load_manifest(root)
     main = main_override or manifest_main
     diagnostics: list[Diagnostic] = []
     active_entries: list[DomainEntry] = []
@@ -786,6 +913,7 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
         main,
         repository,
         branch,
+        contract,
         bindings,
         diagnostics,
     )

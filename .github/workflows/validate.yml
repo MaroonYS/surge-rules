@@ -29,6 +29,9 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
+      - name: Check expanded rule is current
+        run: python scripts/build_expanded.py --check
+
       - name: Validate repository
         run: >
           python scripts/validate.py

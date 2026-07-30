@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 - 2026-07-30
+
+- Added the observed Polymarket S3 upload host as an exact residential-route entry.
+- Removed the broad Persona root while retaining the product-specific WithPersona domain.
+- Removed the redundant intermediate US finance group and expanded its choices directly into `Identity`.
+- Reduced Risk to eight device intelligence and fingerprinting providers.
+
 ## 1.4.0 - 2026-07-30
 
 - Added separate `Identity` and `Risk` DOMAIN-SET layers with copy-ready stable policy groups.

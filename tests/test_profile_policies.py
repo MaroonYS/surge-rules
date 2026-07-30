@@ -65,10 +65,7 @@ FINAL,PROXY
 
     def test_policy_group_snippet_completes_profile(self) -> None:
         rules = "[Rule]\nDOMAIN,example.com,Identity\n"
-        snippet = (
-            'US-FINANCE = select, Residential, "United States"\n'
-            "Identity = select, Residential, US-FINANCE, Finance\n"
-        )
+        snippet = 'Identity = select, Residential, "United States", Finance\n'
         missing, unstable, count = check_profile_policies.check(
             self.PROFILE,
             rules,

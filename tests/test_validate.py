@@ -162,7 +162,6 @@ class SemanticTests(unittest.TestCase):
                         "socure.com",
                         "socure.co",
                         "withpersona.com",
-                        "persona.com",
                         "jumio.com",
                         "netverify.com",
                         "onfido.com",
@@ -185,9 +184,6 @@ class SemanticTests(unittest.TestCase):
                 (
                     "risk-context.conf",
                     (
-                        "sardine.ai",
-                        "sift.com",
-                        "siftcdn.net",
                         "online-metrix.net",
                         "threatmetrix.com",
                         "iovation.com",
@@ -195,10 +191,6 @@ class SemanticTests(unittest.TestCase):
                         "biocatch.com",
                         "fingerprint.com",
                         "fingerprintjs.com",
-                        "riskified.com",
-                        "forter.com",
-                        "castle.io",
-                        "seon.io",
                         "incognia.com",
                     ),
                 ),

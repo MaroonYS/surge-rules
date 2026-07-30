@@ -35,8 +35,10 @@
 
 - 删除全局 `PROTOCOL,STUN,REJECT`，避免破坏 WebRTC、FaceTime 和视频验证。
 - Private Relay 改用独立 `Private-Relay` 策略，不与普通 Apple 服务共用选择状态。
+- Private Relay 增加六条精确端点作为本地兜底。
 - Apple Intelligence 改用独立 `Apple-AI` 策略，不随通用 AIGC 切换。
 - Apple Cash/Pay 三条 Apple 域名在主规则中显式 `DIRECT`，不进入住宅域名集。
+- Polymarket 从宽泛关键词收紧为 `.polymarket.com`、`.polymarket.us` 和一个 Auth0 精确主机。
 - 共享支付聚合、KYC、验证码、设备指纹和反欺诈供应商不进入 `Finance`。
 
 最后一项涉及 52 个共享第三方域名。它们被不同地区和非金融站点共同使用，

@@ -10,6 +10,7 @@
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
 - 不全局接管共享支付、KYC、验证码、设备指纹和反欺诈供应商，避免不同站点的会话被拆到不同出口。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
+- 禁止宽泛共享后缀和未经批准的 `DOMAIN-KEYWORD`，让自定义规则保持精准。
 
 Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合大量域名：
 
@@ -45,6 +46,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 原始 Rule 到各文件的覆盖和有意调整记录在
 [docs/migration-notes.md](docs/migration-notes.md)。
+逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
 
 主规则使用以下公开 Raw 基址：
 
@@ -53,6 +55,7 @@ https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 ```
 
 Private Relay 使用独立的 `Private-Relay` 组，不再复用普通 `Apple` 组。
+六个当前已知端点直接写入主 Rule 作为精确兜底，SKK 远程集仅用于跟进新增端点。
 Apple Intelligence 使用独立的 `Apple-AI` 组，不再随通用 `AIGC` 组切换。
 Apple Cash/Pay 的三个 Apple 域名保持 `DIRECT`，避免与 Wallet、APNs、证书验证及发卡行请求形成出口分裂。
 
@@ -60,6 +63,10 @@ Apple Cash/Pay 的三个 Apple 域名保持 `DIRECT`，避免与 Wallet、APNs�
 
 新增服务时，先确认其最终策略，再把域名加入对应文件。不要按银行创建新文件。
 只有你明确确认停用的域名才应移入 `archive/`，需要时可再移回正式文件。
+
+优先从 Surge 请求日志取得真实主机名，再添加 `DOMAIN` 或足够窄的后缀。
+不要为了“兜底”添加 `.apple.com`、`.auth0.com`、`.cloudflare.com` 或公共后缀；
+这种规则看似覆盖更多，实际会吞掉无关服务。
 
 本地检查：
 

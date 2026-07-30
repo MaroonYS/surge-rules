@@ -16,6 +16,23 @@ from urllib.parse import urlsplit
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 LABEL_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
+FORBIDDEN_SUFFIXES = {
+    "apple.com",
+    "auth0.com",
+    "cloudflare.com",
+    "co.jp",
+    "co.kr",
+    "co.uk",
+    "com.cn",
+    "com.hk",
+    "com.sg",
+    "google.com",
+    "icloud.com",
+    "microsoft.com",
+}
+ALLOWED_KEYWORD_RULES = {
+    "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
+}
 
 
 @dataclass(frozen=True)
@@ -246,6 +263,8 @@ def validate_domain(raw: str) -> str | None:
                 return f"invalid punycode label: {label!r}"
             if encoded != label:
                 return f"non-canonical punycode label: {label!r}"
+    if raw.startswith(".") and domain in FORBIDDEN_SUFFIXES:
+        return f"suffix is too broad for precise routing: {raw}"
     return None
 
 
@@ -557,6 +576,15 @@ def validate_main_rules(
                         f"{file_name} must enable extended-matching",
                     )
 
+        if fields[0] == "DOMAIN-KEYWORD" and rule not in ALLOWED_KEYWORD_RULES:
+            _diag(
+                diagnostics,
+                "error",
+                "UNAPPROVED_KEYWORD",
+                relative,
+                line_number,
+                "DOMAIN-KEYWORD is too broad; use DOMAIN, DOMAIN-SUFFIX or DOMAIN-SET",
+            )
         if rule == "PROTOCOL,STUN,REJECT":
             _diag(
                 diagnostics,
@@ -632,18 +660,19 @@ def validate_main_rules(
     anchors = [
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
         ("LAN", lambda value: value.startswith("RULE-SET,LAN,")),
-        ("Polymarket", lambda value: value.startswith("DOMAIN-KEYWORD,polymarket,")),
-        ("Private Relay", lambda value: "icloud_private_relay.conf" in value),
+        ("Private Relay fallback", lambda value: value.startswith("DOMAIN,mask.icloud.com,")),
+        ("Private Relay upstream", lambda value: "icloud_private_relay.conf" in value),
         ("Apple AI", lambda value: "apple-ai.conf" in value),
         ("Apple Cash", lambda value: "applecash.apple.com" in value),
         ("DIRECT CN", lambda value: "direct-cn.conf" in value),
         ("SYSTEM", lambda value: value == "RULE-SET,SYSTEM,DIRECT"),
-        ("Reject", lambda value: "/domainset/reject.conf" in value),
         ("Dedicated services", lambda value: "Emby.list" in value),
         ("Platform", lambda value: "/non_ip/apple_cdn.conf" in value),
         ("Download", lambda value: "/domainset/speedtest.conf" in value),
-        ("Domestic", lambda value: "/non_ip/domestic.conf" in value),
-        ("IP", lambda value: "/ip/reject.conf" in value),
+        ("Reject", lambda value: "/domainset/reject.conf" in value),
+        ("Domestic", lambda value: "WeChat/WeChat.list" in value),
+        ("IP services", lambda value: "/ip/telegram.conf" in value),
+        ("IP reject", lambda value: "/ip/reject.conf" in value),
         ("FINAL", lambda value: value.startswith("FINAL,")),
     ]
     positions: list[tuple[str, int]] = []

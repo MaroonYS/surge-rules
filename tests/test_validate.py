@@ -19,6 +19,8 @@ class DomainSyntaxTests(unittest.TestCase):
             ".example.com",
             "login.example.co.uk",
             "xn--bcher-kva.example",
+            "apple-relay.apple.com",
+            ".smoot.apple.com",
         ):
             with self.subTest(value=value):
                 self.assertIsNone(validate.validate_domain(value))
@@ -40,6 +42,9 @@ class DomainSyntaxTests(unittest.TestCase):
             "example.com.",
             " example.com",
             "example.com # comment",
+            ".apple.com",
+            ".auth0.com",
+            ".co.uk",
         ):
             with self.subTest(value=value):
                 self.assertIsNotNone(validate.validate_domain(value))

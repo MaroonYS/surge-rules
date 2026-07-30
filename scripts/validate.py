@@ -40,7 +40,6 @@ ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("identity-context.conf", "Identity", "socure.com"),
     ("identity-context.conf", "Identity", "socure.co"),
     ("identity-context.conf", "Identity", "withpersona.com"),
-    ("identity-context.conf", "Identity", "persona.com"),
     ("identity-context.conf", "Identity", "jumio.com"),
     ("identity-context.conf", "Identity", "netverify.com"),
     ("identity-context.conf", "Identity", "onfido.com"),
@@ -58,9 +57,6 @@ ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("identity-context.conf", "Identity", "sumsub.com"),
     ("identity-context.conf", "Identity", "vouched.id"),
     ("identity-context.conf", "Identity", "ekata.com"),
-    ("risk-context.conf", "Identity", "sardine.ai"),
-    ("risk-context.conf", "Identity", "sift.com"),
-    ("risk-context.conf", "Identity", "siftcdn.net"),
     ("risk-context.conf", "Identity", "online-metrix.net"),
     ("risk-context.conf", "Identity", "threatmetrix.com"),
     ("risk-context.conf", "Identity", "iovation.com"),
@@ -68,10 +64,6 @@ ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("risk-context.conf", "Identity", "biocatch.com"),
     ("risk-context.conf", "Identity", "fingerprint.com"),
     ("risk-context.conf", "Identity", "fingerprintjs.com"),
-    ("risk-context.conf", "Identity", "riskified.com"),
-    ("risk-context.conf", "Identity", "forter.com"),
-    ("risk-context.conf", "Identity", "castle.io"),
-    ("risk-context.conf", "Identity", "seon.io"),
     ("risk-context.conf", "Identity", "incognia.com"),
 }
 SHARED_INFRASTRUCTURE_SUFFIXES = {

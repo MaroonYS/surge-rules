@@ -41,13 +41,24 @@
 | Adblock4limbo 精准补集 | +224 | 同时减去 SKK domainset 与 non_ip reject 覆盖 |
 | 最终活动规则 | 707 | 15 个本仓库 DOMAIN-SET |
 
-[surge-expanded.conf](../surge-expanded.conf) 将 707 条自维护规则全部内联。
+1.5.0 将共享服务进一步收窄，并补入实测 Polymarket 主机：
+
+| 项目 | 净变化 | 说明 |
+| --- | ---: | --- |
+| Polymarket S3 上传主机 | +1 | 精确加入 `polymarket-upload.s3.us-east-2.amazonaws.com` |
+| Persona 根域收窄 | -1 | 删除 `.persona.com`，保留 `.withpersona.com` |
+| Risk 保守活动集 | -7 | 删除 7 个通用反欺诈 SaaS，保留 8 个设备情报与指纹域 |
+| 金融/身份/风控自维护小计 | 476 | 14 个业务 DOMAIN-SET |
+| Adblock4limbo 精准补集 | +224 | 同时减去 SKK domainset 与 non_ip reject 覆盖 |
+| 最终活动规则 | 700 | 15 个本仓库 DOMAIN-SET |
+
+[surge-expanded.conf](../surge-expanded.conf) 将 700 条自维护规则全部内联。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：90 行，通过 15 个远程文件加载 707 条规则。
-- `surge-expanded.conf`：814 行，将同样的 707 条规则全部展开。
+- `surge-main.conf`：90 行，通过 15 个远程文件加载 700 条规则。
+- `surge-expanded.conf`：807 行，将同样的 700 条规则全部展开。
 
 两者的自维护活动域名语义一致，不能同时加载。
 CI 会重新生成展开版并逐字比较；任意 DOMAIN-SET 修改后未更新展开版，提交将失败。

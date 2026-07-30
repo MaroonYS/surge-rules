@@ -52,6 +52,22 @@ class RuleContractTests(unittest.TestCase):
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         self.assertIn("/polymarket.conf,Res-Frontier,extended-matching", main)
         self.assertNotIn("DOMAIN-KEYWORD,polymarket", main)
+        entries = {
+            line
+            for line in (ROOT / "polymarket.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {
+                ".polymarket.com",
+                ".polymarket.us",
+                "pmx-prod.us.auth0.com",
+                "polymarket-upload.s3.us-east-2.amazonaws.com",
+            },
+            entries,
+        )
 
     def test_sukkaw_reject_stack_uses_documented_order(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -97,7 +113,6 @@ class RuleContractTests(unittest.TestCase):
             ".socure.com",
             ".socure.co",
             ".withpersona.com",
-            ".persona.com",
             ".jumio.com",
             ".netverify.com",
             ".onfido.com",
@@ -117,9 +132,6 @@ class RuleContractTests(unittest.TestCase):
             ".ekata.com",
         }
         expected_risk = {
-            ".sardine.ai",
-            ".sift.com",
-            ".siftcdn.net",
             ".online-metrix.net",
             ".threatmetrix.com",
             ".iovation.com",
@@ -127,10 +139,6 @@ class RuleContractTests(unittest.TestCase):
             ".biocatch.com",
             ".fingerprint.com",
             ".fingerprintjs.com",
-            ".riskified.com",
-            ".forter.com",
-            ".castle.io",
-            ".seon.io",
             ".incognia.com",
         }
 
@@ -155,13 +163,12 @@ class RuleContractTests(unittest.TestCase):
         snippet = (
             ROOT / "snippets" / "identity-policy-groups.conf"
         ).read_text(encoding="utf-8")
-        self.assertIn(
-            'US-FINANCE = select, Res-Frontier, "United States"',
-            snippet,
-        )
-        self.assertIn(
-            "Identity = select, Res-Frontier, US-FINANCE, Finance",
-            snippet,
+        self.assertEqual(
+            [
+                "# Paste this line inside the existing [Proxy Group] section.",
+                'Identity = select, Res-Frontier, "United States", Finance',
+            ],
+            snippet.splitlines(),
         )
 
     def test_reject_drop_does_not_use_pre_matching(self) -> None:

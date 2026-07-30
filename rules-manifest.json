@@ -8,7 +8,7 @@
     {
       "file": "polymarket.conf",
       "policy": "Res-Frontier",
-      "description": "Polymarket first-party domains and exact authentication tenant"
+      "description": "Polymarket first-party domains, exact authentication tenant and observed S3 upload host"
     },
     {
       "file": "apple-ai.conf",
@@ -63,7 +63,7 @@
     {
       "file": "risk-context.conf",
       "policy": "Identity",
-      "description": "Shared device fingerprinting and fraud prevention services"
+      "description": "Conservative shared device intelligence and fingerprinting set"
     },
     {
       "file": "crypto.conf",

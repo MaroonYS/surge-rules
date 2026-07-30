@@ -45,6 +45,53 @@ class AdblockBuildTests(unittest.TestCase):
                 "DOMAIN,example.com,DIRECT\n"
             )
 
+    def test_excludes_pseudo_domains_and_non_ip_baseline_coverage(self) -> None:
+        source = "\n".join(
+            [
+                "DOMAIN-SUFFIX,ingest.sentry,reject",
+                "DOMAIN-SUFFIX,sentry,reject",
+                "DOMAIN-SUFFIX,histats.com,reject",
+                "DOMAIN-SUFFIX,keep.example,reject",
+            ]
+        )
+        domain_set_baseline = ".unrelated.example\n"
+        ruleset_baseline = "\n".join(
+            [
+                "DOMAIN-KEYWORD,ignored",
+                "DOMAIN-SUFFIX,histats.com",
+                "IP-CIDR,192.0.2.0/24,no-resolve",
+            ]
+        )
+
+        rendered, stats = sync_adblock4limbo.build(
+            source,
+            domain_set_baseline,
+            ruleset_baseline,
+        )
+        entries = [
+            line
+            for line in rendered.splitlines()
+            if line and not line.startswith("#")
+        ]
+
+        self.assertEqual([".keep.example"], entries)
+        self.assertNotIn(".ingest.sentry", entries)
+        self.assertNotIn(".sentry", entries)
+        self.assertNotIn(".histats.com", entries)
+        self.assertEqual(2, stats.explicitly_excluded)
+        self.assertEqual(1, stats.ruleset_baseline_covered)
+        self.assertIn(
+            "# Explicit invalid pseudo-domain exclusions: "
+            ".ingest.sentry, .sentry",
+            rendered,
+        )
+
+    def test_rejects_embedded_policy_in_ruleset_baseline(self) -> None:
+        with self.assertRaisesRegex(ValueError, "invalid baseline RULE-SET"):
+            sync_adblock4limbo.parse_ruleset_domains(
+                "DOMAIN-SUFFIX,example.com,REJECT\n"
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

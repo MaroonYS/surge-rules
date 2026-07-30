@@ -25,16 +25,29 @@
 | 美国住宅精修 | -2 | 移除 13 个共享基础设施，增加 11 个第一方区域银行 |
 | 跨地区 BOC 根域 | +1 | `bankofchina.com` 移入 `Finance` |
 | 第一方自维护小计 | 444 | 12 个业务 DOMAIN-SET |
-| Adblock4limbo 精准补集 | +226 | 排除 34 个关键词、22 个重复、1 个无效、251 个 SKK 已覆盖及 9 个内部冗余项 |
-| 最终活动规则 | 670 | 13 个本仓库 DOMAIN-SET |
+| Adblock4limbo 精准补集 | +226 | 旧版清洗补集 |
+| 1.3.0 活动规则 | 670 | 13 个本仓库 DOMAIN-SET |
 
-[surge-expanded.conf](../surge-expanded.conf) 将 670 条自维护规则全部内联。
+1.4.0 在此基础上继续调整：
+
+| 项目 | 净变化 | 说明 |
+| --- | ---: | --- |
+| ICBC 根域收窄 | -1 | 删除 `.icbc.com`，保留 `.icbc.com.cn` |
+| 美国身份与清算补充 | +4 | Apex、Early Warning、ID.me、Login.gov |
+| Identity 层 | +21 | KYC 与身份验证 |
+| Risk 层 | +15 | 设备指纹与反欺诈 |
+| Adblock 二级去重 | -2 | 删除伪域 `.ingest.sentry` 与已由 SKK non_ip 覆盖的 `.histats.com` |
+| 金融/身份/风控自维护小计 | 483 | 14 个业务 DOMAIN-SET |
+| Adblock4limbo 精准补集 | +224 | 同时减去 SKK domainset 与 non_ip reject 覆盖 |
+| 最终活动规则 | 707 | 15 个本仓库 DOMAIN-SET |
+
+[surge-expanded.conf](../surge-expanded.conf) 将 707 条自维护规则全部内联。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：约 90 行，通过 13 个远程文件加载 670 条规则。
-- `surge-expanded.conf`：约 770 行，将同样的 670 条规则全部展开。
+- `surge-main.conf`：90 行，通过 15 个远程文件加载 707 条规则。
+- `surge-expanded.conf`：814 行，将同样的 707 条规则全部展开。
 
 两者的自维护活动域名语义一致，不能同时加载。
 CI 会重新生成展开版并逐字比较；任意 DOMAIN-SET 修改后未更新展开版，提交将失败。

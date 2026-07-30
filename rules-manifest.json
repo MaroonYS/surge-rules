@@ -56,6 +56,16 @@
       "description": "Financial services whose region cannot be inferred from the domain"
     },
     {
+      "file": "identity-context.conf",
+      "policy": "Identity",
+      "description": "Shared KYC and identity verification services"
+    },
+    {
+      "file": "risk-context.conf",
+      "policy": "Identity",
+      "description": "Shared device fingerprinting and fraud prevention services"
+    },
+    {
       "file": "crypto.conf",
       "policy": "Crypto",
       "description": "Centralized cryptocurrency exchanges"

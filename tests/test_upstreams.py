@@ -132,6 +132,73 @@ class CollectionTests(unittest.TestCase):
             [(item.url, item.rule_type) for item in resources],
         )
 
+    def test_collects_resources_from_downloaded_configuration_text(self) -> None:
+        resources = check_upstreams.collect_resources_text(
+            "[Rule]\n"
+            "DOMAIN-SET,https://example.com/domains,Proxy\n"
+            "FINAL,Proxy\n"
+        )
+        self.assertEqual(1, len(resources))
+        self.assertEqual("https://example.com/domains", resources[0].url)
+
+
+class LocalReferenceTests(unittest.TestCase):
+    def write_manifest(self, root: Path) -> None:
+        (root / "rules-manifest.json").write_text(
+            '{"repository": "MaroonYS/surge-rules", "branch": "main"}\n',
+            encoding="utf-8",
+        )
+
+    def test_builds_immutable_raw_base_from_commit_sha(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_manifest(root)
+            base = check_upstreams.local_raw_base_for_ref(root, "a" * 40)
+        self.assertEqual(
+            "https://raw.githubusercontent.com/MaroonYS/surge-rules/"
+            f"{'a' * 40}/",
+            base,
+        )
+
+    def test_builds_raw_base_for_slash_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_manifest(root)
+            base = check_upstreams.local_raw_base_for_ref(
+                root,
+                "refs/heads/codex/rule-hardening",
+            )
+        self.assertEqual(
+            "https://raw.githubusercontent.com/MaroonYS/surge-rules/"
+            "refs/heads/codex/rule-hardening/",
+            base,
+        )
+
+    def test_rejects_unsafe_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_manifest(root)
+            with self.assertRaisesRegex(ValueError, "invalid Git ref"):
+                check_upstreams.local_raw_base_for_ref(root, "../main")
+
+    def test_extracts_only_safe_local_root_file(self) -> None:
+        base = "https://raw.githubusercontent.com/MaroonYS/surge-rules/main/"
+        self.assertEqual(
+            "apple-ai.conf",
+            check_upstreams.local_relative_path(
+                f"{base}apple-ai.conf",
+                base,
+            ),
+        )
+        self.assertIsNone(
+            check_upstreams.local_relative_path(
+                "https://ruleset.skk.moe/List/non_ip/ai.conf",
+                base,
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "unsafe local repository path"):
+            check_upstreams.local_relative_path(f"{base}nested/file.conf", base)
+
 
 if __name__ == "__main__":
     unittest.main()

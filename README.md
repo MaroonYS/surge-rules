@@ -7,9 +7,9 @@
 
 - 保留地区第一方金融域名的既有分流语义。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
-- 不全局接管共享支付、KYC、验证码、设备指纹和反欺诈供应商，避免不同站点的会话被拆到不同出口。
+- 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
-- 禁止宽泛共享后缀和未经批准的 `DOMAIN-KEYWORD`，让自定义规则保持精准。
+- 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
 
 Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合大量域名：
 
@@ -32,6 +32,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `uk-finance.conf` | `UK-FINANCE` | 英国金融 |
 | `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `finance-context.conf` | `Finance` | 无法仅按域名判断地区的金融服务 |
+| `identity-context.conf` | `Identity` | KYC 与身份验证服务 |
+| `risk-context.conf` | `Identity` | 设备指纹与反欺诈服务 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `adblock4limbo-supplement.conf` | `REJECT` | Adblock4limbo 经清洗、去重并减去 SKK 覆盖后的补集 |
@@ -41,11 +43,13 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 ## 接入
 
 1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
-2. 确认 `Apple`、`AIGC`、`Res-Frontier` 和各地区金融组已选中所需出口。
+2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity` 和各地区金融组已选中所需出口。
+   `Identity` 与 `US-FINANCE` 的稳定 `select` 定义可直接使用
+   [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 13 个远程 DOMAIN-SET 加载 670 条规则；
-   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 670 条规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 13 个本仓库规则集均成功加载。
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 15 个远程 DOMAIN-SET 加载 707 条规则；
+   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 707 条规则全部写回 `[Rule]`，可整段复制。
+4. 在 Surge 的外部资源页面刷新，确认 15 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
@@ -57,7 +61,7 @@ python3 scripts/build_expanded.py --write
 原始 Rule 到各文件的覆盖和有意调整记录在
 [docs/migration-notes.md](docs/migration-notes.md)。
 逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
-原始 Rule、第一方金融扩充及广告补集到最终 670 条活动规则的数量对账见
+原始 Rule、金融/身份/风控扩充及广告补集到最终 707 条活动规则的数量对账见
 [docs/source-parity.md](docs/source-parity.md)。
 本轮金融域名的来源与边界见
 [docs/domain-sources.md](docs/domain-sources.md)。
@@ -91,6 +95,18 @@ python3 -m unittest discover -s tests -v
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 
+核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略使用固定代理或手动
+`select`：
+
+```bash
+python3 scripts/check_profile_policies.py \
+  --profile /path/to/profile.conf \
+  --supplement snippets/identity-policy-groups.conf \
+  --require-stable \
+  Finance HK-FINANCE SG-FINANCE JP-FINANCE KR-FINANCE UK-FINANCE \
+  Res-Frontier US-FINANCE Identity
+```
+
 生成机器可读报告：
 
 ```bash
@@ -112,11 +128,11 @@ Adblock4limbo 原文件把 `reject` 写进了每一条外部规则；生成器�
 排除宽泛关键词、去重并减去 SKK 已覆盖项。许可归属见
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-## 为什么不加载共享验证基础设施
+## Identity 与 Risk 的边界
 
-Stripe、Plaid、KYC、验证码、设备指纹和反欺诈域名会被大量不同地区、甚至非金融网站共用。
-将整类供应商固定到一个地区，会使第一方页面和验证请求出口不一致，并扩大误匹配范围。
-如果正常登录被广告规则误拦，应根据 Surge 请求日志增加具体主机名例外，而不是重新加载整类供应商。
+跨地区第一方金融仍进入 `Finance`。KYC/身份验证进入
+`identity-context.conf`，设备指纹/反欺诈进入 `risk-context.conf`，两者统一使用
+稳定的手动 `Identity` 策略。验证码等未列入活动文件的共享服务仍按实际日志精确补充。
 
 本仓库只负责分流结构与规则数据，不包含节点、代理凭据或订阅。
 它不能保证银行或支付服务不触发风控；稳定、固定的账户地区和正常使用行为

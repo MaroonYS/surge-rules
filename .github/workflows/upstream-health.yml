@@ -1,6 +1,8 @@
 name: Check upstream rule availability
 
 on:
+  push:
+  pull_request:
   schedule:
     - cron: "23 3 * * 1"
   workflow_dispatch:
@@ -9,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: upstream-health
+  group: upstream-health-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -26,12 +28,27 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Check all remote rule URLs
+      - name: Check local files and external upstreams
         run: >
           python scripts/check_upstreams.py
           --timeout 15
           --retries 2
-          --fetch-local
+
+      - name: Check current commit Raw URLs
+        run: >
+          python scripts/check_upstreams.py
+          --local-only
+          --local-ref "$GITHUB_SHA"
+          --timeout 15
+          --retries 2
+
+      - name: Check production main Raw URLs
+        run: >
+          python scripts/check_upstreams.py
+          --local-only
+          --config-ref main
+          --timeout 15
+          --retries 2
 
       - name: Check the Adblock4limbo supplement
         run: >

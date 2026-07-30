@@ -52,6 +52,10 @@
 | US | Umpqua Bank | `.umpquabank.com` | [umpquabank.com](https://www.umpquabank.com/) |
 | US | Webster Bank | `.websterbank.com` | [websterbank.com](https://www.websterbank.com/) |
 | US | Zions Bank | `.zionsbank.com` | [zionsbank.com](https://www.zionsbank.com/) |
+| US | Apex Clearing | `.apexclearing.com` | [apexclearing.com](https://www.apexclearing.com/) |
+| US | Early Warning | `.earlywarning.com` | [earlywarning.com](https://www.earlywarning.com/) |
+| US | ID.me | `.id.me` | [id.me](https://www.id.me/) |
+| US | Login.gov | `.login.gov` | [login.gov](https://www.login.gov/) |
 
 ## 无法靠域名自动判断的边界
 

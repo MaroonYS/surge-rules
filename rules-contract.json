@@ -58,9 +58,11 @@
     },
     {
       "number": 8,
-      "title": "跨地区第一方金融与支付",
+      "title": "跨地区金融、身份与风控",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Finance,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Finance,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/identity-context.conf,Identity,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/risk-context.conf,Identity,extended-matching"
       ]
     },
     {
@@ -88,7 +90,7 @@
       "number": 12,
       "title": "广告和恶意域名",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,pre-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/adblock4limbo-supplement.conf,REJECT,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject.conf,REJECT,extended-matching",
@@ -100,8 +102,8 @@
       "title": "服务专用",
       "rules": [
         "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/Filter/master/Emby.list,Emby",
-        "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Telegram",
+        "DOMAIN,api.github.com,PROXY,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,Streaming"
       ]

@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -68,10 +69,10 @@ class Result:
         return self.status is not None and 200 <= self.status < 300 and not self.message
 
 
-def collect_resources(path: Path) -> list[Resource]:
+def collect_resources_text(text: str) -> list[Resource]:
     resources: dict[tuple[str, str], Resource] = {}
     for line_number, raw_line in enumerate(
-        path.read_text(encoding="utf-8").splitlines(),
+        text.splitlines(),
         1,
     ):
         line = raw_line.strip()
@@ -89,6 +90,10 @@ def collect_resources(path: Path) -> list[Resource]:
     return sorted(resources.values())
 
 
+def collect_resources(path: Path) -> list[Resource]:
+    return collect_resources_text(path.read_text(encoding="utf-8"))
+
+
 def local_raw_base(root: Path) -> str | None:
     try:
         manifest = json.loads(
@@ -100,6 +105,50 @@ def local_raw_base(root: Path) -> str | None:
         )
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError):
         return None
+
+
+def local_raw_base_for_ref(root: Path, ref: str) -> str | None:
+    """Return this repository's Raw base URL for an explicit Git ref."""
+    try:
+        manifest = json.loads(
+            (root / "rules-manifest.json").read_text(encoding="utf-8")
+        )
+        repository = manifest["repository"]
+    except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError):
+        return None
+
+    if (
+        not isinstance(repository, str)
+        or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository)
+    ):
+        return None
+    if (
+        not ref
+        or ref.startswith("/")
+        or ref.endswith("/")
+        or "//" in ref
+        or any(part in {"", ".", ".."} for part in ref.split("/"))
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", ref)
+    ):
+        raise ValueError(f"invalid Git ref: {ref!r}")
+
+    encoded_ref = urllib.parse.quote(ref, safe="/-._")
+    return f"https://raw.githubusercontent.com/{repository}/{encoded_ref}/"
+
+
+def local_relative_path(url: str, raw_base: str | None) -> str | None:
+    """Return a safe repository-root filename for a configured Raw URL."""
+    if raw_base is None or not url.startswith(raw_base):
+        return None
+    relative = url[len(raw_base) :]
+    if (
+        not relative
+        or "/" in relative
+        or relative in {".", ".."}
+        or not re.fullmatch(r"[A-Za-z0-9_.-]+", relative)
+    ):
+        raise ValueError(f"unsafe local repository path: {relative!r}")
+    return relative
 
 
 def effective_lines(text: str) -> list[str]:
@@ -278,32 +327,38 @@ def probe(
     raw_base: str | None,
     fetch_local: bool,
     retries: int,
+    local_ref_base: str | None = None,
 ) -> Result:
+    result_resource = resource
     try:
-        if (
-            not fetch_local
-            and raw_base is not None
-            and resource.url.startswith(raw_base)
-        ):
-            relative = resource.url[len(raw_base) :]
-            if "/" in relative or not relative:
-                raise ValueError(f"unsafe local repository path: {relative!r}")
+        relative = local_relative_path(resource.url, raw_base)
+        if relative is not None and not fetch_local and local_ref_base is None:
             text = (root / relative).read_text(encoding="utf-8")
             status = 200
             final_url = resource.url
             source = "LOCAL"
         else:
+            request_url = (
+                f"{local_ref_base}{relative}"
+                if relative is not None and local_ref_base is not None
+                else resource.url
+            )
+            result_resource = Resource(
+                request_url,
+                resource.rule_type,
+                resource.line,
+            )
             status, final_url, _, text = read_http(
-                resource.url,
+                request_url,
                 timeout,
                 max_bytes,
                 retries,
             )
             source = "HTTP"
-        count, problem = validate_payload(resource, text)
-        return Result(resource, status, source, count, problem, final_url)
+        count, problem = validate_payload(result_resource, text)
+        return Result(result_resource, status, source, count, problem, final_url)
     except urllib.error.HTTPError as exc:
-        return Result(resource, exc.code, "HTTP", 0, str(exc.reason))
+        return Result(result_resource, exc.code, "HTTP", 0, str(exc.reason))
     except (
         UnicodeError,
         urllib.error.URLError,
@@ -311,7 +366,7 @@ def probe(
         OSError,
         ValueError,
     ) as exc:
-        return Result(resource, None, "ERR", 0, str(exc))
+        return Result(result_resource, None, "ERR", 0, str(exc))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -326,10 +381,32 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--retries", type=int, default=1)
     parser.add_argument("--max-bytes", type=int, default=16 * 1024 * 1024)
-    parser.add_argument(
+    local_source = parser.add_mutually_exclusive_group()
+    local_source.add_argument(
         "--fetch-local",
         action="store_true",
         help="fetch this repository's Raw URLs instead of validating local files",
+    )
+    local_source.add_argument(
+        "--local-ref",
+        metavar="REF",
+        help=(
+            "fetch this repository's Raw files from an explicit Git ref "
+            "(for example the current commit SHA)"
+        ),
+    )
+    parser.add_argument(
+        "--local-only",
+        action="store_true",
+        help="check only this repository's Raw resources",
+    )
+    parser.add_argument(
+        "--config-ref",
+        metavar="REF",
+        help=(
+            "load surge-main.conf from this repository at REF and fetch its "
+            "local Raw resources (used to validate a deployed production ref)"
+        ),
     )
     return parser
 
@@ -347,15 +424,80 @@ def main(argv: Sequence[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+    main_path = args.main.resolve()
+    root = main_path.parent
     try:
-        main_path = args.main.resolve()
-        root = main_path.parent
-        resources = collect_resources(main_path)
-    except (OSError, UnicodeError) as exc:
-        print(f"cannot read {args.main}: {exc}", file=sys.stderr)
+        local_ref_base = (
+            local_raw_base_for_ref(root, args.local_ref)
+            if args.local_ref is not None
+            else None
+        )
+        config_ref_base = (
+            local_raw_base_for_ref(root, args.config_ref)
+            if args.config_ref is not None
+            else None
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if args.config_ref is not None and (
+        args.local_ref is not None or args.fetch_local
+    ):
+        print(
+            "--config-ref cannot be combined with --local-ref or --fetch-local",
+            file=sys.stderr,
+        )
         return 2
 
-    raw_base = local_raw_base(root)
+    try:
+        if config_ref_base is not None:
+            config_url = f"{config_ref_base}{main_path.name}"
+            _, final_url, _, config_text = read_http(
+                config_url,
+                args.timeout,
+                args.max_bytes,
+                args.retries,
+            )
+            resources = collect_resources_text(config_text)
+            print(f"Loaded deployed configuration: {final_url}")
+        else:
+            resources = collect_resources(main_path)
+    except urllib.error.HTTPError as exc:
+        print(
+            f"cannot fetch deployed configuration: HTTP {exc.code} {exc.reason}",
+            file=sys.stderr,
+        )
+        return 2
+    except (
+        UnicodeError,
+        urllib.error.URLError,
+        TimeoutError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"cannot read configuration: {exc}", file=sys.stderr)
+        return 2
+
+    raw_base = config_ref_base or local_raw_base(root)
+    if raw_base is None:
+        print("cannot determine local Raw URL base from rules-manifest.json", file=sys.stderr)
+        return 2
+
+    try:
+        local_resources = [
+            resource
+            for resource in resources
+            if local_relative_path(resource.url, raw_base) is not None
+        ]
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if not local_resources:
+        print("surge-main.conf contains no local Raw resources", file=sys.stderr)
+        return 2
+    if args.local_only:
+        resources = local_resources
+
     results: list[Result] = []
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         pending = {
@@ -366,8 +508,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.max_bytes,
                 root,
                 raw_base,
-                args.fetch_local,
+                args.fetch_local or config_ref_base is not None,
                 args.retries,
+                local_ref_base,
             ): resource
             for resource in resources
         }

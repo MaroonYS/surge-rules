@@ -30,10 +30,50 @@ FORBIDDEN_SUFFIXES = {
     "icloud.com",
     "microsoft.com",
 }
-ALLOWED_KEYWORD_RULES = {
-    "DOMAIN-KEYWORD,cr18,Singapore,extended-matching",
+ALLOWED_KEYWORD_RULES: set[str] = set()
+SENSITIVE_POLICIES = {"Finance", "Identity", "Res-Frontier"}
+ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
+    ("us-residential.conf", "Res-Frontier", "apexclearing.com"),
+    ("us-residential.conf", "Res-Frontier", "earlywarning.com"),
+    ("us-residential.conf", "Res-Frontier", "id.me"),
+    ("us-residential.conf", "Res-Frontier", "login.gov"),
+    ("identity-context.conf", "Identity", "socure.com"),
+    ("identity-context.conf", "Identity", "socure.co"),
+    ("identity-context.conf", "Identity", "withpersona.com"),
+    ("identity-context.conf", "Identity", "persona.com"),
+    ("identity-context.conf", "Identity", "jumio.com"),
+    ("identity-context.conf", "Identity", "netverify.com"),
+    ("identity-context.conf", "Identity", "onfido.com"),
+    ("identity-context.conf", "Identity", "trulioo.com"),
+    ("identity-context.conf", "Identity", "idology.com"),
+    ("identity-context.conf", "Identity", "au10tix.com"),
+    ("identity-context.conf", "Identity", "alloy.com"),
+    ("identity-context.conf", "Identity", "sentilink.com"),
+    ("identity-context.conf", "Identity", "middesk.com"),
+    ("identity-context.conf", "Identity", "prove.com"),
+    ("identity-context.conf", "Identity", "proveidentity.com"),
+    ("identity-context.conf", "Identity", "miteksystems.com"),
+    ("identity-context.conf", "Identity", "mitekcloud.com"),
+    ("identity-context.conf", "Identity", "veriff.com"),
+    ("identity-context.conf", "Identity", "sumsub.com"),
+    ("identity-context.conf", "Identity", "vouched.id"),
+    ("identity-context.conf", "Identity", "ekata.com"),
+    ("risk-context.conf", "Identity", "sardine.ai"),
+    ("risk-context.conf", "Identity", "sift.com"),
+    ("risk-context.conf", "Identity", "siftcdn.net"),
+    ("risk-context.conf", "Identity", "online-metrix.net"),
+    ("risk-context.conf", "Identity", "threatmetrix.com"),
+    ("risk-context.conf", "Identity", "iovation.com"),
+    ("risk-context.conf", "Identity", "iovation.io"),
+    ("risk-context.conf", "Identity", "biocatch.com"),
+    ("risk-context.conf", "Identity", "fingerprint.com"),
+    ("risk-context.conf", "Identity", "fingerprintjs.com"),
+    ("risk-context.conf", "Identity", "riskified.com"),
+    ("risk-context.conf", "Identity", "forter.com"),
+    ("risk-context.conf", "Identity", "castle.io"),
+    ("risk-context.conf", "Identity", "seon.io"),
+    ("risk-context.conf", "Identity", "incognia.com"),
 }
-SENSITIVE_POLICIES = {"Finance", "Res-Frontier"}
 SHARED_INFRASTRUCTURE_SUFFIXES = {
     "akoya.com",
     "alloy.com",
@@ -523,6 +563,12 @@ def detect_shared_infrastructure(
             entry.policy in SENSITIVE_POLICIES
             and entry.suffix
             and entry.domain in SHARED_INFRASTRUCTURE_SUFFIXES
+            and (
+                entry.path,
+                entry.policy,
+                entry.domain,
+            )
+            not in ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES
         ):
             _diag(
                 diagnostics,

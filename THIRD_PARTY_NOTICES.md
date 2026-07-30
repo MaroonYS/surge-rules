@@ -6,7 +6,7 @@
 [`Adblock4limbo_surge.list`](https://github.com/limbopro/Adblock4limbo/blob/main/Adblock4limbo_surge.list).
 The generator retains only `DOMAIN` and `DOMAIN-SUFFIX` records, removes the
 embedded policy column, and excludes records already covered by the referenced
-SKK reject DOMAIN-SET.
+SKK reject DOMAIN-SET and non-IP RULE-SET.
 
 MIT License
 

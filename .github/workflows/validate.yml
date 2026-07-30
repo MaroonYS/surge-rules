@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -38,6 +38,34 @@ jobs:
           --strict
           --github-annotations
           --json-out validation-report.json
+
+      - name: Check generated Adblock supplement
+        run: >
+          python scripts/sync_adblock4limbo.py
+          --check
+          --timeout 30
+
+      - name: Check local files and external upstreams
+        run: >
+          python scripts/check_upstreams.py
+          --timeout 15
+          --retries 2
+
+      - name: Check current commit Raw URLs
+        run: >
+          python scripts/check_upstreams.py
+          --local-only
+          --local-ref "$GITHUB_SHA"
+          --timeout 15
+          --retries 2
+
+      - name: Check production main Raw URLs
+        run: >
+          python scripts/check_upstreams.py
+          --local-only
+          --config-ref main
+          --timeout 15
+          --retries 2
 
       - name: Upload validation report
         if: always()

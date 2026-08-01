@@ -6,7 +6,8 @@
 
 | 来源策略 | 仓库位置 | 处理 |
 | --- | --- | --- |
-| `DIRECT` | `direct-cn.conf` | 全部迁移 |
+| `DIRECT` | `direct-cn.conf` | 中国大陆银行与银联迁移 |
+| `DIRECT`（Bilibili） | `bilibili-direct.conf` | 原宽泛关键词收窄为 3 个视频 CDN 后缀并恢复前置优先级 |
 | `HK-FINANCE` | `hk-finance.conf` | 全部迁移 |
 | `SG-FINANCE` | `sg-finance.conf` | 全部迁移 |
 | `JP-FINANCE` | `jp-finance.conf` | 全部迁移 |
@@ -35,6 +36,12 @@
 ## 有意调整
 
 - 按 17 段契约保留 `PROTOCOL,STUN,REJECT`。
+- 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
+  `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享
+  Reject、Streaming、CDN 与 Global 规则命中。
+- Bilibili 前置文件不收录 `bilibili.com` 与 `biliapi.net` API 域，保证
+  BiliUniverse Global 的脚本、MITM 与 `http-client-policy` 地区选择不被覆盖；
+  模块保持 `ForceHost=1`。
 - Private Relay 保持 `Apple`，Apple Intelligence 保持 `AIGC`。
 - Apple Cash/Pay 与 PayPal 归入 `us-residential.conf`。
 - Polymarket 从宽泛 `DOMAIN-KEYWORD` 收窄为 `.com`、`.us`、精确 Auth0 租户和

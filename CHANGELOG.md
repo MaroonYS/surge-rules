@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 - 2026-08-01
+
+- Restored Bilibili video CDN direct routing with three precise suffixes instead of the former broad keyword.
+- Placed the dedicated Bilibili DOMAIN-SET before Polymarket and all shared Reject, Streaming, CDN and Global rules.
+- Added contract and regression coverage for the Bilibili domain set, policy and ordering.
+- Added live CI compatibility checks for the latest official BiliUniverse Global Surge module.
+- Refreshed Adblock4limbo/SKK derivation hashes after the upstream sources changed without altering the 224-entry supplement.
+
 ## 1.5.0 - 2026-07-30
 
 - Added the observed Polymarket S3 upload host as an exact residential-route entry.

@@ -45,6 +45,11 @@ jobs:
           --check
           --timeout 30
 
+      - name: Check BiliUniverse Global compatibility
+        run: >
+          python scripts/check_biliuniverse.py
+          --timeout 30
+
       - name: Check local files and external upstreams
         run: >
           python scripts/check_upstreams.py

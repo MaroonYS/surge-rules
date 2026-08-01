@@ -6,7 +6,7 @@
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
 | 1 | STUN、MTProto、LAN | 4 条全部保留；补充 SKK 非 IP LAN，内建 LAN 保持 `DIRECT,no-resolve` |
-| 2 | Polymarket 最优先 | 4 个精确目标放入 `polymarket.conf`，包括实测 S3 上传主机，不再宽泛匹配关键词 |
+| 2 | 特殊服务最优先 | Bilibili 的 3 个精确视频 CDN 后缀先固定到 `DIRECT`；随后是 Polymarket 的 4 个精确目标，全部位于共享 Reject/CDN 规则之前 |
 | 3 | iCloud Private Relay | SKK DOMAIN-SET 固定到 `Apple` |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `AIGC` |
 | 5 | 中国大陆银行 | `direct-cn.conf`，24 条，`DIRECT`；跨地区的 `bankofchina.com` 与宽泛 `.icbc.com` 不在此强制直连 |
@@ -27,6 +27,7 @@
 
 | 文件 | 策略 |
 | --- | --- |
+| `bilibili-direct.conf` | `DIRECT` |
 | `polymarket.conf` | `Res-Frontier` |
 | `apple-ai.conf` | `AIGC` |
 | `direct-cn.conf` | `DIRECT` |
@@ -55,3 +56,7 @@ Identity 与 Risk 的 28 条共享服务严格限定为两个指定文件及 `Id
 
 `api.github.com` 在 SKK `ai.conf` 前精确进入 `PROXY`，避免普通 GitHub API
 请求被 AIGC 接管。活动主 Rule 不再包含 `DOMAIN-KEYWORD`。
+
+Bilibili 前置文件只包含 `bilivideo` 媒体 CDN 后缀，不包含 BiliUniverse Global
+执行脚本、MITM 和动态地区策略所需的 `bilibili.com` / `biliapi.net` API 主机。
+CI 会实时下载官方最新 Surge 模块并检查两者没有交集。

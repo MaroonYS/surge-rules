@@ -42,6 +42,11 @@ jobs:
           --timeout 15
           --retries 2
 
+      - name: Check BiliUniverse Global compatibility
+        run: >
+          python scripts/check_biliuniverse.py
+          --timeout 30
+
       - name: Check production main Raw URLs
         run: >
           python scripts/check_upstreams.py

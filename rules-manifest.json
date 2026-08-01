@@ -6,6 +6,11 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "bilibili-direct.conf",
+      "policy": "DIRECT",
+      "description": "Bilibili video CDN domains forced direct before shared reject and CDN rules"
+    },
+    {
       "file": "polymarket.conf",
       "policy": "Res-Frontier",
       "description": "Polymarket first-party domains, exact authentication tenant and observed S3 upload host"

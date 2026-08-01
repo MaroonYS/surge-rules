@@ -49,8 +49,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `Identity` 的稳定 `select` 定义可直接使用
    [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载 703 条规则；
-   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 703 条规则全部写回 `[Rule]`，可整段复制。
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载 765 条规则；
+   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 765 条规则全部写回 `[Rule]`，可整段复制。
 4. 在 Surge 的外部资源页面刷新，确认 16 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
@@ -65,7 +65,7 @@ python3 scripts/build_expanded.py --write
 与 BiliUniverse Global 的域名边界、模块参数及持续兼容检查见
 [docs/biliuniverse-global.md](docs/biliuniverse-global.md)。
 逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
-原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集到最终 703 条活动规则的数量对账见
+原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集到最终 765 条活动规则的数量对账见
 [docs/source-parity.md](docs/source-parity.md)。
 本轮金融域名的来源与边界见
 [docs/domain-sources.md](docs/domain-sources.md)。

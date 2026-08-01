@@ -56,18 +56,19 @@
 
 | 项目 | 净变化 | 说明 |
 | --- | ---: | --- |
+| 同期主分支金融更新 | +62 | 合入最新 Finance/HK/SG/JP/UK 活动条目后的净增量 |
 | Bilibili 精确直连 | +3 | 用 `.bilivideo.com`、`.bilivideo.cn`、`.bilivideo.net` 替代原宽泛关键词 |
-| 业务自维护小计 | 479 | 15 个业务 DOMAIN-SET |
+| 业务自维护小计 | 541 | 15 个业务 DOMAIN-SET |
 | Adblock4limbo 精准补集 | +224 | 同时减去 SKK domainset 与 non_ip reject 覆盖 |
-| 最终活动规则 | 703 | 16 个本仓库 DOMAIN-SET |
+| 最终活动规则 | 765 | 16 个本仓库 DOMAIN-SET |
 
-[surge-expanded.conf](../surge-expanded.conf) 将 703 条自维护规则全部内联。
+[surge-expanded.conf](../surge-expanded.conf) 将 765 条自维护规则全部内联。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：91 行，通过 16 个远程文件加载 703 条规则。
-- `surge-expanded.conf`：812 行，将同样的 703 条规则全部展开。
+- `surge-main.conf`：91 行，通过 16 个远程文件加载 765 条规则。
+- `surge-expanded.conf`：874 行，将同样的 765 条规则全部展开。
 
 两者的自维护活动域名语义一致，不能同时加载。
 CI 会重新生成展开版并逐字比较；任意 DOMAIN-SET 修改后未更新展开版，提交将失败。

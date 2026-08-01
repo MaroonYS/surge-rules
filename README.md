@@ -6,6 +6,7 @@
 ## 设计目标
 
 - 保留地区第一方金融域名的既有分流语义。
+- 用精确后缀恢复 Bilibili 视频 CDN 的前置直连，避免被共享 Reject/CDN 规则抢先命中。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
@@ -22,6 +23,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
+| `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
 | `apple-ai.conf` | `AIGC` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
@@ -47,9 +49,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `Identity` 的稳定 `select` 定义可直接使用
    [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 15 个远程 DOMAIN-SET 加载 700 条规则；
-   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 700 条规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 15 个本仓库规则集均成功加载。
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载 765 条规则；
+   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 765 条规则全部写回 `[Rule]`，可整段复制。
+4. 在 Surge 的外部资源页面刷新，确认 16 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
@@ -60,8 +62,10 @@ python3 scripts/build_expanded.py --write
 
 原始 Rule 到各文件的覆盖和有意调整记录在
 [docs/migration-notes.md](docs/migration-notes.md)。
+与 BiliUniverse Global 的域名边界、模块参数及持续兼容检查见
+[docs/biliuniverse-global.md](docs/biliuniverse-global.md)。
 逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
-原始 Rule、金融/身份/风控扩充及广告补集到最终 700 条活动规则的数量对账见
+原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集到最终 765 条活动规则的数量对账见
 [docs/source-parity.md](docs/source-parity.md)。
 本轮金融域名的来源与边界见
 [docs/domain-sources.md](docs/domain-sources.md)。
@@ -92,6 +96,7 @@ Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
 python3 scripts/validate.py --strict
 python3 scripts/build_expanded.py --check
 python3 -m unittest discover -s tests -v
+python3 scripts/check_biliuniverse.py --timeout 30
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 

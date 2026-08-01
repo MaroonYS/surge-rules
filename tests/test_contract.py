@@ -69,6 +69,32 @@ class RuleContractTests(unittest.TestCase):
             entries,
         )
 
+    def test_bilibili_uses_early_precise_domain_set(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        entries = {
+            line
+            for line in (ROOT / "bilibili-direct.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {
+                ".bilivideo.com",
+                ".bilivideo.cn",
+                ".bilivideo.net",
+            },
+            entries,
+        )
+
+        bilibili = "/bilibili-direct.conf,DIRECT,extended-matching"
+        polymarket = "/polymarket.conf,Res-Frontier,extended-matching"
+        reject = "/domainset/reject.conf,REJECT,extended-matching"
+        cdn = "/domainset/cdn.conf,PROXY"
+        positions = [main.index(item) for item in (bilibili, polymarket, reject, cdn)]
+        self.assertEqual(sorted(positions), positions)
+        self.assertNotIn("DOMAIN-KEYWORD,bilivideo", main)
+
     def test_sukkaw_reject_stack_uses_documented_order(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         expected = [

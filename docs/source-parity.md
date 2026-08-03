@@ -62,13 +62,15 @@
 | Adblock4limbo 精准补集 | +224 | 同时减去 SKK domainset 与 non_ip reject 覆盖 |
 | 最终活动规则 | 765 | 16 个本仓库 DOMAIN-SET |
 
-[surge-expanded.conf](../surge-expanded.conf) 将 765 条自维护规则全部内联。
+[surge-expanded.conf](../surge-expanded.conf) 将当前自维护活动规则全部内联。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：91 行，通过 16 个远程文件加载 765 条规则。
-- `surge-expanded.conf`：874 行，将同样的 765 条规则全部展开。
+- `surge-main.conf`：通过 16 个远程文件加载当前活动规则。
+- `surge-expanded.conf`：由生成器将同样的活动规则全部展开。
 
 两者的自维护活动域名语义一致，不能同时加载。
 CI 会重新生成展开版并逐字比较；任意 DOMAIN-SET 修改后未更新展开版，提交将失败。
+Adblock4limbo 的活动数量允许随上游和 SKK 基线变化，因此当前总数以严格校验器及
+`surge-expanded.conf` 的自动生成标头为准；上表中的数字保留为对应版本快照。

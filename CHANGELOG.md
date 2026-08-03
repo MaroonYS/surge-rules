@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0 - 2026-08-04
+
+- Added a six-hour Adblock4limbo synchronization workflow that rebuilds and deduplicates the supplement against both SKK reject baselines.
+- Added pre-publication unit, generated-file and strict repository validation with change-scoped draft pull requests.
+- Removed volatile current-rule totals from usage documentation while retaining versioned count snapshots.
+
 ## 1.6.0 - 2026-08-01
 
 - Restored Bilibili video CDN direct routing with three precise suffixes instead of the former broad keyword.

@@ -49,8 +49,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `Identity` 的稳定 `select` 定义可直接使用
    [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载 765 条规则；
-   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的 765 条规则全部写回 `[Rule]`，可整段复制。
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载当前活动规则；
+   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
 4. 在 Surge 的外部资源页面刷新，确认 16 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
@@ -65,7 +65,7 @@ python3 scripts/build_expanded.py --write
 与 BiliUniverse Global 的域名边界、模块参数及持续兼容检查见
 [docs/biliuniverse-global.md](docs/biliuniverse-global.md)。
 逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
-原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集到最终 765 条活动规则的数量对账见
+原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集的版本数量对账见
 [docs/source-parity.md](docs/source-parity.md)。
 本轮金融域名的来源与边界见
 [docs/domain-sources.md](docs/domain-sources.md)。
@@ -132,6 +132,16 @@ Deprecated 标记、空文件、SKK 哨兵占位及外部 RULE-SET 的策略列�
 Adblock4limbo 原文件把 `reject` 写进了每一条外部规则；生成器会移除策略列、
 排除宽泛关键词、去重并减去 SKK 已覆盖项。许可归属见
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+`.github/workflows/sync-adblock4limbo.yml` 每 6 小时轮询一次 Adblock4limbo
+及两个 SKK Reject 基线，也可以从 Actions 手动运行。它会依次重新生成
+`adblock4limbo-supplement.conf` 与 `surge-expanded.conf`、运行全部单元测试和严格
+校验，并且只有两个生成文件确实变化时才创建或更新固定的 Draft PR。工作流不会
+直接推送或自动合并 `main`；上游下载、生成或校验失败时也不会发布任何变更。
+
+GitHub 定时任务是轮询而不是上游 Webhook，因此正常更新延迟最多约 6 小时，实际
+执行时间还可能受 GitHub 调度影响。仓库需要在 Actions 设置中允许工作流写入内容
+和创建 Pull Request。
 
 ## Identity 与 Risk 的边界
 

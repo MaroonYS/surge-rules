@@ -133,15 +133,18 @@ Adblock4limbo 原文件把 `reject` 写进了每一条外部规则；生成器�
 排除宽泛关键词、去重并减去 SKK 已覆盖项。许可归属见
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-`.github/workflows/sync-adblock4limbo.yml` 每 6 小时轮询一次 Adblock4limbo
-及两个 SKK Reject 基线，也可以从 Actions 手动运行。它会依次重新生成
+`.github/workflows/sync-adblock4limbo.yml` 每天香港时间 02:37 轮询一次
+Adblock4limbo 及两个 SKK Reject 基线，也可以从 Actions 手动运行。它会依次重新生成
 `adblock4limbo-supplement.conf` 与 `surge-expanded.conf`、运行全部单元测试和严格
-校验，并且只有两个生成文件确实变化时才创建或更新固定的 Draft PR。工作流不会
-直接推送或自动合并 `main`；上游下载、生成或校验失败时也不会发布任何变更。
+校验。只有这两个生成文件确实变化且全部检查通过时，才会由 GitHub Actions 机器人
+直接创建提交并以普通非强制推送快进 `main`，无需人工确认或合并。
 
-GitHub 定时任务是轮询而不是上游 Webhook，因此正常更新延迟最多约 6 小时，实际
-执行时间还可能受 GitHub 调度影响。仓库需要在 Actions 设置中允许工作流写入内容
-和创建 Pull Request。
+没有有效变化时不会创建提交；上游下载、生成、测试或校验失败时不会发布任何变更。
+若同步期间 `main` 出现其他提交，工作流会拒绝推送并由下一次计划任务重新执行，避免
+覆盖并发修改。瞬时下载错误会在当前运行中短暂重试，整个工作流失败时还会自动从最新
+`main` 重新排队最多两次，不需要人工重新运行。GitHub 定时任务是轮询而不是上游
+Webhook，因此临时人工更新最多约延迟 24 小时，实际执行时间还可能受 GitHub 调度
+影响。仓库需要允许工作流写入内容和重新调度 Actions。
 
 ## Identity 与 Risk 的边界
 

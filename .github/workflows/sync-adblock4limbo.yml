@@ -2,9 +2,16 @@ name: Sync Adblock4limbo supplement
 
 on:
   schedule:
-    # GitHub schedules use UTC. Check every six hours away from the hour.
-    - cron: "37 */6 * * *"
+    # GitHub cron uses UTC: 18:37 UTC = 02:37 Asia/Hong_Kong the next day.
+    # The predictable month-end refresh is normally picked up 2h37m later.
+    - cron: "37 18 * * *"
   workflow_dispatch:
+    inputs:
+      retry_count:
+        description: Internal automatic retry counter
+        required: false
+        type: number
+        default: 0
 
 permissions: {}
 
@@ -14,7 +21,6 @@ concurrency:
 
 env:
   BASE_BRANCH: main
-  UPDATE_BRANCH: automation/adblock4limbo-sync
 
 jobs:
   sync:
@@ -23,8 +29,8 @@ jobs:
     timeout-minutes: 15
 
     permissions:
+      actions: write
       contents: write
-      pull-requests: write
 
     steps:
       - name: Check out main
@@ -41,7 +47,22 @@ jobs:
       - name: Regenerate supplement and expanded rules
         run: |
           set -euo pipefail
-          python scripts/sync_adblock4limbo.py --write --timeout 30
+
+          for attempt in 1 2 3
+          do
+            if python scripts/sync_adblock4limbo.py --write --timeout 30
+            then
+              break
+            fi
+
+            if (( attempt == 3 ))
+            then
+              exit 1
+            fi
+
+            sleep $((attempt * 15))
+          done
+
           python scripts/build_expanded.py --write
 
       - name: Test and validate generated output
@@ -59,6 +80,22 @@ jobs:
         id: changes
         run: |
           set -euo pipefail
+
+          changed_files="$(git diff --name-only)"
+          unexpected_files="$(
+            printf '%s\n' "$changed_files" \
+              | grep -Ev \
+                '^(adblock4limbo-supplement\.conf|surge-expanded\.conf)$' \
+              || true
+          )"
+
+          if [[ -n "$unexpected_files" ]]
+          then
+            echo "::error::Generator changed files outside the allowlist."
+            printf '%s\n' "$unexpected_files"
+            exit 1
+          fi
+
           if git diff --quiet -- \
             adblock4limbo-supplement.conf \
             surge-expanded.conf
@@ -73,18 +110,13 @@ jobs:
               surge-expanded.conf
           fi
 
-      - name: Commit and update automation branch
+      - name: Commit and fast-forward main
         if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
 
-          remote_sha="$(
-            git ls-remote --heads \
-              origin "refs/heads/${UPDATE_BRANCH}" \
-              | awk '{print $1}'
-          )"
+          base_sha="$(git rev-parse HEAD)"
 
-          git switch -C "${UPDATE_BRANCH}" "${BASE_BRANCH}"
           git config user.name "github-actions[bot]"
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
@@ -92,59 +124,50 @@ jobs:
           git add -- \
             adblock4limbo-supplement.conf \
             surge-expanded.conf
-          git commit -m "chore: refresh Adblock4limbo supplement"
 
-          if [[ -n "$remote_sha" ]]
+          unexpected_staged="$(
+            git diff --cached --name-only \
+              | grep -Ev \
+                '^(adblock4limbo-supplement\.conf|surge-expanded\.conf)$' \
+              || true
+          )"
+          if [[ -n "$unexpected_staged" ]]
           then
-            git push \
-              --force-with-lease="refs/heads/${UPDATE_BRANCH}:${remote_sha}" \
-              origin "HEAD:refs/heads/${UPDATE_BRANCH}"
-          else
-            git push \
-              --force-with-lease="refs/heads/${UPDATE_BRANCH}:" \
-              origin "HEAD:refs/heads/${UPDATE_BRANCH}"
+            echo "::error::Unexpected staged files: $unexpected_staged"
+            exit 1
           fi
 
-      - name: Open or update pull request
-        if: steps.changes.outputs.changed == 'true'
+          git commit -m "chore: refresh Adblock4limbo supplement"
+
+          git fetch --no-tags origin "$BASE_BRANCH"
+          if [[ "$(git rev-parse FETCH_HEAD)" != "$base_sha" ]]
+          then
+            echo "::error::main moved during synchronization; refusing to publish."
+            exit 1
+          fi
+
+          git push origin "HEAD:refs/heads/${BASE_BRANCH}"
+          echo "Published verified generated files to main." \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Queue bounded automatic retry
+        if: ${{ failure() && !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
+          RETRY_COUNT: ${{ inputs.retry_count || 0 }}
         run: |
           set -euo pipefail
 
-          pr_number="$(
-            gh pr list \
-              --repo "$GITHUB_REPOSITORY" \
-              --base "$BASE_BRANCH" \
-              --head "$UPDATE_BRANCH" \
-              --state open \
-              --json number \
-              --jq '.[0].number // empty'
-          )"
-
-          if [[ -z "$pr_number" ]]
+          if (( RETRY_COUNT >= 2 ))
           then
-            pr_url="$(
-              gh pr create \
-                --repo "$GITHUB_REPOSITORY" \
-                --base "$BASE_BRANCH" \
-                --head "$UPDATE_BRANCH" \
-                --title "chore: refresh Adblock4limbo supplement" \
-                --body-file .github/adblock-sync-pr.md \
-                --draft
-            )"
-          else
-            gh pr edit "$pr_number" \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "chore: refresh Adblock4limbo supplement" \
-              --body-file .github/adblock-sync-pr.md
-
-            pr_url="$(
-              gh pr view "$pr_number" \
-                --repo "$GITHUB_REPOSITORY" \
-                --json url \
-                --jq '.url'
-            )"
+            echo "Automatic retry limit reached." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
 
-          echo "Updated pull request: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          sleep 30
+          gh workflow run sync-adblock4limbo.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$BASE_BRANCH" \
+            -f retry_count="$((RETRY_COUNT + 1))"
+          echo "Queued automatic retry $((RETRY_COUNT + 1)) of 2." \
+            >> "$GITHUB_STEP_SUMMARY"

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.1 - 2026-08-04
+
+- Changed Adblock4limbo polling from every six hours to once daily at 02:37 Asia/Hong_Kong.
+- Replaced the manual draft-PR gate with a fully automatic, validated, non-force fast-forward to `main`.
+- Added fail-closed guards for unexpected generated files and concurrent changes to `main`.
+- Added bounded download and whole-workflow retries without force-pushing or bypassing validation.
+- Removed the obsolete synchronization pull-request template and pull-request permission.
+
 ## 1.7.0 - 2026-08-04
 
 - Added a six-hour Adblock4limbo synchronization workflow that rebuilds and deduplicates the supplement against both SKK reject baselines.

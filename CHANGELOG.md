@@ -4,6 +4,7 @@
 
 - Added a six-hour Adblock4limbo synchronization workflow that rebuilds and deduplicates the supplement against both SKK reject baselines.
 - Added pre-publication unit, generated-file and strict repository validation with change-scoped draft pull requests.
+- Upgraded all official GitHub Actions to their Node.js 24 major versions.
 - Removed volatile current-rule totals from usage documentation while retaining versioned count snapshots.
 
 ## 1.6.0 - 2026-08-01

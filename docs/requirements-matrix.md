@@ -5,7 +5,7 @@
 
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
-| 1 | Google Voice、STUN、MTProto、LAN | Google Voice 的控制域和 4 条官方 UDP 媒体网段先于全局 STUN 拦截；MTProto、SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` 保留 |
+| 1 | Google Voice、STUN、MTProto、LAN | Google Voice 的 2 条页面/控制域进入 `GoogleVoice-Control`，1 条 STUN 域和 5 条 Workspace 官方 UDP 媒体规则进入 `GoogleVoice-Media`，全部先于全局 STUN 拦截；MTProto、SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` 保留 |
 | 2 | 特殊服务最优先 | Bilibili 的 3 个精确视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；随后是 Polymarket 的 4 个精确目标，全部位于共享 Reject/CDN 规则之前 |
 | 3 | iCloud Private Relay | SKK DOMAIN-SET 固定到 `Apple` |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `AIGC` |
@@ -27,7 +27,8 @@
 
 | 文件 | 策略 |
 | --- | --- |
-| `google-voice.conf` | `GoogleVoice` |
+| `google-voice.conf` | `GoogleVoice-Control` |
+| `google-voice-media.conf` | `GoogleVoice-Media` |
 | `bilibili-direct.conf` | `DIRECT` |
 | `taobao-functional.conf` | `DIRECT` |
 | `polymarket.conf` | `Res-Frontier` |

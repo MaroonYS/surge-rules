@@ -37,17 +37,38 @@ class RuleContractTests(unittest.TestCase):
 
     def test_google_voice_media_precedes_global_stun_block(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        voice = "/google-voice.conf,GoogleVoice,extended-matching"
-        media = (
+        control = (
+            "/google-voice.conf,GoogleVoice-Control,extended-matching"
+        )
+        stun_host = (
+            "/google-voice-media.conf,GoogleVoice-Media,extended-matching"
+        )
+        media_rules = [
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
-            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice"
-        )
+            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
+            "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),"
+            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
+            "AND,((PROTOCOL,UDP),(DEST-PORT,19302),"
+            "(IP-CIDR,74.125.250.129/32,no-resolve)),GoogleVoice-Media",
+            "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
+            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),"
+            "GoogleVoice-Media",
+            "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),"
+            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),"
+            "GoogleVoice-Media",
+        ]
         stun = "PROTOCOL,STUN,REJECT"
+        ordered = [control, stun_host, *media_rules, stun]
         self.assertEqual(
-            sorted(main.index(item) for item in (voice, media, stun)),
-            [main.index(item) for item in (voice, media, stun)],
+            sorted(main.index(item) for item in ordered),
+            [main.index(item) for item in ordered],
         )
-        entries = {
+        for media_rule in media_rules:
+            with self.subTest(media_rule=media_rule):
+                self.assertLess(main.index(media_rule), main.index(stun))
+                self.assertTrue(media_rule.endswith("GoogleVoice-Media"))
+        self.assertNotIn(",GoogleVoice\n", main)
+        control_entries = {
             line
             for line in (ROOT / "google-voice.conf").read_text(
                 encoding="utf-8"
@@ -55,8 +76,19 @@ class RuleContractTests(unittest.TestCase):
             if line and not line.startswith("#")
         }
         self.assertEqual(
-            {".voice.google.com", ".telephony.goog", "stun.l.google.com"},
-            entries,
+            {".voice.google.com", ".telephony.goog"},
+            control_entries,
+        )
+        media_entries = {
+            line
+            for line in (ROOT / "google-voice-media.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {"stun.l.google.com"},
+            media_entries,
         )
 
     def test_changing_private_relay_policy_fails_contract(self) -> None:
@@ -300,7 +332,14 @@ class RuleContractTests(unittest.TestCase):
         snippet = (
             ROOT / "snippets" / "service-policy-groups.conf"
         ).read_text(encoding="utf-8")
-        self.assertIn('GoogleVoice = select, "United States"', snippet)
+        self.assertIn(
+            'GoogleVoice-Control = select, Res-Frontier, "United States"',
+            snippet,
+        )
+        self.assertIn(
+            'GoogleVoice-Media = select, DIRECT, "United States"',
+            snippet,
+        )
         self.assertIn(
             'Apple-Push = fallback, "Hong Kong", "United States", DIRECT, '
             "interval=600, timeout=5",

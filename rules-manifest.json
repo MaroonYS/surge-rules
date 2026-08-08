@@ -7,8 +7,13 @@
   "active": [
     {
       "file": "google-voice.conf",
-      "policy": "GoogleVoice",
-      "description": "Google Voice control and STUN hosts routed before the global STUN block"
+      "policy": "GoogleVoice-Control",
+      "description": "Google Voice page, signaling and call-control hosts"
+    },
+    {
+      "file": "google-voice-media.conf",
+      "policy": "GoogleVoice-Media",
+      "description": "Google Voice STUN host routed with the Workspace-published UDP media path"
     },
     {
       "file": "bilibili-direct.conf",

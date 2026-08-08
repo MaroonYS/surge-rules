@@ -35,6 +35,30 @@ class RuleContractTests(unittest.TestCase):
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
 
+    def test_google_voice_media_precedes_global_stun_block(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        voice = "/google-voice.conf,GoogleVoice,extended-matching"
+        media = (
+            "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
+            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice"
+        )
+        stun = "PROTOCOL,STUN,REJECT"
+        self.assertEqual(
+            sorted(main.index(item) for item in (voice, media, stun)),
+            [main.index(item) for item in (voice, media, stun)],
+        )
+        entries = {
+            line
+            for line in (ROOT / "google-voice.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {".voice.google.com", ".telephony.goog", "stun.l.google.com"},
+            entries,
+        )
+
     def test_changing_private_relay_policy_fails_contract(self) -> None:
         codes = self.validate_modified_main(
             "icloud_private_relay.conf,Apple,extended-matching",
@@ -94,6 +118,22 @@ class RuleContractTests(unittest.TestCase):
         positions = [main.index(item) for item in (bilibili, polymarket, reject, cdn)]
         self.assertEqual(sorted(positions), positions)
         self.assertNotIn("DOMAIN-KEYWORD,bilivideo", main)
+
+    def test_taobao_miniapp_runtime_precedes_shared_reject(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        entries = {
+            line
+            for line in (ROOT / "taobao-functional.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual({".hybrid.miniapp.taobao.com"}, entries)
+        taobao = "/taobao-functional.conf,DIRECT,extended-matching"
+        reject = "/domainset/reject.conf,REJECT,extended-matching"
+        domestic = "/non_ip/domestic.conf,DIRECT"
+        self.assertLess(main.index(taobao), main.index(reject))
+        self.assertLess(main.index(taobao), main.index(domestic))
 
     def test_sukkaw_reject_stack_uses_documented_order(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -185,6 +225,65 @@ class RuleContractTests(unittest.TestCase):
         positions = [main.index(fragment) for fragment in (finance, identity, risk, crypto)]
         self.assertEqual(sorted(positions), positions)
 
+    def test_bybit_documented_api_fallback_is_not_left_to_final(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        entries = {
+            line
+            for line in (ROOT / "bybit.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual({".bybit.com", ".bytick.com"}, entries)
+        self.assertNotIn(".bybit.com", (ROOT / "crypto.conf").read_text(encoding="utf-8"))
+        self.assertLess(
+            main.index("/bybit.conf,Crypto,extended-matching"),
+            main.index("/crypto.conf,Crypto,extended-matching"),
+        )
+
+    def test_apple_push_override_precedes_system(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        push = "/apple-push.conf,Apple-Push,extended-matching"
+        system = "RULE-SET,SYSTEM,DIRECT"
+        self.assertLess(main.index(push), main.index(system))
+        self.assertEqual(
+            {
+                ".push.apple.com",
+                ".courier-push-apple.com.akadns.net",
+                ".push-apple.com.akadns.net",
+            },
+            {
+                line
+                for line in (ROOT / "apple-push.conf").read_text(
+                    encoding="utf-8"
+                ).splitlines()
+                if line and not line.startswith("#")
+            },
+        )
+        apple_ranges = {
+            "17.249.0.0/16",
+            "17.252.0.0/16",
+            "17.57.144.0/22",
+            "17.188.128.0/18",
+            "17.188.20.0/23",
+            "2620:149:a44::/48",
+            "2403:300:a42::/48",
+            "2403:300:a51::/48",
+            "2a01:b740:a42::/48",
+        }
+        for network in apple_ranges:
+            with self.subTest(network=network):
+                self.assertIn(
+                    f"(DEST-PORT,5223),(IP-CIDR{'6' if ':' in network else ''},{network},no-resolve)",
+                    main,
+                )
+
+    def test_telegram_ip_precedes_general_ip_reject(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        telegram = "/ip/telegram.conf,Telegram"
+        reject = "/ip/reject.conf,REJECT-DROP"
+        self.assertLess(main.index(telegram), main.index(reject))
+
     def test_identity_policy_group_snippet_is_copy_ready(self) -> None:
         snippet = (
             ROOT / "snippets" / "identity-policy-groups.conf"
@@ -196,6 +295,24 @@ class RuleContractTests(unittest.TestCase):
             ],
             snippet.splitlines(),
         )
+
+    def test_service_policy_group_snippet_is_copy_ready(self) -> None:
+        snippet = (
+            ROOT / "snippets" / "service-policy-groups.conf"
+        ).read_text(encoding="utf-8")
+        self.assertIn('GoogleVoice = select, "United States"', snippet)
+        self.assertIn(
+            'Apple-Push = fallback, "Hong Kong", "United States", DIRECT, '
+            "interval=600, timeout=5",
+            snippet,
+        )
+        ios = (ROOT / "snippets" / "ios-apns-capture.conf").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("include-all-networks = true", ios)
+        self.assertIn("include-apns = true", ios)
+        self.assertIn("include-local-networks = false", ios)
+        self.assertIn("include-cellular-services = false", ios)
 
     def test_reject_drop_does_not_use_pre_matching(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

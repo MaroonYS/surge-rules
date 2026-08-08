@@ -4,6 +4,11 @@
       "number": 1,
       "title": "协议和局域网",
       "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,GoogleVoice,extended-matching",
+        "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice",
+        "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice",
+        "AND,((PROTOCOL,UDP),(DEST-PORT,19302),(IP-CIDR,74.125.250.129/32,no-resolve)),GoogleVoice",
+        "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),GoogleVoice",
         "PROTOCOL,STUN,REJECT",
         "PROTOCOL,MTProto,Telegram",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/lan.conf,DIRECT",
@@ -15,6 +20,7 @@
       "title": "必须最优先匹配的特殊服务",
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bilibili-direct.conf,DIRECT,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/taobao-functional.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket.conf,Res-Frontier,extended-matching"
       ]
     },
@@ -70,6 +76,7 @@
       "number": 9,
       "title": "中心化交易所",
       "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Crypto,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
       ]
     },
@@ -82,8 +89,18 @@
     },
     {
       "number": 11,
-      "title": "剩余系统服务",
+      "title": "Apple Push 与剩余系统服务",
       "rules": [
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push.conf,Apple-Push,extended-matching",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.249.0.0/16,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.252.0.0/16,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.57.144.0/22,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.188.128.0/18,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.188.20.0/23,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2620:149:a44::/48,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2403:300:a42::/48,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2403:300:a51::/48,no-resolve)),Apple-Push",
+        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2a01:b740:a42::/48,no-resolve)),Apple-Push",
         "RULE-SET,SYSTEM,DIRECT"
       ]
     },
@@ -145,8 +162,8 @@
       "number": 17,
       "title": "IP 类规则",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
         "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Telegram",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
         "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,Streaming",
         "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT",

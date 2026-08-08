@@ -76,6 +76,35 @@ FINAL,PROXY
         self.assertEqual([], unstable)
         self.assertEqual(1, count)
 
+    def test_fallback_policy_can_exist_without_being_required_stable(self) -> None:
+        rules = "[Rule]\nDOMAIN,example.com,Apple-Push\n"
+        snippet = (
+            'Apple-Push = fallback, "Hong Kong", "United States", DIRECT, '
+            "interval=600, timeout=5\n"
+        )
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+            (),
+            (snippet,),
+        )
+        self.assertEqual([], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(1, count)
+
+    def test_logical_rule_policy_is_checked(self) -> None:
+        rules = """\
+[Rule]
+AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309)),GoogleVoice
+"""
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+        )
+        self.assertEqual(["GoogleVoice"], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(1, count)
+
 
 if __name__ == "__main__":
     unittest.main()

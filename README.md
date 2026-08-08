@@ -7,7 +7,11 @@
 
 - 保留地区第一方金融域名的既有分流语义。
 - 用精确后缀恢复 Bilibili 视频 CDN 的前置直连，避免被共享 Reject/CDN 规则抢先命中。
+- 仅恢复淘宝/天猫品牌互动页依赖的 mini-app 运行时，不对整个淘宝广告域放行。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
+- 在全局 STUN 拦截前精确放行 Google Voice 的控制与媒体通道。
+- 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出。
+- 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
 - 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
@@ -23,7 +27,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
+| `google-voice.conf` | `GoogleVoice` | Google Voice 控制域、STUN 与媒体通道前置匹配 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
+| `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
 | `apple-ai.conf` | `AIGC` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
@@ -36,8 +42,10 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `finance-context.conf` | `Finance` | 无法仅按域名判断地区的金融服务 |
 | `identity-context.conf` | `Identity` | KYC 与身份验证服务 |
 | `risk-context.conf` | `Identity` | 保守的设备情报与指纹服务活动集 |
+| `bybit.conf` | `Crypto` | Bybit 官方 App/API 域名，优先于通用 Crypto |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
+| `apple-push.conf` | `Apple-Push` | APNs 长连接，优先于内建 `SYSTEM` |
 | `adblock4limbo-supplement.conf` | `REJECT` | Adblock4limbo 经清洗、去重并减去 SKK 覆盖后的补集 |
 
 `archive/` 中的文件永远不被主规则加载。当前没有任何被确认停用的域名。
@@ -45,13 +53,16 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 ## 接入
 
 1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
-2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity` 和各地区金融组已选中所需出口。
+2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity`、`GoogleVoice`、
+   `Apple-Push` 和各地区金融组已选中所需出口。
    `Identity` 的稳定 `select` 定义可直接使用
-   [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)。
+   [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)；
+   实时通信组见
+   [snippets/service-policy-groups.conf](snippets/service-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 16 个远程 DOMAIN-SET 加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 20 个远程 DOMAIN-SET 加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 16 个本仓库规则集均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 20 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
@@ -100,16 +111,18 @@ python3 scripts/check_biliuniverse.py --timeout 30
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 
-核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略使用固定代理或手动
-`select`：
+核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略及 Google Voice
+使用固定代理或手动 `select`。`Apple-Push` 只要求存在；仓库提供的定义刻意使用
+`fallback` 自动切换可用 APNs 出口：
 
 ```bash
 python3 scripts/check_profile_policies.py \
   --profile /path/to/profile.conf \
   --supplement snippets/identity-policy-groups.conf \
+  --supplement snippets/service-policy-groups.conf \
   --require-stable \
   Finance HK-FINANCE SG-FINANCE JP-FINANCE KR-FINANCE UK-FINANCE \
-  Res-Frontier "United States" Identity
+  Res-Frontier "United States" Identity GoogleVoice
 ```
 
 生成机器可读报告：
@@ -156,6 +169,31 @@ Webhook，因此临时人工更新最多约延迟 24 小时，实际执行时间
 本仓库只负责分流结构与规则数据，不包含节点、代理凭据或订阅。
 它不能保证银行或支付服务不触发风控；稳定、固定的账户地区和正常使用行为
 比持续扩大共享验证规则更重要。
+
+## 实时通信与 Apple 连续互通
+
+Google Voice 的媒体规则只放行 Google 官方公布的 Voice UDP
+端口和专用 IP 段，其他 STUN 仍保持拒绝。`GoogleVoice` 必须固定到
+已实测 UDP Relay 正常的节点，不能使用不支持 UDP 的住宅链路。
+
+`apple-push.conf` 只在 Surge iOS 实际接管 APNs 时生效。论坛的 Surge 实测中，
+Wi-Fi 下仅代理 `*.push.apple.com` 可能已足够；蜂窝网络还需要同时开启
+`include-all-networks` 与 `include-apns`。将
+[snippets/ios-apns-capture.conf](snippets/ios-apns-capture.conf) 中的键合并到
+`[General]`，不要新建第二个同名段；改动后开启飞行模式数秒，让原有
+APNs 长连接断开并重建。主规则仅覆盖 `*.push.apple.com`、其 APNs CNAME
+和 Apple 公开网段上的 TCP 5223，不代理整个 `17.0.0.0/8`或整个 Apple
+规则集，以避免论坛已反馈的 iCloud 照片同步异常。
+
+`include-all-networks=true` 可能影响 AirDrop/Continuity，因此保持
+`include-local-networks=false` 和 `include-cellular-services=false`，并在同一 Wi-Fi 上做
+开/关 Surge 对照。APNs 链路恢复后，若仅 Telegram 官方客户端仍无横幅/
+声音，而其他推送或第三方 Telegram 客户端正常，则属于官方客户端的独立故障，
+不应再扩大 Apple 代理范围。
+
+Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配。
+`Crypto` 的最终出口必须与账户本人真实、获支持的地区一致；不应使用
+规则去规避服务商的地区与合规限制。
 
 ## 官方参考
 

@@ -6,9 +6,19 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "google-voice.conf",
+      "policy": "GoogleVoice",
+      "description": "Google Voice control and STUN hosts routed before the global STUN block"
+    },
+    {
       "file": "bilibili-direct.conf",
       "policy": "DIRECT",
       "description": "Bilibili video CDN domains forced direct before shared reject and CDN rules"
+    },
+    {
+      "file": "taobao-functional.conf",
+      "policy": "DIRECT",
+      "description": "Taobao/Tmall interactive mini-app runtime restored before the shared reject stack"
     },
     {
       "file": "polymarket.conf",
@@ -71,9 +81,14 @@
       "description": "Conservative shared device intelligence and fingerprinting set"
     },
     {
+      "file": "bybit.conf",
+      "policy": "Crypto",
+      "description": "Bybit first-party application and documented API domains"
+    },
+    {
       "file": "crypto.conf",
       "policy": "Crypto",
-      "description": "Centralized cryptocurrency exchanges"
+      "description": "Remaining centralized cryptocurrency exchanges"
     },
     {
       "file": "web3.conf",
@@ -81,9 +96,14 @@
       "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
     },
     {
+      "file": "apple-push.conf",
+      "policy": "Apple-Push",
+      "description": "Apple Push Notification service override before the internal SYSTEM ruleset"
+    },
+    {
       "file": "adblock4limbo-supplement.conf",
       "policy": "REJECT",
-      "description": "Precise Adblock4limbo domains not already covered by the SKK reject DOMAIN-SET"
+      "description": "Precise Adblock4limbo domains not already covered by the SKK reject DOMAIN-SET or RULE-SET"
     }
   ]
 }

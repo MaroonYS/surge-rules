@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Added precise Google Voice control, STUN and media exceptions before the global STUN rejection rule.
+- Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared reject stack without broadly allowing Taobao advertising hosts.
+- Split Bybit's documented application/API domains from the remaining centralized-exchange set so `api.bytick.com` no longer falls through to `FINAL`.
+- Added a dedicated APNs layer before `SYSTEM`, limited to push hostnames/CNAMEs and TCP 5223 on Apple's published APNs ranges.
+- Added copy-ready policy and iOS APNs-capture snippets, plus regression coverage for rule ordering and policy completeness.
+- Restored Telegram IP routing before the general IP rejection set.
+
 ## 1.7.1 - 2026-08-04
 
 - Changed Adblock4limbo polling from every six hours to once daily at 02:37 Asia/Hong_Kong.

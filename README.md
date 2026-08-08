@@ -1,7 +1,8 @@
 # Surge Rules
 
 一套面向 Surge 的模块化规则仓库。主配置只保留有顺序意义的规则骨架，
-大量域名按“最终策略”拆成远程 `DOMAIN-SET`，从而减少重复、顺序错误和后续维护成本。
+大量域名按“最终策略”拆成远程 `DOMAIN-SET`，IP/端口组合拆成远程
+`RULE-SET`，从而减少重复、顺序错误和后续维护成本。
 
 ## 设计目标
 
@@ -12,6 +13,7 @@
 - 在全局 STUN 拦截前精确放行 Google Voice 的控制与媒体通道。
 - 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出。
 - 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
+- 将 Google Voice 与 APNs 的逻辑 `AND` 规则移入独立、无策略列的远程 `RULE-SET`。
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
 - 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
@@ -21,14 +23,17 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 - `example.com` 只匹配精确域名；
 - `.example.com` 匹配根域名及其子域名。
 
-规则文件中只写域名，不写 `DOMAIN-SUFFIX`、策略名或逗号。
+`DOMAIN-SET` 文件中只写域名，不写 `DOMAIN-SUFFIX`、策略名或逗号。
+`RULE-SET` 文件每行写一条完整规则声明，但不写策略列；策略由主 Rule 的外层
+`RULE-SET` 统一指定。
 
 ## 文件与策略
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
 | `google-voice.conf` | `GoogleVoice-Control` | Google Voice 页面、信令与呼叫控制 |
-| `google-voice-media.conf` | `GoogleVoice-Media` | Google Voice STUN；UDP 媒体 IP/端口保留在主 Rule |
+| `google-voice-media.conf` | `GoogleVoice-Media` | Google Voice STUN 主机 |
+| `google-voice-media-rules.conf` | `GoogleVoice-Media` | Google Voice UDP 媒体 IP/端口逻辑规则 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
@@ -47,6 +52,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `Apple-Push` | APNs 长连接，优先于内建 `SYSTEM` |
+| `apple-push-rules.conf` | `Apple-Push` | Apple 公布网段上的 APNs TCP 5223 逻辑规则 |
 | `adblock4limbo-supplement.conf` | `REJECT` | Adblock4limbo 经清洗、去重并减去 SKK 覆盖后的补集 |
 
 `archive/` 中的文件永远不被主规则加载。当前没有任何被确认停用的域名。
@@ -62,12 +68,12 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    实时通信组见
    [snippets/service-policy-groups.conf](snippets/service-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 21 个远程 DOMAIN-SET 加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 23 个远程本仓库规则文件（21 个 `DOMAIN-SET`、2 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 21 个本仓库规则集均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 23 个本仓库规则文件均成功加载。
 
-展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
-它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
+展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
+它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
 
 ```bash
 python3 scripts/build_expanded.py --write
@@ -183,13 +189,14 @@ Google Voice 的页面、信令和呼叫控制进入 `GoogleVoice-Control`，默
 与账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
 实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
 
-`apple-push.conf` 只在 Surge iOS 实际接管 APNs 时生效。论坛的 Surge 实测中，
+两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效。论坛的 Surge 实测中，
 Wi-Fi 下仅代理 `*.push.apple.com` 可能已足够；蜂窝网络还需要同时开启
 `include-all-networks` 与 `include-apns`。将
 [snippets/ios-apns-capture.conf](snippets/ios-apns-capture.conf) 中的键合并到
 `[General]`，不要新建第二个同名段；改动后开启飞行模式数秒，让原有
-APNs 长连接断开并重建。主规则仅覆盖 `*.push.apple.com`、其 APNs CNAME
-和 Apple 公开网段上的 TCP 5223，不代理整个 `17.0.0.0/8`或整个 Apple
+APNs 长连接断开并重建。主规则通过两个独立远程文件覆盖
+`*.push.apple.com`、其 APNs CNAME 和 Apple 公开网段上的 TCP 5223，
+不代理整个 `17.0.0.0/8` 或整个 Apple
 规则集，以避免论坛已反馈的 iCloud 照片同步异常。
 
 `include-all-networks=true` 可能影响 AirDrop/Continuity，因此保持
@@ -205,6 +212,7 @@ Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配。
 ## 官方参考
 
 - [Surge Ruleset](https://manual.nssurge.com/rule/ruleset.html)
+- [Surge Logical Rule](https://manual.nssurge.com/rule/logical-rule.html)
 - [Surge Domain-based Rule](https://manual.nssurge.com/rule/domain-based.html)
 - [Surge Policy Group](https://manual.nssurge.com/policy/group.html)
 - [Google Voice connectivity requirements](https://knowledge.workspace.google.com/admin/voice/voice-connectivity-requirements)

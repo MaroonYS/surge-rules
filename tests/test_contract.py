@@ -43,30 +43,28 @@ class RuleContractTests(unittest.TestCase):
         stun_host = (
             "/google-voice-media.conf,GoogleVoice-Media,extended-matching"
         )
+        media_rule_set = (
+            "/google-voice-media-rules.conf,GoogleVoice-Media"
+        )
         media_rules = [
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
-            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
+            "(IP-CIDR,74.125.39.0/24,no-resolve))",
             "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),"
-            "(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
+            "(IP-CIDR,74.125.39.0/24,no-resolve))",
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302),"
-            "(IP-CIDR,74.125.250.129/32,no-resolve)),GoogleVoice-Media",
+            "(IP-CIDR,74.125.250.129/32,no-resolve))",
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
-            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),"
-            "GoogleVoice-Media",
+            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve))",
             "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),"
-            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),"
-            "GoogleVoice-Media",
+            "(IP-CIDR6,2001:4860:4864:2::/64,no-resolve))",
         ]
         stun = "PROTOCOL,STUN,REJECT"
-        ordered = [control, stun_host, *media_rules, stun]
+        ordered = [control, stun_host, media_rule_set, stun]
         self.assertEqual(
             sorted(main.index(item) for item in ordered),
             [main.index(item) for item in ordered],
         )
-        for media_rule in media_rules:
-            with self.subTest(media_rule=media_rule):
-                self.assertLess(main.index(media_rule), main.index(stun))
-                self.assertTrue(media_rule.endswith("GoogleVoice-Media"))
+        self.assertNotIn("AND,((PROTOCOL,UDP)", main)
         self.assertNotIn(",GoogleVoice\n", main)
         control_entries = {
             line
@@ -89,6 +87,17 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(
             {"stun.l.google.com"},
             media_entries,
+        )
+        remote_media_rules = [
+            line
+            for line in (ROOT / "google-voice-media-rules.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        ]
+        self.assertEqual(media_rules, remote_media_rules)
+        self.assertTrue(
+            all("GoogleVoice-Media" not in line for line in remote_media_rules)
         )
 
     def test_changing_private_relay_policy_fails_contract(self) -> None:
@@ -276,8 +285,11 @@ class RuleContractTests(unittest.TestCase):
     def test_apple_push_override_precedes_system(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         push = "/apple-push.conf,Apple-Push,extended-matching"
+        push_rule_set = "/apple-push-rules.conf,Apple-Push"
         system = "RULE-SET,SYSTEM,DIRECT"
         self.assertLess(main.index(push), main.index(system))
+        self.assertLess(main.index(push), main.index(push_rule_set))
+        self.assertLess(main.index(push_rule_set), main.index(system))
         self.assertEqual(
             {
                 ".push.apple.com",
@@ -292,7 +304,7 @@ class RuleContractTests(unittest.TestCase):
                 if line and not line.startswith("#")
             },
         )
-        apple_ranges = {
+        apple_ranges = [
             "17.249.0.0/16",
             "17.252.0.0/16",
             "17.57.144.0/22",
@@ -302,13 +314,22 @@ class RuleContractTests(unittest.TestCase):
             "2403:300:a42::/48",
             "2403:300:a51::/48",
             "2a01:b740:a42::/48",
-        }
-        for network in apple_ranges:
-            with self.subTest(network=network):
-                self.assertIn(
-                    f"(DEST-PORT,5223),(IP-CIDR{'6' if ':' in network else ''},{network},no-resolve)",
-                    main,
-                )
+        ]
+        expected_rules = [
+            "AND,((PROTOCOL,TCP),(DEST-PORT,5223),"
+            f"(IP-CIDR{'6' if ':' in network else ''},{network},no-resolve))"
+            for network in apple_ranges
+        ]
+        remote_rules = [
+            line
+            for line in (ROOT / "apple-push-rules.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        ]
+        self.assertEqual(expected_rules, remote_rules)
+        self.assertNotIn("AND,((PROTOCOL,TCP),(DEST-PORT,5223)", main)
+        self.assertTrue(all("Apple-Push" not in line for line in remote_rules))
 
     def test_telegram_ip_precedes_general_ip_reject(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

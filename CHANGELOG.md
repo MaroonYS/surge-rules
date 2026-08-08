@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Moved all 14 Google Voice and APNs logical `AND` declarations into two policy-free remote `RULE-SET` files and taught validation and expanded-rule generation to preserve their semantics.
 - Split Google Voice page/call-control traffic from its STUN and UDP media path so page access can use a stable United States or residential exit while calls default to `DIRECT`.
 - Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared reject stack without broadly allowing Taobao advertising hosts.
 - Split Bybit's documented application/API domains from the remaining centralized-exchange set so `api.bytick.com` no longer falls through to `FINAL`.

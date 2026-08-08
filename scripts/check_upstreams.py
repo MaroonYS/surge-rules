@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Sequence
 from urllib.parse import urlsplit
 
+import validate as repository_validator
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SKK_SENTINEL = "7h1s_rul35et_i5_mad3_by_5ukk4w-ruleset.skk.moe"
@@ -236,7 +238,11 @@ def validate_rule_set(lines: Sequence[str]) -> str | None:
     return None
 
 
-def validate_payload(resource: Resource, text: str) -> tuple[int, str]:
+def validate_payload(
+    resource: Resource,
+    text: str,
+    strict_local_rule_set: bool = False,
+) -> tuple[int, str]:
     if text.startswith("\ufeff"):
         return 0, "resource contains a UTF-8 BOM"
     beginning = text.lstrip()[:256].casefold()
@@ -258,6 +264,17 @@ def validate_payload(resource: Resource, text: str) -> tuple[int, str]:
         problem = validate_domain_set(business_lines)
     else:
         problem = validate_rule_set(business_lines)
+        if problem is None and strict_local_rule_set:
+            for line_number, line in enumerate(business_lines, 1):
+                _, local_problem = repository_validator.validate_policy_free_rule(
+                    line
+                )
+                if local_problem:
+                    problem = (
+                        f"invalid local RULE-SET record {line_number}: "
+                        f"{local_problem}: {line!r}"
+                    )
+                    break
     return len(business_lines), problem or ""
 
 
@@ -355,7 +372,11 @@ def probe(
                 retries,
             )
             source = "HTTP"
-        count, problem = validate_payload(result_resource, text)
+        count, problem = validate_payload(
+            result_resource,
+            text,
+            strict_local_rule_set=relative is not None,
+        )
         return Result(result_resource, status, source, count, problem, final_url)
     except urllib.error.HTTPError as exc:
         return Result(result_resource, exc.code, "HTTP", 0, str(exc.reason))

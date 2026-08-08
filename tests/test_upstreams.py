@@ -71,6 +71,27 @@ class PayloadTests(unittest.TestCase):
         self.assertEqual(1, count)
         self.assertEqual("", problem)
 
+    def test_local_logical_rules_use_strict_policy_free_validation(self) -> None:
+        valid = (
+            "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
+            "(IP-CIDR,192.0.2.0/24,no-resolve))\n"
+        )
+        count, problem = check_upstreams.validate_payload(
+            self.resource(),
+            valid,
+            strict_local_rule_set=True,
+        )
+        self.assertEqual(1, count)
+        self.assertEqual("", problem)
+
+        count, problem = check_upstreams.validate_payload(
+            self.resource(),
+            valid.rstrip("\n") + ",CustomPolicy\n",
+            strict_local_rule_set=True,
+        )
+        self.assertEqual(1, count)
+        self.assertIn("embedded policy", problem)
+
     def test_unexpected_ip_option_is_rejected(self) -> None:
         count, problem = check_upstreams.validate_payload(
             self.resource(),

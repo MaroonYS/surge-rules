@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -219,6 +220,63 @@ class SemanticTests(unittest.TestCase):
         )
 
 
+class RuleSetSyntaxTests(unittest.TestCase):
+    def test_policy_free_simple_and_logical_rules_are_accepted(self) -> None:
+        diagnostics: list[validate.Diagnostic] = []
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "local.conf").write_text(
+                "DOMAIN-SUFFIX,example.com\n"
+                "IP-CIDR,192.0.2.0/24,no-resolve\n"
+                "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
+                "(IP-CIDR,192.0.2.0/24,no-resolve))\n",
+                encoding="utf-8",
+            )
+            entries = validate.parse_rule_set(
+                root,
+                "local.conf",
+                "TEST",
+                diagnostics,
+            )
+
+        self.assertEqual(3, len(entries))
+        self.assertEqual(
+            ["DOMAIN-SUFFIX", "IP-CIDR", "AND"],
+            [entry.rule_type for entry in entries],
+        )
+        self.assertEqual([], diagnostics)
+
+    def test_embedded_policy_is_rejected(self) -> None:
+        rule_type, problem = validate.validate_policy_free_rule(
+            "DOMAIN-SUFFIX,example.com,DIRECT"
+        )
+        self.assertIsNone(rule_type)
+        self.assertIn("embedded policy", problem or "")
+
+    def test_embedded_policy_in_logical_child_is_rejected(self) -> None:
+        rule_type, problem = validate.validate_policy_free_rule(
+            "AND,((PROTOCOL,UDP,DIRECT),(DEST-PORT,19302))"
+        )
+        self.assertIsNone(rule_type)
+        self.assertIn("logical sub-rule", problem or "")
+
+    def test_unknown_types_and_invalid_matchers_are_rejected(self) -> None:
+        invalid = {
+            "PROTOCL,UDP": "unsupported",
+            "PROTOCOL,BOGUS": "TCP or UDP",
+            "DEST-PORT,abc": "one port",
+            "DEST-PORT,65536": "65535",
+            "DEST-PORT,200-100": "65535",
+            "IP-CIDR,192.0.2.1/24,no-resolve": "host bits",
+            "DOMAIN,example.com,no-resolve": "unsupported option",
+        }
+        for rule, expected in invalid.items():
+            with self.subTest(rule=rule):
+                rule_type, problem = validate.validate_policy_free_rule(rule)
+                self.assertIsNone(rule_type)
+                self.assertIn(expected, problem or "")
+
+
 class RepositoryTests(unittest.TestCase):
     def test_repository_passes_strict_validation(self) -> None:
         result = validate.validate_repository(ROOT)
@@ -226,6 +284,27 @@ class RepositoryTests(unittest.TestCase):
         self.assertTrue(report["ok"], result.diagnostics)
         self.assertEqual(len(result.bindings), report["files"]["active"])
         self.assertEqual(len(result.bindings), report["references"]["found"])
+        self.assertEqual(
+            report["entries"]["active"],
+            report["entries"]["domain_set"] + report["entries"]["rule_set"],
+        )
+        self.assertEqual(
+            report["files"]["active"],
+            report["files"]["domain_set"] + report["files"]["rule_set"],
+        )
+        self.assertEqual(
+            {"google-voice-media-rules.conf", "apple-push-rules.conf"},
+            {
+                binding.file
+                for binding in result.bindings
+                if binding.type == "RULE-SET"
+            },
+        )
+        self.assertGreater(len(result.active_rule_entries), 0)
+        self.assertEqual(
+            len(result.active_rule_entries),
+            report["entries"]["rule_set"],
+        )
 
     def test_parser_rejects_bom_and_duplicate(self) -> None:
         diagnostics: list[validate.Diagnostic] = []
@@ -245,6 +324,117 @@ class RepositoryTests(unittest.TestCase):
             {"UTF8_BOM", "DUPLICATE"},
             {item.code for item in diagnostics},
         )
+
+    def test_manifest_binding_type_defaults_and_allows_rule_set(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = {
+                "repository": "owner/repository",
+                "branch": "main",
+                "main": "surge-main.conf",
+                "contract": "rules-contract.json",
+                "active": [
+                    {"file": "domains.conf", "policy": "DIRECT"},
+                    {
+                        "file": "rules.conf",
+                        "type": "RULE-SET",
+                        "policy": "Proxy",
+                    },
+                ],
+            }
+            (root / "rules-manifest.json").write_text(
+                json.dumps(manifest),
+                encoding="utf-8",
+            )
+            *_, bindings = validate.load_manifest(root)
+
+        self.assertEqual(
+            ["DOMAIN-SET", "RULE-SET"],
+            [binding.type for binding in bindings],
+        )
+
+    def test_manifest_rejects_unknown_binding_type(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = {
+                "repository": "owner/repository",
+                "branch": "main",
+                "main": "surge-main.conf",
+                "contract": "rules-contract.json",
+                "active": [
+                    {
+                        "file": "rules.conf",
+                        "type": "IP-SET",
+                        "policy": "Proxy",
+                    }
+                ],
+            }
+            (root / "rules-manifest.json").write_text(
+                json.dumps(manifest),
+                encoding="utf-8",
+            )
+            with self.assertRaises(validate.ConfigurationError):
+                validate.load_manifest(root)
+
+    def test_main_reference_must_match_binding_type(self) -> None:
+        binding = validate.Binding(
+            file="rules.conf",
+            policy="Proxy",
+            description="",
+            type="RULE-SET",
+        )
+        raw_base = "https://raw.githubusercontent.com/owner/repository/main/"
+
+        def diagnostics_for(
+            reference_type: str,
+            options: str = "",
+        ) -> list[validate.Diagnostic]:
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                sections = [
+                    {"number": number, "title": f"Section {number}", "rules": []}
+                    for number in range(1, 18)
+                ]
+                reference = (
+                    f"{reference_type},{raw_base}rules.conf,Proxy{options}"
+                )
+                sections[0]["rules"] = [reference]
+                sections[-1]["rules"] = ["FINAL,DIRECT,dns-failed"]
+                (root / "rules-contract.json").write_text(
+                    json.dumps({"sections": sections}),
+                    encoding="utf-8",
+                )
+                main_lines = ["[Rule]"]
+                for section in sections:
+                    main_lines.append(
+                        f"# {section['number']}. {section['title']}"
+                    )
+                    main_lines.extend(section["rules"])
+                (root / "surge-main.conf").write_text(
+                    "\n".join(main_lines) + "\n",
+                    encoding="utf-8",
+                )
+                diagnostics: list[validate.Diagnostic] = []
+                validate.validate_main_rules(
+                    root,
+                    "surge-main.conf",
+                    "owner/repository",
+                    "main",
+                    "rules-contract.json",
+                    [binding],
+                    diagnostics,
+                )
+                return diagnostics
+
+        valid_codes = {item.code for item in diagnostics_for("RULE-SET")}
+        invalid_codes = {item.code for item in diagnostics_for("DOMAIN-SET")}
+        option_codes = {
+            item.code
+            for item in diagnostics_for("RULE-SET", ",extended-matching")
+        }
+        self.assertNotIn("LOCAL_REFERENCE_TYPE", valid_codes)
+        self.assertIn("LOCAL_REFERENCE_TYPE", invalid_codes)
+        self.assertIn("LOCAL_RULESET_OPTIONS", option_codes)
 
 
 if __name__ == "__main__":

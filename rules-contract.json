@@ -6,11 +6,7 @@
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,GoogleVoice-Control,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media.conf,GoogleVoice-Media,extended-matching",
-        "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
-        "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),(IP-CIDR,74.125.39.0/24,no-resolve)),GoogleVoice-Media",
-        "AND,((PROTOCOL,UDP),(DEST-PORT,19302),(IP-CIDR,74.125.250.129/32,no-resolve)),GoogleVoice-Media",
-        "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),GoogleVoice-Media",
-        "AND,((PROTOCOL,UDP),(DEST-PORT,26500-26501),(IP-CIDR6,2001:4860:4864:2::/64,no-resolve)),GoogleVoice-Media",
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media-rules.conf,GoogleVoice-Media",
         "PROTOCOL,STUN,REJECT",
         "PROTOCOL,MTProto,Telegram",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/lan.conf,DIRECT",
@@ -94,15 +90,7 @@
       "title": "Apple Push 与剩余系统服务",
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push.conf,Apple-Push,extended-matching",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.249.0.0/16,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.252.0.0/16,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.57.144.0/22,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.188.128.0/18,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR,17.188.20.0/23,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2620:149:a44::/48,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2403:300:a42::/48,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2403:300:a51::/48,no-resolve)),Apple-Push",
-        "AND,((PROTOCOL,TCP),(DEST-PORT,5223),(IP-CIDR6,2a01:b740:a42::/48,no-resolve)),Apple-Push",
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push-rules.conf,Apple-Push",
         "RULE-SET,SYSTEM,DIRECT"
       ]
     },

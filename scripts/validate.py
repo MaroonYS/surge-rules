@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate this repository's Surge DOMAIN-SET files and main rule skeleton."""
+"""Validate this repository's local Surge rule files and main rule skeleton."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import ipaddress
 import json
 import re
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Iterable, Sequence
 from urllib.parse import urlsplit
@@ -133,6 +133,24 @@ SHARED_INFRASTRUCTURE_SUFFIXES = {
     "withpersona.com",
     "yodlee.com",
 }
+LOCAL_RULE_TYPES = {
+    "AND",
+    "DEST-PORT",
+    "DOMAIN",
+    "DOMAIN-SUFFIX",
+    "IP-CIDR",
+    "IP-CIDR6",
+    "PROTOCOL",
+}
+LOGICAL_LEAF_TYPES = {
+    "DEST-PORT",
+    "DOMAIN",
+    "DOMAIN-SUFFIX",
+    "IP-CIDR",
+    "IP-CIDR6",
+    "PROTOCOL",
+}
+LOCAL_PROTOCOLS = {"TCP", "UDP"}
 
 
 @dataclass(frozen=True)
@@ -160,10 +178,20 @@ class DomainEntry:
 
 
 @dataclass(frozen=True)
+class RuleSetEntry:
+    path: str
+    line: int
+    raw: str
+    rule_type: str
+    policy: str
+
+
+@dataclass(frozen=True)
 class Binding:
     file: str
     policy: str
     description: str
+    type: str = "DOMAIN-SET"
 
 
 @dataclass
@@ -174,6 +202,7 @@ class ValidationResult:
     bindings: list[Binding]
     main_rule_count: int
     local_references: int
+    active_rule_entries: list[RuleSetEntry] = field(default_factory=list)
 
     @property
     def errors(self) -> list[Diagnostic]:
@@ -193,6 +222,9 @@ class ValidationResult:
                 "policy": binding.policy,
                 "entries": sum(
                     entry.path == binding.file for entry in self.active_entries
+                )
+                + sum(
+                    entry.path == binding.file for entry in self.active_rule_entries
                 ),
             }
             for binding in self.bindings
@@ -202,10 +234,18 @@ class ValidationResult:
             "strict": strict,
             "files": {
                 "active": len(self.bindings),
+                "domain_set": sum(
+                    binding.type == "DOMAIN-SET" for binding in self.bindings
+                ),
+                "rule_set": sum(
+                    binding.type == "RULE-SET" for binding in self.bindings
+                ),
                 "archive": len({entry.path for entry in self.archive_entries}),
             },
             "entries": {
-                "active": len(self.active_entries),
+                "active": len(self.active_entries) + len(self.active_rule_entries),
+                "domain_set": len(self.active_entries),
+                "rule_set": len(self.active_rule_entries),
                 "exact": exact,
                 "suffix": suffix,
                 "archive": len(self.archive_entries),
@@ -287,8 +327,9 @@ def load_manifest(root: Path) -> tuple[str, str, str, str, list[Binding]]:
                 file=str(item["file"]),
                 policy=str(item["policy"]),
                 description=str(item.get("description", "")),
+                type=str(item.get("type", "DOMAIN-SET")),
             )
-        except (KeyError, TypeError) as exc:
+        except (AttributeError, KeyError, TypeError) as exc:
             raise ConfigurationError(f"invalid active binding: {exc}") from exc
         file_path = Path(binding.file)
         if (
@@ -297,6 +338,7 @@ def load_manifest(root: Path) -> tuple[str, str, str, str, list[Binding]]:
             or file_path.suffix != ".conf"
             or binding.file in seen_files
             or not binding.policy
+            or binding.type not in {"DOMAIN-SET", "RULE-SET"}
         ):
             raise ConfigurationError(f"invalid active binding: {binding}")
         bindings.append(binding)
@@ -459,6 +501,236 @@ def parse_domain_set(
 
     detect_internal_redundancy(entries, diagnostics)
     return entries
+
+
+def split_rule_fields(raw: str) -> tuple[list[str], str | None]:
+    """Split a rule on top-level commas while preserving logical sub-rules."""
+    fields: list[str] = []
+    start = 0
+    depth = 0
+    for index, character in enumerate(raw):
+        if character == "(":
+            depth += 1
+        elif character == ")":
+            depth -= 1
+            if depth < 0:
+                return [], "unbalanced parentheses"
+        elif character == "," and depth == 0:
+            fields.append(raw[start:index])
+            start = index + 1
+    if depth != 0:
+        return [], "unbalanced parentheses"
+    fields.append(raw[start:])
+    return fields, None
+
+
+def _logical_children(expression: str) -> tuple[list[str], str | None]:
+    if not (expression.startswith("(") and expression.endswith(")")):
+        return [], "logical matcher must wrap its sub-rules in parentheses"
+    children, problem = split_rule_fields(expression[1:-1])
+    if problem:
+        return [], problem
+    unwrapped: list[str] = []
+    for child in children:
+        if not (child.startswith("(") and child.endswith(")")):
+            return [], "each logical sub-rule must be parenthesized"
+        unwrapped.append(child[1:-1])
+    return unwrapped, None
+
+
+def _invalid_rule_fields(rule_type: str) -> tuple[None, str]:
+    return (
+        None,
+        f"{rule_type} contains an embedded policy or unsupported option",
+    )
+
+
+def _validate_destination_port(matcher: str) -> str | None:
+    match = re.fullmatch(r"([0-9]{1,5})(?:-([0-9]{1,5}))?", matcher)
+    if match is None:
+        return "DEST-PORT must be one port or one inclusive port range"
+    start = int(match.group(1))
+    end = int(match.group(2) or match.group(1))
+    if not (1 <= start <= end <= 65535):
+        return "DEST-PORT values must satisfy 1 <= start <= end <= 65535"
+    return None
+
+
+def validate_policy_free_rule(raw: str) -> tuple[str | None, str | None]:
+    """Validate one deliberately narrow, policy-free local RULE-SET record.
+
+    The repository currently needs logical AND rules composed from TCP/UDP,
+    destination-port and IP-network leaves. Simple domain and IP records stay
+    supported for deterministic expansion tests. Other Surge rule types must
+    be added explicitly instead of being accepted by a permissive parser.
+    """
+    if raw != raw.strip():
+        return None, "leading or trailing whitespace is not allowed"
+    fields, problem = split_rule_fields(raw)
+    if problem:
+        return None, problem
+    if any(field != field.strip() for field in fields):
+        return None, "whitespace around top-level commas is not allowed"
+    if len(fields) < 2 or not fields[0] or not fields[1]:
+        return None, "a rule type and matcher are required"
+
+    rule_type = fields[0]
+    if rule_type not in LOCAL_RULE_TYPES:
+        return None, f"unsupported local RULE-SET rule type: {rule_type!r}"
+
+    if rule_type in {"IP-CIDR", "IP-CIDR6"}:
+        if len(fields) == 3 and fields[2] == "no-resolve":
+            pass
+        elif len(fields) != 2:
+            return _invalid_rule_fields(rule_type)
+    elif len(fields) != 2:
+        return _invalid_rule_fields(rule_type)
+
+    matcher = fields[1]
+    if rule_type == "AND":
+        children, problem = _logical_children(matcher)
+        if problem:
+            return None, problem
+        if len(children) < 2:
+            return None, "AND requires at least two sub-rules"
+        for child in children:
+            child_type, child_problem = validate_policy_free_rule(child)
+            if child_problem:
+                return None, f"invalid logical sub-rule: {child_problem}"
+            if child_type not in LOGICAL_LEAF_TYPES:
+                return None, "nested logical rules are not supported"
+        return rule_type, None
+
+    if rule_type == "DOMAIN":
+        if matcher.startswith("."):
+            return None, "DOMAIN matcher must not start with a dot"
+        problem = validate_domain(matcher)
+        if problem:
+            return None, problem
+    elif rule_type == "DOMAIN-SUFFIX":
+        if matcher.startswith("."):
+            return None, "DOMAIN-SUFFIX matcher must not start with a dot"
+        problem = validate_domain(f".{matcher}")
+        if problem:
+            return None, problem
+    elif rule_type in {"IP-CIDR", "IP-CIDR6"}:
+        try:
+            network = ipaddress.ip_network(matcher, strict=True)
+        except ValueError as exc:
+            return None, f"invalid network: {exc}"
+        expected_version = 6 if rule_type == "IP-CIDR6" else 4
+        if network.version != expected_version:
+            return None, f"{rule_type} requires an IPv{expected_version} network"
+    elif rule_type == "PROTOCOL":
+        if matcher not in LOCAL_PROTOCOLS:
+            return None, "PROTOCOL must be TCP or UDP"
+    elif rule_type == "DEST-PORT":
+        problem = _validate_destination_port(matcher)
+        if problem:
+            return None, problem
+
+    return rule_type, None
+
+
+def parse_rule_set(
+    root: Path,
+    relative: str,
+    policy: str,
+    diagnostics: list[Diagnostic],
+) -> list[RuleSetEntry]:
+    try:
+        path = _safe_repository_path(root, relative)
+    except ConfigurationError as exc:
+        _diag(diagnostics, "error", "UNSAFE_PATH", relative, 0, str(exc))
+        return []
+
+    try:
+        payload = path.read_bytes()
+    except OSError as exc:
+        _diag(diagnostics, "error", "FILE_READ", relative, 0, str(exc))
+        return []
+
+    if payload.startswith(b"\xef\xbb\xbf"):
+        _diag(diagnostics, "error", "UTF8_BOM", relative, 1, "UTF-8 BOM is not allowed")
+        payload = payload[3:]
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        _diag(diagnostics, "error", "UTF8", relative, exc.start, str(exc))
+        return []
+
+    if payload and not payload.endswith((b"\n", b"\r")):
+        _diag(
+            diagnostics,
+            "warning",
+            "FINAL_NEWLINE",
+            relative,
+            len(text.splitlines()),
+            "file should end with a newline",
+        )
+
+    entries: list[RuleSetEntry] = []
+    first_seen: dict[str, RuleSetEntry] = {}
+    for line_number, raw_line in enumerate(text.splitlines(), 1):
+        if not raw_line or raw_line.startswith("#"):
+            continue
+        rule_type, problem = validate_policy_free_rule(raw_line)
+        if problem:
+            _diag(
+                diagnostics,
+                "error",
+                "RULE_SYNTAX",
+                relative,
+                line_number,
+                problem,
+            )
+            continue
+        assert rule_type is not None
+        entry = RuleSetEntry(
+            path=relative,
+            line=line_number,
+            raw=raw_line,
+            rule_type=rule_type,
+            policy=policy,
+        )
+        original = first_seen.get(raw_line)
+        if original is not None:
+            _diag(
+                diagnostics,
+                "error",
+                "DUPLICATE",
+                relative,
+                line_number,
+                f"duplicates line {original.line}: {raw_line}",
+            )
+            continue
+        first_seen[raw_line] = entry
+        entries.append(entry)
+    return entries
+
+
+def rule_set_domain_entries(entries: Sequence[RuleSetEntry]) -> list[DomainEntry]:
+    """Expose simple RULE-SET domain records to overlap safety checks."""
+    domains: list[DomainEntry] = []
+    for entry in entries:
+        if entry.rule_type not in {"DOMAIN", "DOMAIN-SUFFIX"}:
+            continue
+        fields, problem = split_rule_fields(entry.raw)
+        if problem or len(fields) < 2:
+            continue
+        suffix = entry.rule_type == "DOMAIN-SUFFIX"
+        domain = fields[1]
+        domains.append(
+            DomainEntry(
+                path=entry.path,
+                line=entry.line,
+                raw=f".{domain}" if suffix else domain,
+                domain=domain,
+                suffix=suffix,
+                policy=entry.policy,
+            )
+        )
+    return domains
 
 
 def domain_ancestors(domain: str) -> Iterable[str]:
@@ -822,16 +1094,20 @@ def validate_main_rules(
                     )
                     continue
                 references.append((line_number, file_name, fields[2]))
-                if fields[0] != "DOMAIN-SET":
+                binding = expected[file_name]
+                if fields[0] != binding.type:
                     _diag(
                         diagnostics,
                         "error",
                         "LOCAL_REFERENCE_TYPE",
                         relative,
                         line_number,
-                        f"{file_name} must use DOMAIN-SET",
+                        f"{file_name} must use {binding.type}",
                     )
-                if "extended-matching" not in fields[3:]:
+                if (
+                    binding.type == "DOMAIN-SET"
+                    and "extended-matching" not in fields[3:]
+                ):
                     _diag(
                         diagnostics,
                         "error",
@@ -839,6 +1115,15 @@ def validate_main_rules(
                         relative,
                         line_number,
                         f"{file_name} must enable extended-matching",
+                    )
+                if binding.type == "RULE-SET" and fields[3:]:
+                    _diag(
+                        diagnostics,
+                        "error",
+                        "LOCAL_RULESET_OPTIONS",
+                        relative,
+                        line_number,
+                        f"{file_name} must not use outer RULE-SET options",
                     )
 
         if fields[0] == "DOMAIN-KEYWORD" and rule not in ALLOWED_KEYWORD_RULES:
@@ -863,7 +1148,7 @@ def validate_main_rules(
                 "MISSING_REFERENCE",
                 relative,
                 0,
-                f"missing DOMAIN-SET reference for {binding.file}",
+                f"missing {binding.type} reference for {binding.file}",
             )
             continue
         if len(found) > 1:
@@ -895,7 +1180,7 @@ def validate_main_rules(
             "LOCAL_REFERENCE_ORDER",
             relative,
             references[0][0] if references else 0,
-            f"expected local DOMAIN-SET order: {', '.join(expected_order)}",
+            f"expected local rule order: {', '.join(expected_order)}",
         )
 
     anchors = [
@@ -982,17 +1267,28 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
     main = main_override or manifest_main
     diagnostics: list[Diagnostic] = []
     active_entries: list[DomainEntry] = []
+    active_rule_entries: list[RuleSetEntry] = []
 
     for binding in bindings:
-        active_entries.extend(
-            parse_domain_set(
-                root,
-                binding.file,
-                binding.policy,
-                archive=False,
-                diagnostics=diagnostics,
+        if binding.type == "DOMAIN-SET":
+            active_entries.extend(
+                parse_domain_set(
+                    root,
+                    binding.file,
+                    binding.policy,
+                    archive=False,
+                    diagnostics=diagnostics,
+                )
             )
-        )
+        else:
+            active_rule_entries.extend(
+                parse_rule_set(
+                    root,
+                    binding.file,
+                    binding.policy,
+                    diagnostics=diagnostics,
+                )
+            )
 
     archive_entries: list[DomainEntry] = []
     archive_root = root / "archive"
@@ -1020,8 +1316,9 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
                 )
             )
 
-    detect_active_overlaps(active_entries, diagnostics)
-    detect_shared_infrastructure(active_entries, diagnostics)
+    semantic_entries = active_entries + rule_set_domain_entries(active_rule_entries)
+    detect_active_overlaps(semantic_entries, diagnostics)
+    detect_shared_infrastructure(semantic_entries, diagnostics)
     main_rule_count, references = validate_main_rules(
         root,
         main,
@@ -1038,6 +1335,7 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
         bindings=bindings,
         main_rule_count=main_rule_count,
         local_references=references,
+        active_rule_entries=active_rule_entries,
     )
 
 
@@ -1082,10 +1380,14 @@ def print_summary(report: dict[str, object]) -> None:
     assert isinstance(entries, dict)
     assert isinstance(references, dict)
     assert isinstance(diagnostics, dict)
-    print(f"Active DOMAIN-SET files : {files['active']}")
+    print(f"Active local rule files : {files['active']}")
+    print(f"  DOMAIN-SET files      : {files['domain_set']}")
+    print(f"  RULE-SET files        : {files['rule_set']}")
     print(f"Active entries          : {entries['active']}")
-    print(f"  exact                 : {entries['exact']}")
-    print(f"  suffix                : {entries['suffix']}")
+    print(f"  DOMAIN-SET entries    : {entries['domain_set']}")
+    print(f"    exact               : {entries['exact']}")
+    print(f"    suffix              : {entries['suffix']}")
+    print(f"  RULE-SET entries      : {entries['rule_set']}")
     print(f"Archive files           : {files['archive']}")
     print(f"Archive entries         : {entries['archive']} (not loaded)")
     print(f"Main rules              : {report['main_rules']}")

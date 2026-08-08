@@ -18,6 +18,7 @@ BUILT_IN_POLICIES = {
     "REJECT-TINYGIF",
 }
 POLICY_FIELD_BY_RULE = {
+    "AND": -1,
     "DOMAIN": 2,
     "DOMAIN-KEYWORD": 2,
     "DOMAIN-SET": 2,
@@ -27,6 +28,8 @@ POLICY_FIELD_BY_RULE = {
     "IP-ASN": 2,
     "IP-CIDR": 2,
     "IP-CIDR6": 2,
+    "NOT": -1,
+    "OR": -1,
     "PROTOCOL": 2,
     "RULE-SET": 2,
 }
@@ -89,7 +92,11 @@ def referenced_policies(text: str) -> dict[str, list[int]]:
             continue
         fields = [field.strip().strip('"') for field in line.split(",")]
         policy_index = POLICY_FIELD_BY_RULE.get(fields[0].upper())
-        if policy_index is None or len(fields) <= policy_index:
+        if policy_index is None:
+            continue
+        if policy_index < 0:
+            policy_index += len(fields)
+        if policy_index < 0 or len(fields) <= policy_index:
             continue
         policy = fields[policy_index]
         if policy:

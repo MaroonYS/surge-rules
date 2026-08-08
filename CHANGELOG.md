@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Added precise Google Voice control, STUN and media exceptions before the global STUN rejection rule.
+- Split Google Voice page/call-control traffic from its STUN and UDP media path so page access can use a stable United States or residential exit while calls default to `DIRECT`.
 - Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared reject stack without broadly allowing Taobao advertising hosts.
 - Split Bybit's documented application/API domains from the remaining centralized-exchange set so `api.bytick.com` no longer falls through to `FINAL`.
 - Added a dedicated APNs layer before `SYSTEM`, limited to push hostnames/CNAMEs and TCP 5223 on Apple's published APNs ranges.

@@ -27,7 +27,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
-| `google-voice.conf` | `GoogleVoice` | Google Voice 控制域、STUN 与媒体通道前置匹配 |
+| `google-voice.conf` | `GoogleVoice-Control` | Google Voice 页面、信令与呼叫控制 |
+| `google-voice-media.conf` | `GoogleVoice-Media` | Google Voice STUN；UDP 媒体 IP/端口保留在主 Rule |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
@@ -53,16 +54,17 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 ## 接入
 
 1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
-2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity`、`GoogleVoice`、
-   `Apple-Push` 和各地区金融组已选中所需出口。
+2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity`、
+   `GoogleVoice-Control`、`GoogleVoice-Media`、`Apple-Push` 和各地区金融组
+   已选中所需出口。
    `Identity` 的稳定 `select` 定义可直接使用
    [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)；
    实时通信组见
    [snippets/service-policy-groups.conf](snippets/service-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 20 个远程 DOMAIN-SET 加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 21 个远程 DOMAIN-SET 加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 20 个本仓库规则集均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 21 个本仓库规则集均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动域名语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应 DOMAIN-SET 后运行：
@@ -122,7 +124,7 @@ python3 scripts/check_profile_policies.py \
   --supplement snippets/service-policy-groups.conf \
   --require-stable \
   Finance HK-FINANCE SG-FINANCE JP-FINANCE KR-FINANCE UK-FINANCE \
-  Res-Frontier "United States" Identity GoogleVoice
+  Res-Frontier "United States" Identity GoogleVoice-Control GoogleVoice-Media
 ```
 
 生成机器可读报告：
@@ -172,9 +174,14 @@ Webhook，因此临时人工更新最多约延迟 24 小时，实际执行时间
 
 ## 实时通信与 Apple 连续互通
 
-Google Voice 的媒体规则只放行 Google 官方公布的 Voice UDP
-端口和专用 IP 段，其他 STUN 仍保持拒绝。`GoogleVoice` 必须固定到
-已实测 UDP Relay 正常的节点，不能使用不支持 UDP 的住宅链路。
+Google Voice 的页面、信令和呼叫控制进入 `GoogleVoice-Control`，默认可选择
+`Res-Frontier`；精确 STUN 主机以及 Google Workspace Voice 官方公布的 UDP
+端口和专用 IP 段进入 `GoogleVoice-Media`，其他 STUN 仍保持拒绝。仓库把
+`DIRECT` 放在媒体组首位，是基于当前用户网络已完成的直连拨号 A/B；它会形成
+美国控制面与本地媒体面的出口分离。若直连媒体异常，只切换
+`GoogleVoice-Media` 到已实测支持 UDP Relay 的固定美国节点，无需改变页面
+与账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
+实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
 
 `apple-push.conf` 只在 Surge iOS 实际接管 APNs 时生效。论坛的 Surge 实测中，
 Wi-Fi 下仅代理 `*.push.apple.com` 可能已足够；蜂窝网络还需要同时开启
@@ -200,6 +207,7 @@ Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配。
 - [Surge Ruleset](https://manual.nssurge.com/rule/ruleset.html)
 - [Surge Domain-based Rule](https://manual.nssurge.com/rule/domain-based.html)
 - [Surge Policy Group](https://manual.nssurge.com/policy/group.html)
+- [Google Voice connectivity requirements](https://knowledge.workspace.google.com/admin/voice/voice-connectivity-requirements)
 - [SukkaW/Surge 使用说明](https://github.com/SukkaW/Surge)
 - [blackmatrix7 WeChat 规则说明](https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/Surge/WeChat)
 - [ddgksf2013/Filter](https://github.com/ddgksf2013/Filter)

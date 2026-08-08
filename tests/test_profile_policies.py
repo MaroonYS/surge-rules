@@ -95,13 +95,13 @@ FINAL,PROXY
     def test_logical_rule_policy_is_checked(self) -> None:
         rules = """\
 [Rule]
-AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309)),GoogleVoice
+AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309)),GoogleVoice-Media
 """
         missing, unstable, count = check_profile_policies.check(
             self.PROFILE,
             rules,
         )
-        self.assertEqual(["GoogleVoice"], missing)
+        self.assertEqual(["GoogleVoice-Media"], missing)
         self.assertEqual([], unstable)
         self.assertEqual(1, count)
 

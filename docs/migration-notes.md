@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `DIRECT` | `direct-cn.conf` | 中国大陆银行与银联迁移 |
 | `DIRECT`（Bilibili） | `bilibili-direct.conf` | 原宽泛关键词收窄为 3 个视频 CDN 后缀并恢复前置优先级 |
-| `HK-FINANCE` | `hk-finance.conf` | 全部迁移 |
+| `HK-FINANCE` | `hk-finance.conf`、`hk-finance-context.conf` | 香港第一方域名迁移；当前账户的香港汇丰及香港券商共享基础设施从跨地区集合固定到香港上下文 |
 | `SG-FINANCE` | `sg-finance.conf` | 全部迁移 |
 | `JP-FINANCE` | `jp-finance.conf` | 全部迁移 |
 | `KR-FINANCE` | `kr-finance.conf` | 全部迁移 |
@@ -16,7 +16,7 @@
 | `Res-Frontier` | `polymarket.conf`、`us-residential.conf` | Polymarket（含实测 S3 上传主机）；美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
 | `Identity` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层 |
-| `Crypto` | `crypto.conf` | 全部迁移 |
+| `Bybit` / `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立 fail-closed；其余中心化交易所保留通用手动组 |
 | `Web3` | `web3.conf` | 全部有效语义迁移 |
 | `AIGC` | `apple-ai.conf` | 全部迁移并保持 `AIGC` |
 
@@ -42,7 +42,7 @@
 - Bilibili 前置文件不收录 `bilibili.com` 与 `biliapi.net` API 域，保证
   BiliUniverse Global 的脚本、MITM 与 `http-client-policy` 地区选择不被覆盖；
   模块保持 `ForceHost=1`。
-- Private Relay 保持 `Apple`，Apple Intelligence 保持 `AIGC`。
+- Private Relay 从宽泛 `Apple` 拆到不含住宅 SOCKS5 的独立 `Private`；Apple Intelligence 保持 `AIGC`。
 - Apple Cash/Pay 与 PayPal 归入 `us-residential.conf`。
 - Polymarket 从宽泛 `DOMAIN-KEYWORD` 收窄为 `.com`、`.us`、精确 Auth0 租户和
   实测 `polymarket-upload.s3.us-east-2.amazonaws.com` 上传主机，独立放入
@@ -54,8 +54,12 @@
   `identity-context.conf` 与 `risk-context.conf`，统一使用 `Identity`。
 - Identity 删除宽泛 `.persona.com`，保留产品域 `.withpersona.com`；Risk 收窄为
   8 个设备情报、设备信誉、行为生物识别与指纹域名。
-- `Identity` 直接选择 `Res-Frontier`、`United States` 与 `Finance`，不再定义
-  中间美国金融策略组。
+- `Identity` 保持手动上下文，可选择住宅、跨地区 Finance 或明确地区金融组，
+  不进入 Smart、url-test 或 load-balance。
+- HSBC HK、Futu/Moomoo HK 与 Longbridge HK 的共享基础设施从
+  `finance-context.conf` 移入 `hk-finance-context.conf`，避免当前账户误走美国住宅。
+- Bybit 从通用 `Crypto` 拆为默认 `REJECT` 的独立策略；只有账户本人真实且受支持
+  地区一致的线路才能由用户显式加入。
 - 美国住宅文件明确补回 Apex Clearing、Early Warning、ID.me 与 Login.gov。
 - 删除宽泛 `.icbc.com`，保留大陆专用 `.icbc.com.cn` 与香港 `.icbcasia.com`。
 - Apple CDN 从已废弃的 `non_ip` 占位切换至有效 DOMAIN-SET。

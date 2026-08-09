@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-- Moved all 14 Google Voice and APNs logical `AND` declarations into two policy-free remote `RULE-SET` files and taught validation and expanded-rule generation to preserve their semantics.
+- Added a dedicated Hong Kong account-context layer for HSBC HK, Futu/Moomoo HK and Longbridge HK shared infrastructure, ahead of cross-region Finance.
+- Split Private Relay into an ordinary UDP/QUIC-capable `Private` group and Bybit into a compliant fail-closed `Bybit` group.
+- Added a per-device module baseline that removes overlapping HTTPDNS, ad blocking, Bilibili and YouTube rewrite chains and protects financial endpoints from broad MITM.
+- Documented the two deliberate SKK example deviations required by the tested Bilibili/Taobao allow paths and no-resolve Google Voice/APNs logical rules.
+- Split the mutually incompatible iOS capture settings into explicit APNs and Continuity snippets, rejected the ineffective `include-all-networks=true` plus `include-apns=false` middle state, and changed `Apple-Push` to a fixed manual selection because HTTP health checks do not verify TCP 5223.
+- Added Apple's recommended `17.0.0.0/8` APNs fallback while retaining the TCP 5223 constraint and the published narrow IPv4/IPv6 ranges.
+- Moved all 15 Google Voice and APNs logical `AND` declarations into two policy-free remote `RULE-SET` files and taught validation and expanded-rule generation to preserve their semantics.
 - Split Google Voice page/call-control traffic from its STUN and UDP media path so page access can use a stable United States or residential exit while calls default to `DIRECT`.
 - Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared reject stack without broadly allowing Taobao advertising hosts.
 - Split Bybit's documented application/API domains from the remaining centralized-exchange set so `api.bytick.com` no longer falls through to `FINAL`.

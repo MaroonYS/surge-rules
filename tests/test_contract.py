@@ -102,7 +102,7 @@ class RuleContractTests(unittest.TestCase):
 
     def test_changing_private_relay_policy_fails_contract(self) -> None:
         codes = self.validate_modified_main(
-            "icloud_private_relay.conf,Apple,extended-matching",
+            "icloud_private_relay.conf,Private,extended-matching",
             "icloud_private_relay.conf,AIGC,extended-matching",
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
@@ -259,12 +259,28 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(expected_identity, active_entries("identity-context.conf"))
         self.assertEqual(expected_risk, active_entries("risk-context.conf"))
 
+        hk_context = "/hk-finance-context.conf,HK-FINANCE,extended-matching"
         finance = "/finance-context.conf,Finance,extended-matching"
         identity = "/identity-context.conf,Identity,extended-matching"
         risk = "/risk-context.conf,Identity,extended-matching"
         crypto = "/crypto.conf,Crypto,extended-matching"
-        positions = [main.index(fragment) for fragment in (finance, identity, risk, crypto)]
+        positions = [
+            main.index(fragment)
+            for fragment in (hk_context, finance, identity, risk, crypto)
+        ]
         self.assertEqual(sorted(positions), positions)
+
+        hk_context_entries = active_entries("hk-finance-context.conf")
+        self.assertTrue(
+            {
+                ".hsbc.com",
+                ".futunn.com",
+                ".moomoo.com",
+                ".longbridge.com",
+            }.issubset(hk_context_entries)
+        )
+        finance_entries = active_entries("finance-context.conf")
+        self.assertTrue(hk_context_entries.isdisjoint(finance_entries))
 
     def test_bybit_documented_api_fallback_is_not_left_to_final(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -278,7 +294,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual({".bybit.com", ".bytick.com"}, entries)
         self.assertNotIn(".bybit.com", (ROOT / "crypto.conf").read_text(encoding="utf-8"))
         self.assertLess(
-            main.index("/bybit.conf,Crypto,extended-matching"),
+            main.index("/bybit.conf,Bybit,extended-matching"),
             main.index("/crypto.conf,Crypto,extended-matching"),
         )
 
@@ -310,6 +326,7 @@ class RuleContractTests(unittest.TestCase):
             "17.57.144.0/22",
             "17.188.128.0/18",
             "17.188.20.0/23",
+            "17.0.0.0/8",
             "2620:149:a44::/48",
             "2403:300:a42::/48",
             "2403:300:a51::/48",
@@ -341,12 +358,10 @@ class RuleContractTests(unittest.TestCase):
         snippet = (
             ROOT / "snippets" / "identity-policy-groups.conf"
         ).read_text(encoding="utf-8")
-        self.assertEqual(
-            [
-                "# Paste this line inside the existing [Proxy Group] section.",
-                'Identity = select, Res-Frontier, "United States", Finance',
-            ],
-            snippet.splitlines(),
+        self.assertIn(
+            "Identity = select, Res-Frontier, Finance, HK-FINANCE, "
+            "SG-FINANCE, JP-FINANCE, KR-FINANCE, UK-FINANCE, PROXY",
+            snippet,
         )
 
     def test_service_policy_group_snippet_is_copy_ready(self) -> None:
@@ -362,17 +377,28 @@ class RuleContractTests(unittest.TestCase):
             snippet,
         )
         self.assertIn(
-            'Apple-Push = fallback, "Hong Kong", "United States", DIRECT, '
-            "interval=600, timeout=5",
+            'Apple-Push = select, "United States", "Hong Kong", DIRECT',
             snippet,
         )
-        ios = (ROOT / "snippets" / "ios-apns-capture.conf").read_text(
+        self.assertIn(
+            'Private = select, "United States", "Hong Kong", Singapore, DIRECT',
+            snippet,
+        )
+        self.assertIn("Bybit = select, REJECT, DIRECT", snippet)
+        apns = (ROOT / "snippets" / "ios-apns-capture.conf").read_text(
             encoding="utf-8"
         )
-        self.assertIn("include-all-networks = true", ios)
-        self.assertIn("include-apns = true", ios)
-        self.assertIn("include-local-networks = false", ios)
-        self.assertIn("include-cellular-services = false", ios)
+        continuity = (ROOT / "snippets" / "ios-continuity.conf").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("include-all-networks = true", apns)
+        self.assertIn("include-apns = true", apns)
+        self.assertIn("include-local-networks = false", apns)
+        self.assertIn("include-cellular-services = false", apns)
+        self.assertIn("include-all-networks = false", continuity)
+        self.assertIn("include-apns = false", continuity)
+        self.assertIn("include-local-networks = false", continuity)
+        self.assertIn("include-cellular-services = false", continuity)
 
     def test_reject_drop_does_not_use_pre_matching(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

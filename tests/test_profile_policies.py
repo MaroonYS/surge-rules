@@ -76,21 +76,38 @@ FINAL,PROXY
         self.assertEqual([], unstable)
         self.assertEqual(1, count)
 
-    def test_fallback_policy_can_exist_without_being_required_stable(self) -> None:
+    def test_select_policy_can_be_required_stable(self) -> None:
         rules = "[Rule]\nDOMAIN,example.com,Apple-Push\n"
-        snippet = (
-            'Apple-Push = fallback, "Hong Kong", "United States", DIRECT, '
-            "interval=600, timeout=5\n"
-        )
+        snippet = 'Apple-Push = select, "Hong Kong", "United States", DIRECT\n'
         missing, unstable, count = check_profile_policies.check(
             self.PROFILE,
             rules,
-            (),
+            ("Apple-Push",),
             (snippet,),
         )
         self.assertEqual([], missing)
         self.assertEqual([], unstable)
         self.assertEqual(1, count)
+
+    def test_private_and_bybit_groups_are_manual_and_stable(self) -> None:
+        rules = """\
+[Rule]
+DOMAIN-SET,https://example.com/private.conf,Private,extended-matching
+DOMAIN-SET,https://example.com/bybit.conf,Bybit,extended-matching
+"""
+        snippet = """\
+Private = select, \"United States\", DIRECT
+Bybit = select, REJECT, DIRECT
+"""
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+            ("Private", "Bybit"),
+            (snippet,),
+        )
+        self.assertEqual([], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(2, count)
 
     def test_logical_rule_policy_is_checked(self) -> None:
         rules = """\

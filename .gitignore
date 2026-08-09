@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 validation-report.json
+Surge-Final*.conf
+*.p12
+*.pem
+*.key

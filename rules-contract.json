@@ -26,7 +26,7 @@
       "number": 3,
       "title": "iCloud Private Relay",
       "rules": [
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,Apple,extended-matching"
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,Private,extended-matching"
       ]
     },
     {
@@ -48,6 +48,7 @@
       "title": "分地区金融",
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,HK-FINANCE,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance-context.conf,HK-FINANCE,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/sg-finance.conf,SG-FINANCE,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,JP-FINANCE,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,KR-FINANCE,extended-matching",
@@ -74,7 +75,7 @@
       "number": 9,
       "title": "中心化交易所",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Crypto,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Bybit,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
       ]
     },

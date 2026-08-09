@@ -52,6 +52,11 @@
       "description": "Hong Kong financial services"
     },
     {
+      "file": "hk-finance-context.conf",
+      "policy": "HK-FINANCE",
+      "description": "Shared infrastructure pinned to the owner's Hong Kong HSBC and brokerage context"
+    },
+    {
       "file": "sg-finance.conf",
       "policy": "SG-FINANCE",
       "description": "Singapore financial services"
@@ -93,7 +98,7 @@
     },
     {
       "file": "bybit.conf",
-      "policy": "Crypto",
+      "policy": "Bybit",
       "description": "Bybit first-party application and documented API domains"
     },
     {
@@ -115,7 +120,7 @@
       "file": "apple-push-rules.conf",
       "type": "RULE-SET",
       "policy": "Apple-Push",
-      "description": "Apple-published APNs TCP 5223 address constraints"
+      "description": "Apple-published APNs TCP 5223 ranges plus a port-constrained 17/8 fallback"
     },
     {
       "file": "adblock4limbo-supplement.conf",

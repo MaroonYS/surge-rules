@@ -63,13 +63,13 @@
 | 最终活动规则 | 765 | 16 个本仓库 DOMAIN-SET |
 
 [surge-expanded.conf](../surge-expanded.conf) 将当前自维护活动规则全部内联。
-当前远程版共加载 23 个本仓库文件：21 个域名 `DOMAIN-SET`，以及承载
-Google Voice 5 条和 APNs 9 条逻辑规则的 2 个无策略列 `RULE-SET`。
+当前远程版共加载 24 个本仓库文件：22 个域名 `DOMAIN-SET`，以及承载
+Google Voice 5 条和 APNs 10 条逻辑规则的 2 个无策略列 `RULE-SET`。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：通过 23 个远程文件加载当前活动规则。
+- `surge-main.conf`：通过 24 个远程文件加载当前活动规则。
 - `surge-expanded.conf`：由生成器将同样的活动规则全部展开。
 
 两者的自维护活动规则语义一致，不能同时加载。

@@ -15,6 +15,7 @@
 - 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
 - 将 Google Voice 与 APNs 的逻辑 `AND` 规则移入独立、无策略列的远程 `RULE-SET`。
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
+- 将当前账户使用的 HSBC HK、Futu/Moomoo HK 与 Longbridge HK 共享基础设施固定到香港金融上下文。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
 - 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
 
@@ -40,6 +41,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `apple-ai.conf` | `AIGC` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `hk-finance.conf` | `HK-FINANCE` | 香港金融 |
+| `hk-finance-context.conf` | `HK-FINANCE` | 当前账户的香港汇丰及香港券商共享基础设施 |
 | `sg-finance.conf` | `SG-FINANCE` | 新加坡金融 |
 | `jp-finance.conf` | `JP-FINANCE` | 日本金融 |
 | `kr-finance.conf` | `KR-FINANCE` | 韩国金融 |
@@ -48,7 +50,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `finance-context.conf` | `Finance` | 无法仅按域名判断地区的金融服务 |
 | `identity-context.conf` | `Identity` | KYC 与身份验证服务 |
 | `risk-context.conf` | `Identity` | 保守的设备情报与指纹服务活动集 |
-| `bybit.conf` | `Crypto` | Bybit 官方 App/API 域名，优先于通用 Crypto |
+| `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立 fail-closed 策略 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `Apple-Push` | APNs 长连接，优先于内建 `SYSTEM` |
@@ -61,16 +63,16 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
 2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity`、
-   `GoogleVoice-Control`、`GoogleVoice-Media`、`Apple-Push` 和各地区金融组
+   `GoogleVoice-Control`、`GoogleVoice-Media`、`Apple-Push`、`Private`、`Bybit` 和各地区金融组
    已选中所需出口。
    `Identity` 的稳定 `select` 定义可直接使用
    [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)；
    实时通信组见
    [snippets/service-policy-groups.conf](snippets/service-policy-groups.conf)。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 23 个远程本仓库规则文件（21 个 `DOMAIN-SET`、2 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 24 个远程本仓库规则文件（22 个 `DOMAIN-SET`、2 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 23 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 24 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -95,7 +97,7 @@ python3 scripts/build_expanded.py --write
 https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 ```
 
-Private Relay 严格按 17 段契约使用 `Apple`。
+Private Relay 使用不含住宅 SOCKS5 的独立 `Private` 策略。
 Apple Intelligence 严格使用 `AIGC`。
 Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
 `us-residential.conf`，命中 `Res-Frontier`；这些服务本身并非天然只属于美国。
@@ -119,9 +121,9 @@ python3 scripts/check_biliuniverse.py --timeout 30
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 
-核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略及 Google Voice
-使用固定代理或手动 `select`。`Apple-Push` 只要求存在；仓库提供的定义刻意使用
-`fallback` 自动切换可用 APNs 出口：
+核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略、Google Voice 与
+`Apple-Push` 使用固定代理或手动 `select`。APNs 是 TCP 5223 长连接，普通 HTTP
+健康检查不能证明该端口可用，所以仓库不再使用自动 `fallback`：
 
 ```bash
 python3 scripts/check_profile_policies.py \
@@ -130,7 +132,8 @@ python3 scripts/check_profile_policies.py \
   --supplement snippets/service-policy-groups.conf \
   --require-stable \
   Finance HK-FINANCE SG-FINANCE JP-FINANCE KR-FINANCE UK-FINANCE \
-  Res-Frontier "United States" Identity GoogleVoice-Control GoogleVoice-Media
+  Res-Frontier "United States" Identity GoogleVoice-Control GoogleVoice-Media \
+  Apple-Push Private Bybit
 ```
 
 生成机器可读报告：
@@ -167,6 +170,21 @@ Adblock4limbo 及两个 SKK Reject 基线，也可以从 Actions 手动运行。
 Webhook，因此临时人工更新最多约延迟 24 小时，实际执行时间还可能受 GitHub 调度
 影响。仓库需要允许工作流写入内容和重新调度 Actions。
 
+### SKK 兼容性边界
+
+SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → ip` 总体结构均保留。
+本配置有两项经过测试的有意例外，不能描述成对其示例的逐字复制：
+
+- `reject-drop.conf` 不加 `pre-matching`。Surge 会把带该参数的拒绝规则提升到所有
+  普通规则之前，导致 Bilibili 视频 CDN 与淘宝互动运行时无法由更精确的前置规则放行。
+- Google Voice 与 APNs 的端口约束规则必须先于全局 STUN / `SYSTEM` 生效；其所有
+  IP 子规则均带 `no-resolve`，不会为域名触发本地 DNS 查询。Blackmatrix7 的 WeChat
+  文件按其 README 作为一个混合 `RULE-SET` 原样加载，其中 IP 子规则同样自带
+  `no-resolve`。
+
+这是对多个上游约束和本配置实测例外的显式取舍，不应删除 `no-resolve`，也不应在
+未重新验证 Bilibili、淘宝、Google Voice 与 APNs 前恢复 `pre-matching`。
+
 ## Identity 与 Risk 的边界
 
 跨地区第一方金融仍进入 `Finance`。KYC/身份验证进入
@@ -189,25 +207,37 @@ Google Voice 的页面、信令和呼叫控制进入 `GoogleVoice-Control`，默
 与账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
 实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
 
-两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效。论坛的 Surge 实测中，
-Wi-Fi 下仅代理 `*.push.apple.com` 可能已足够；蜂窝网络还需要同时开启
-`include-all-networks` 与 `include-apns`。将
-[snippets/ios-apns-capture.conf](snippets/ios-apns-capture.conf) 中的键合并到
-`[General]`，不要新建第二个同名段；改动后开启飞行模式数秒，让原有
-APNs 长连接断开并重建。主规则通过两个独立远程文件覆盖
-`*.push.apple.com`、其 APNs CNAME 和 Apple 公开网段上的 TCP 5223，
-不代理整个 `17.0.0.0/8` 或整个 Apple
-规则集，以避免论坛已反馈的 iCloud 照片同步异常。
+两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效。蜂窝网络需要
+同时开启 `include-all-networks` 与 `include-apns`。将
+[snippets/ios-apns-capture.conf](snippets/ios-apns-capture.conf) 中的键合并到现有
+`[General]`，不要新建第二个同名段；改动后开启飞行模式数秒，让原有 APNs
+长连接断开并重建。主规则覆盖 `*.push.apple.com`、其 CNAME、Apple 公布的窄网段，
+并以 Apple 建议的整个 `17.0.0.0/8` 作为仅限 TCP 5223 的 IPv4 兜底。它不会代理
+17/8 上的普通 HTTPS 或整个 Apple 规则集。
 
-`include-all-networks=true` 可能影响 AirDrop/Continuity，因此保持
-`include-local-networks=false` 和 `include-cellular-services=false`，并在同一 Wi-Fi 上做
-开/关 Surge 对照。APNs 链路恢复后，若仅 Telegram 官方客户端仍无横幅/
-声音，而其他推送或第三方 Telegram 客户端正常，则属于官方客户端的独立故障，
-不应再扩大 Apple 代理范围。
+Surge 官方明确警告 `include-all-networks=true` 可能影响 AirDrop。不要使用
+`include-all-networks=true`、`include-apns=false` 这个中间态：它承担 Continuity
+副作用，却没有让 APNs 进入规则系统。仓库提供两个互斥片段：
 
-Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配。
-`Crypto` 的最终出口必须与账户本人真实、获支持的地区一致；不应使用
-规则去规避服务商的地区与合规限制。
+- [ios-continuity.conf](snippets/ios-continuity.conf)：AirDrop/Handoff 优先，APNs 直连。
+- [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
+  的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
+
+先用 Continuity 模式确认 AirDrop/Handoff；只有在多款国际 App 都不能推送时才切换
+APNs 模式。若其他推送正常，仅 Telegram 官方客户端无横幅/声音或打开 App 后才出现，
+则属于 Telegram/iOS 独立故障，不应继续扩大 Apple 代理范围。
+
+`RULE-SET,SYSTEM,DIRECT` 保留在 Private Relay、Apple Intelligence/Siri 与 APNs
+三个精确例外之后、宽泛 Apple Services 之前。Surge 的内建 `SYSTEM` 覆盖大多数
+iOS/macOS 自身请求，但不包含 App Store、iTunes 等内容服务；这个位置既让三个例外
+按指定策略接管，也避免后面的 `.apple.com` / `.icloud.com` 聚合规则代理过多系统流量。
+
+Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配，并进入独立
+`Bybit` 组。该组默认 `REJECT`，只能加入与账户本人真实且受支持地区一致的策略；
+不得复用包含受限地区的宽泛 `Crypto` 组。
+
+模块会覆盖主 Profile，且启用状态不会跨设备同步。以稳定为目标的保留、禁用与
+条件启用清单见 [docs/module-baseline.md](docs/module-baseline.md)。
 
 ## 官方参考
 
@@ -215,7 +245,11 @@ Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配。
 - [Surge Logical Rule](https://manual.nssurge.com/rule/logical-rule.html)
 - [Surge Domain-based Rule](https://manual.nssurge.com/rule/domain-based.html)
 - [Surge Policy Group](https://manual.nssurge.com/policy/group.html)
+- [Surge Modules](https://manual.nssurge.com/others/module.html)
+- [Surge iOS Miscellaneous Options](https://manual.nssurge.com/others/misc-options.html)
+- [Apple APNs network requirements](https://support.apple.com/102266)
 - [Google Voice connectivity requirements](https://knowledge.workspace.google.com/admin/voice/voice-connectivity-requirements)
+- [Bybit Service Restricted Countries](https://www.bybit.com/en/help-center/article/Service-Restricted-Countries)
 - [SukkaW/Surge 使用说明](https://github.com/SukkaW/Surge)
 - [blackmatrix7 WeChat 规则说明](https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/Surge/WeChat)
 - [ddgksf2013/Filter](https://github.com/ddgksf2013/Filter)

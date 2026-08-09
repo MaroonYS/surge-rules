@@ -60,6 +60,10 @@ class ExpandedRuleTests(unittest.TestCase):
                         "type": "RULE-SET",
                         "policy": "Media",
                     },
+                    {
+                        "file": "regional.conf",
+                        "policy": "United States",
+                    },
                 ],
             }
             (root / "rules-manifest.json").write_text(
@@ -76,10 +80,16 @@ class ExpandedRuleTests(unittest.TestCase):
                 "DOMAIN,api.example.net,extended-matching\n",
                 encoding="utf-8",
             )
+            (root / "regional.conf").write_text(
+                ".example.org\n",
+                encoding="utf-8",
+            )
             (root / "surge-main.conf").write_text(
                 "[Rule]\n"
                 f"DOMAIN-SET,{raw_base}domains.conf,DIRECT,extended-matching\n"
                 f"RULE-SET,{raw_base}rules.conf,Media\n"
+                f'DOMAIN-SET,{raw_base}regional.conf,"United States",'
+                "extended-matching\n"
                 "FINAL,DIRECT,dns-failed\n",
                 encoding="utf-8",
             )
@@ -91,10 +101,11 @@ class ExpandedRuleTests(unittest.TestCase):
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302)),Media",
             "IP-CIDR,192.0.2.0/24,Media,no-resolve",
             "DOMAIN,api.example.net,Media,extended-matching",
+            'DOMAIN-SUFFIX,example.org,"United States",extended-matching',
         ]
         positions = [rendered.index(rule) for rule in expected_rules]
         self.assertEqual(positions, sorted(positions))
-        self.assertIn("4 local rule entries expanded inline", rendered)
+        self.assertIn("5 local rule entries expanded inline", rendered)
         self.assertNotIn(raw_base, rendered)
 
     def test_local_rule_set_outer_options_are_rejected(self) -> None:

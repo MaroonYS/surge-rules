@@ -1,63 +1,118 @@
-# 稳定性模块基线
+# 全量模块兼容基线
 
-Surge 模块的优先级高于主 Profile，启用状态也不会同步到其他设备。每台 Mac、
-iPhone 和 iPad 都要分别核对。下面的基线面向本仓库强调的金融、Apple 连续互通、
-BiliUniverse 与单一字幕处理链路。
+本基线适用于配置所有者明确保留当前全部模块的场景。目标不是让每一条重复声明都
+执行一次，而是保证模块所需的路由、MITM、Rewrite 与 Script 具备真实命中条件，
+同时不以放开整个 Apple 或金融域名的方式换取表面兼容。
 
-## 保留
+Surge 会把模块规则放到主 Profile 规则之前；模块的启用状态、参数、缓存和有效顺序
+也不会跨设备同步。因此 Mac、iPhone 和 iPad 必须分别检查“修改后配置”，不能只用
+仓库主 Rule 或另一台设备的状态推断本机行为。
 
-- BiliUniverse 官方四件套：`📺 BiliBili: 🛡️ ADBlock`、`⚙️ Enhanced`、
-  `🌐 Global`、`🔀 Redirect`。四者功能边界不同，可按官方设计共存。
-- `🍿️ DualSubs: ▶️ YouTube`：作为唯一的 YouTube 双语字幕实现。
-- `Sub-Store`。
-- `BoxJs` 与 `Script Hub(β)`：仅在确实使用其管理功能时保留。
-- `YouTube去广告(>=iOS15)`：可选；启用后在修改后配置和请求日志中确认
-  player、timedtext 与 browse 每个阶段只有一套处理链。
-- `谷歌中国重定向`、`快捷搜索`、`流媒体解锁检测`、`节假日信息`：按需启用。
-- `HTTP Download Optimization`：仅在 Mac 的 Steam、Windows Update、
-  Microsoft Store 或 Xbox 下载场景保留。
+## 主 Profile 必须保持的边界
 
-## 必须停用
+- `skip-server-cert-verify = false`，不得为兼容模块而关闭服务器证书校验。
+- 只对实际保留模块的精确 Apple 主机开启 MITM。下列 21 项必须位于
+  `-*.apple.com`、`-*.itunes.com` 等负向通配之前：
 
-- `Disable HTTP Engine`：与 Rewrite、Script 和 MITM 的目标直接冲突。
-- `YouTube双语翻译`：与 DualSubs YouTube 重复处理 player、timedtext 和 browse。
-- `哔哩哔哩增强`、`Bilibili 1080P`：与 BiliUniverse 请求处理重叠。
-- `AllInOne`、`可莉广告过滤器`、`适配可莉插件中心`、`广告平台拦截器`、
-  `毒奶特供`、`通用解锁`。
-- 两份 `[Sukka] Enhance Better ADBlock for Surge` 与
-  `[Sukka] Surge Reject MITM`。主 Rule 已加载 SKK Reject 与本仓库补集。
-- `🍟 Fries: 🌐 DNS enhanced`、`🚫 Block HTTPDNS`、`🌐 General Enhanced`、
-  `🔓 MitM`，以及独立的 `拦截HTTPDNS`。其中 `Fries: Block HTTPDNS` 与独立
-  `拦截HTTPDNS` 存在大量完全相同的 pre-matching；其余模块继续叠加 Host、MITM
-  与 DNS 行为，使最终边界难以审计。
-- `[Sukka] Always Real IP Plus` 与 `[Sukka] Local DNS Mapping`，除非有经过日志
-  证实的单域名兼容问题后再按需恢复。
-- 全部 iRingo 模块作为稳定基线停用；它们会在主 Apple Rule 之前插入分流或改写。
-
-## 条件启用
-
-- `🍿️ DualSubs: 🔣 Universal`：只在确实需要其支持的非 YouTube 平台字幕时启用。
-- Akamaized AddOn：只在实际使用其对应 CDN/平台时启用。
-- Microsoft Translate AddOn：只有明确选择 Microsoft 作为翻译供应商且凭据有效时
-  启用；它也可能服务 YouTube，并非仅用于非 YouTube 平台。
-- Spotify 相关模块只选一套，不叠加 `Spotify(>=iOS15)`、`Spotify歌词增强` 与
-  DualSubs Spotify/Transcripts。
-- `QX重写&规则集转化` 与 `Script Hub(β)` 二选一。
-- `router.com`、`HomeKit Accessories Quirk`、`Game Console STUN`、
-  `Google Home Devices`、`Fix Windows No Network Alert` 只在对应设备场景启用。
-
-## MITM 基线
-
-基础 Profile 必须保持：
-
-```ini
-skip-server-cert-verify = false
+```text
+weatherkit.apple.com
+gspe1-ssl.ls.apple.com
+gs-loc.apple.com
+gs-loc-cn.apple.com
+dispatcher.is.autonavi.com
+configuration.ls.apple.com
+gspe35-ssl.ls.apple.com
+gspe35-ssl.ls.apple.cn
+uts-api.itunes.apple.com
+umc-tempo-api.apple.com
+play-cdn.itunes.apple.com
+play-edge-cdn.itunes.apple.com
+news-edge.apple.com
+news-todayconfig-edge.apple.com
+news-events.apple.com
+news-sports-events.apple.com
+news-client.apple.com
+news-client-search.apple.com
+hls.itunes.apple.com
+hls-svod.itunes.apple.com
+vod-*.tv.apple.com
 ```
 
-金融、身份验证和 Apple 系统域名应作为负向项放在 `hostname` 最前。负向项是
-防御层，不是继续保留广域 MITM 模块的理由；最可靠的方案仍是停用上述重叠模块，
-只让 BiliUniverse、DualSubs 等明确功能声明各自需要的 hostname。
+- 不额外加入 `play.itunes.apple.com` 或 `play-edge.itunes.apple.com`。iRingo TV 先在
+  已解密的 `play-cdn` / `play-edge-cdn` 请求上执行 URL Rewrite，DualSubs 再匹配
+  改写后的 URL；目标主机不是新的 TLS 握手入口。
+- Apple 精确正项之后继续保留 Apple 通配负项、金融/KYC/风控负项和
+  `-<ip-address>`。`api5.futunn.com` 没有对应的活动处理脚本，不应为了广域 MITM
+  清单而解除券商端点保护。
+- Google Voice 的控制面和媒体例外必须位于全局 `PROTOCOL,STUN,REJECT` 之前。
+  全局 STUN 拦截是隐私选择；改为 `DIRECT` 会恢复其他 WebRTC/游戏打洞，但也可能
+  暴露公网地址，两种目标不能同时保证。
+- 主 Profile 不再复制 Sukka/Fries 模块注入的 `[Host]`、`always-real-ip` 或
+  `skip-proxy`。模块行优先于主 Profile，再复制只会形成第三份配置，不能消除冲突。
 
-模块可能通过覆盖或 `%INSERT%` 改变最终 `hostname` 顺序。每台设备完成模块清理后，
-必须打开 Surge 的“修改后配置”（effective/modified profile），确认负向项仍位于所有
-相关正向 hostname 之前，并在请求详情中确认银行、券商和身份验证域未启用 MITM。
+## 模块实际生效检查
+
+### iRingo 与 WLOC
+
+- WeatherKit、LocationService、Maps、News、TV 与 WLOC 的上述 MITM 主机必须在
+  修改后配置中先于 Apple 负项。
+- News 的代理参数必须引用现有的 `United States`；不能保留不存在的 emoji 策略名。
+- LocationService、Maps 与 WLOC 会同时执行，但它们分别修改地区、地图供应商和
+  坐标。当前常见的 US Location + CN/AutoNavi Maps + 自定义坐标是混合语义，主 Rule
+  无法替模块统一，必须在每台设备的模块参数中自行保持一致。
+- WeatherKit 使用第三方天气源时必须在模块参数中具备有效凭据；主 Profile 或远程
+  Rule 无法补齐模块参数。
+- Maps v4.6.1 的 `Missing style` 只表示当前 Geo Resource Manifest 不含某些
+  可选或历史样式；若日志仍完成 decode、Set TileSets、encode 并以
+  `Script Completed` 结束，不应将这些警告判为配置或 MITM 失败。
+
+### DualSubs
+
+- YouTube、Spotify、Universal 与 Transcripts 的脚本主机必须出现在有效 MITM 中，
+  并确认当前翻译供应商可用。当前固定基线使用 Google，避免持久化的空 Microsoft
+  Token 造成连续重试。
+- iRingo TV 的 CDN Rewrite 与 DualSubs Universal Apple TV 分支是配套处理链：
+  `play-cdn`/`play-edge-cdn` 负责 TLS 入口，改写后由 DualSubs 匹配 `play` URL。
+- 同一个 YouTube/Spotify 请求可能同时命中多个已保留模块。主 Profile 只能让它们
+  都具备运行条件，不能从外部指定哪一个响应脚本最终获得修改权；应以请求详情中的
+  实际脚本名和输出为准。
+
+### BiliUniverse
+
+- Global 的启用地区与策略名必须真实存在。当前稳定组合使用 `CHN,HKG`，HKG 对应
+  `Hong Kong`；不要启用不存在的 `Taiwan` 策略。
+- `bilibili-direct.conf` 只固定视频 CDN，不排除 `bilibili.com`、`biliapi.net` 等
+  API 主机的 MITM/Script。DIRECT 是路由结果，不等于绕过 HTTP 引擎。
+- 官方 Global/Enhanced/ADBlock/Redirect 与其他已保留 Bilibili 模块有请求重叠。
+  主 Rule 无法让一个模块的 pre-matching REJECT 为后置模块让路；验证标准是播放、
+  搜索、地区选择和 CDN 结果，而不是要求每条重复脚本都执行。
+
+## 已知无法由主 Profile 修复的冲突
+
+- WeatherKit 模块把 Apple AS714/AS6185 的 QUIC 提升为前置 `REJECT-DROP`，会让
+  Private Relay 的部分 QUIC 路径回落 TCP/H2。主 Rule 位于模块规则之后，无法抢先
+  放行；在“不改模块且全部保留”的约束下不能同时保证两者完整 QUIC。
+- 多套 HTTPDNS 模块存在相同的 pre-matching 拒绝，Sukka 与 Fries 还会对
+  `dot.pub`、`doh.pub`、`doh.360.cn` 注入不同 Host 值。主 `[Host]` 排在模块之后，
+  无法删除前面的条目；添加第三份只会增加歧义。
+- 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库 59 条主 Rule。
+  被模块先行拒绝的连接不能再由 GitHub `DOMAIN-SET,DIRECT` 救回。
+- 一个前置模块已经产生最终 REJECT 时，后置模块的 Rewrite/Script 不再执行。这不等于
+  后置模块整体失效，但意味着“全部模块的每一条声明都执行”在逻辑上不可实现。
+
+## 每台设备的验证顺序
+
+1. 用 Surge 原生检查确认基础 Profile 可加载。
+2. 打开“修改后配置”，确认没有未知策略；核对 21 个 Apple 精确正项均位于 Apple
+   负项之前，金融负项仍在模块追加的广域正项之前。
+3. 在请求详情中分别验证 WeatherKit、Location/Maps、News、TV、DualSubs、
+   BiliUniverse 与 WLOC 的 Script/MITM 命中，而不是只看模块开关。
+4. 用真实 App 功能测试最终效果；重复规则以首个实际结果为准。
+5. Mac 与 iPhone 分别重复以上步骤。模块参数、策略选择和证书信任不得假定同步。
+
+官方语义参考：
+
+- [Surge 模块优先级](https://manual.nssurge.com/others/module.html)
+- [MITM Host List 首条匹配](https://manual.nssurge.com/others/host-list.html)
+- [HTTP Rewrite 与 Script 处理顺序](https://manual.nssurge.com/http-processing.html)
+- [Surge Rule 首条匹配](https://manual.nssurge.com/rule.html)

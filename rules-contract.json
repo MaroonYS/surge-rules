@@ -4,11 +4,12 @@
       "number": 1,
       "title": "协议和局域网",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,GoogleVoice-Control,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media.conf,GoogleVoice-Media,extended-matching",
-        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media-rules.conf,GoogleVoice-Media",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,Res-Frontier,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media.conf,DIRECT,extended-matching",
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media-rules.conf,DIRECT",
         "PROTOCOL,STUN,REJECT",
-        "PROTOCOL,MTProto,Telegram",
+        "PROTOCOL,MTProto,Singapore",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/lan.conf,DIRECT",
         "RULE-SET,LAN,DIRECT,no-resolve"
       ]
@@ -26,14 +27,14 @@
       "number": 3,
       "title": "iCloud Private Relay",
       "rules": [
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,Private,extended-matching"
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,\"United States\",extended-matching"
       ]
     },
     {
       "number": 4,
       "title": "Apple Intelligence / Siri / PCC",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-ai.conf,AIGC,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-ai.conf,\"United States\",extended-matching"
       ]
     },
     {
@@ -47,12 +48,12 @@
       "number": 6,
       "title": "分地区金融",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,HK-FINANCE,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance-context.conf,HK-FINANCE,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/sg-finance.conf,SG-FINANCE,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,JP-FINANCE,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,KR-FINANCE,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/uk-finance.conf,UK-FINANCE,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,\"Hong Kong\",extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance-context.conf,\"Hong Kong\",extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/sg-finance.conf,Singapore,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,Japan,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,Korea,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/uk-finance.conf,\"United Kingdom\",extended-matching"
       ]
     },
     {
@@ -66,9 +67,9 @@
       "number": 8,
       "title": "跨地区金融、身份与风控",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Finance,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/identity-context.conf,Identity,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/risk-context.conf,Identity,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Res-Frontier,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/identity-context.conf,Res-Frontier,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/risk-context.conf,Res-Frontier,extended-matching"
       ]
     },
     {
@@ -90,8 +91,8 @@
       "number": 11,
       "title": "Apple Push 与剩余系统服务",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push.conf,Apple-Push,extended-matching",
-        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push-rules.conf,Apple-Push",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push.conf,\"United States\",extended-matching",
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-push-rules.conf,\"United States\"",
         "RULE-SET,SYSTEM,DIRECT"
       ]
     },
@@ -110,11 +111,10 @@
       "number": 13,
       "title": "服务专用",
       "rules": [
-        "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/Filter/master/Emby.list,Emby",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Telegram",
+        "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/Filter/master/Emby.list,Singapore",
         "DOMAIN,api.github.com,PROXY,extended-matching",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,Streaming"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,\"United States\"",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,\"United States\""
       ]
     },
     {
@@ -124,8 +124,8 @@
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft_cdn.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,Apple",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft.conf,Microsoft"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,\"United States\"",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft.conf,\"United States\""
       ]
     },
     {
@@ -133,8 +133,8 @@
       "title": "下载和 CDN",
       "rules": [
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/speedtest.conf,PROXY,extended-matching",
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,Download",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/download.conf,Download",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,\"Hong Kong\"",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/download.conf,\"Hong Kong\"",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/cdn.conf,PROXY"
       ]
@@ -153,9 +153,9 @@
       "number": 17,
       "title": "IP 类规则",
       "rules": [
-        "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Telegram",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Singapore",
         "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
-        "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,Streaming",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT",
         "FINAL,PROXY,dns-failed"

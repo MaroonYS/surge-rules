@@ -7,18 +7,21 @@
   "active": [
     {
       "file": "google-voice.conf",
-      "policy": "GoogleVoice-Control",
+      "policy": "Res-Frontier",
+      "semantic_role": "GoogleVoice-Control",
       "description": "Google Voice page, signaling and call-control hosts"
     },
     {
       "file": "google-voice-media.conf",
-      "policy": "GoogleVoice-Media",
+      "policy": "DIRECT",
+      "semantic_role": "GoogleVoice-Media",
       "description": "Google Voice STUN host routed with the Workspace-published UDP media path"
     },
     {
       "file": "google-voice-media-rules.conf",
       "type": "RULE-SET",
-      "policy": "GoogleVoice-Media",
+      "policy": "DIRECT",
+      "semantic_role": "GoogleVoice-Media",
       "description": "Workspace-published Google Voice UDP media IP and port constraints"
     },
     {
@@ -38,7 +41,8 @@
     },
     {
       "file": "apple-ai.conf",
-      "policy": "AIGC",
+      "policy": "United States",
+      "semantic_role": "AIGC",
       "description": "Apple Intelligence, Siri and Private Cloud Compute"
     },
     {
@@ -48,32 +52,38 @@
     },
     {
       "file": "hk-finance.conf",
-      "policy": "HK-FINANCE",
+      "policy": "Hong Kong",
+      "semantic_role": "HK-FINANCE",
       "description": "Hong Kong financial services"
     },
     {
       "file": "hk-finance-context.conf",
-      "policy": "HK-FINANCE",
+      "policy": "Hong Kong",
+      "semantic_role": "HK-FINANCE",
       "description": "Shared infrastructure pinned to the owner's Hong Kong HSBC and brokerage context"
     },
     {
       "file": "sg-finance.conf",
-      "policy": "SG-FINANCE",
+      "policy": "Singapore",
+      "semantic_role": "SG-FINANCE",
       "description": "Singapore financial services"
     },
     {
       "file": "jp-finance.conf",
-      "policy": "JP-FINANCE",
+      "policy": "Japan",
+      "semantic_role": "JP-FINANCE",
       "description": "Japan financial services"
     },
     {
       "file": "kr-finance.conf",
-      "policy": "KR-FINANCE",
+      "policy": "Korea",
+      "semantic_role": "KR-FINANCE",
       "description": "Korea financial services"
     },
     {
       "file": "uk-finance.conf",
-      "policy": "UK-FINANCE",
+      "policy": "United Kingdom",
+      "semantic_role": "UK-FINANCE",
       "description": "United Kingdom financial services"
     },
     {
@@ -83,17 +93,20 @@
     },
     {
       "file": "finance-context.conf",
-      "policy": "Finance",
+      "policy": "Res-Frontier",
+      "semantic_role": "Finance",
       "description": "Financial services whose region cannot be inferred from the domain"
     },
     {
       "file": "identity-context.conf",
-      "policy": "Identity",
+      "policy": "Res-Frontier",
+      "semantic_role": "Identity",
       "description": "Shared KYC and identity verification services"
     },
     {
       "file": "risk-context.conf",
-      "policy": "Identity",
+      "policy": "Res-Frontier",
+      "semantic_role": "Risk",
       "description": "Conservative shared device intelligence and fingerprinting set"
     },
     {
@@ -113,13 +126,15 @@
     },
     {
       "file": "apple-push.conf",
-      "policy": "Apple-Push",
+      "policy": "United States",
+      "semantic_role": "Apple-Push",
       "description": "Apple Push Notification service override before the internal SYSTEM ruleset"
     },
     {
       "file": "apple-push-rules.conf",
       "type": "RULE-SET",
-      "policy": "Apple-Push",
+      "policy": "United States",
+      "semantic_role": "Apple-Push",
       "description": "Apple-published APNs TCP 5223 ranges plus a port-constrained 17/8 fallback"
     },
     {

@@ -38,13 +38,13 @@ class RuleContractTests(unittest.TestCase):
     def test_google_voice_media_precedes_global_stun_block(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         control = (
-            "/google-voice.conf,GoogleVoice-Control,extended-matching"
+            "/google-voice.conf,Res-Frontier,extended-matching"
         )
         stun_host = (
-            "/google-voice-media.conf,GoogleVoice-Media,extended-matching"
+            "/google-voice-media.conf,DIRECT,extended-matching"
         )
         media_rule_set = (
-            "/google-voice-media-rules.conf,GoogleVoice-Media"
+            "/google-voice-media-rules.conf,DIRECT"
         )
         media_rules = [
             "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
@@ -102,8 +102,8 @@ class RuleContractTests(unittest.TestCase):
 
     def test_changing_private_relay_policy_fails_contract(self) -> None:
         codes = self.validate_modified_main(
-            "icloud_private_relay.conf,Private,extended-matching",
-            "icloud_private_relay.conf,AIGC,extended-matching",
+            'icloud_private_relay.conf,"United States",extended-matching',
+            "icloud_private_relay.conf,DIRECT,extended-matching",
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
 
@@ -191,7 +191,10 @@ class RuleContractTests(unittest.TestCase):
     def test_service_specific_rules_are_precise_and_ordered(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         github = "DOMAIN,api.github.com,PROXY,extended-matching"
-        ai = "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,AIGC"
+        ai = (
+            'RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,'
+            '"United States"'
+        )
         self.assertIn(github, main)
         self.assertLess(main.index(github), main.index(ai))
         self.assertNotIn("DOMAIN-KEYWORD,cr18", main)
@@ -259,10 +262,10 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(expected_identity, active_entries("identity-context.conf"))
         self.assertEqual(expected_risk, active_entries("risk-context.conf"))
 
-        hk_context = "/hk-finance-context.conf,HK-FINANCE,extended-matching"
-        finance = "/finance-context.conf,Finance,extended-matching"
-        identity = "/identity-context.conf,Identity,extended-matching"
-        risk = "/risk-context.conf,Identity,extended-matching"
+        hk_context = '/hk-finance-context.conf,"Hong Kong",extended-matching'
+        finance = "/finance-context.conf,Res-Frontier,extended-matching"
+        identity = "/identity-context.conf,Res-Frontier,extended-matching"
+        risk = "/risk-context.conf,Res-Frontier,extended-matching"
         crypto = "/crypto.conf,Crypto,extended-matching"
         positions = [
             main.index(fragment)
@@ -300,8 +303,8 @@ class RuleContractTests(unittest.TestCase):
 
     def test_apple_push_override_precedes_system(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        push = "/apple-push.conf,Apple-Push,extended-matching"
-        push_rule_set = "/apple-push-rules.conf,Apple-Push"
+        push = '/apple-push.conf,"United States",extended-matching'
+        push_rule_set = '/apple-push-rules.conf,"United States"'
         system = "RULE-SET,SYSTEM,DIRECT"
         self.assertLess(main.index(push), main.index(system))
         self.assertLess(main.index(push), main.index(push_rule_set))
@@ -350,8 +353,14 @@ class RuleContractTests(unittest.TestCase):
 
     def test_telegram_ip_precedes_general_ip_reject(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        telegram = "/ip/telegram.conf,Telegram"
+        telegram = "/ip/telegram.conf,Singapore"
         reject = "/ip/reject.conf,REJECT-DROP"
+        self.assertLess(main.index(telegram), main.index(reject))
+
+    def test_telegram_non_ip_precedes_shared_reject_stack(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        telegram = "/non_ip/telegram.conf,Singapore"
+        reject = "/non_ip/reject-drop.conf,REJECT-DROP"
         self.assertLess(main.index(telegram), main.index(reject))
 
     def test_identity_policy_group_snippet_is_copy_ready(self) -> None:

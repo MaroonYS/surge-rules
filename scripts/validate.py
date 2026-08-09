@@ -31,7 +31,7 @@ FORBIDDEN_SUFFIXES = {
     "microsoft.com",
 }
 ALLOWED_KEYWORD_RULES: set[str] = set()
-SENSITIVE_POLICIES = {"Finance", "Identity", "Res-Frontier"}
+SENSITIVE_POLICIES = {"Finance", "Identity", "Risk", "Res-Frontier"}
 ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("us-residential.conf", "Res-Frontier", "apexclearing.com"),
     ("us-residential.conf", "Res-Frontier", "earlywarning.com"),
@@ -57,14 +57,14 @@ ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("identity-context.conf", "Identity", "sumsub.com"),
     ("identity-context.conf", "Identity", "vouched.id"),
     ("identity-context.conf", "Identity", "ekata.com"),
-    ("risk-context.conf", "Identity", "online-metrix.net"),
-    ("risk-context.conf", "Identity", "threatmetrix.com"),
-    ("risk-context.conf", "Identity", "iovation.com"),
-    ("risk-context.conf", "Identity", "iovation.io"),
-    ("risk-context.conf", "Identity", "biocatch.com"),
-    ("risk-context.conf", "Identity", "fingerprint.com"),
-    ("risk-context.conf", "Identity", "fingerprintjs.com"),
-    ("risk-context.conf", "Identity", "incognia.com"),
+    ("risk-context.conf", "Risk", "online-metrix.net"),
+    ("risk-context.conf", "Risk", "threatmetrix.com"),
+    ("risk-context.conf", "Risk", "iovation.com"),
+    ("risk-context.conf", "Risk", "iovation.io"),
+    ("risk-context.conf", "Risk", "biocatch.com"),
+    ("risk-context.conf", "Risk", "fingerprint.com"),
+    ("risk-context.conf", "Risk", "fingerprintjs.com"),
+    ("risk-context.conf", "Risk", "incognia.com"),
 }
 SHARED_INFRASTRUCTURE_SUFFIXES = {
     "akoya.com",
@@ -192,6 +192,12 @@ class Binding:
     policy: str
     description: str
     type: str = "DOMAIN-SET"
+    semantic_role: str = ""
+
+    @property
+    def semantic_policy(self) -> str:
+        """Return the logical validation layer independently of runtime routing."""
+        return self.semantic_role or self.policy
 
 
 @dataclass
@@ -220,6 +226,7 @@ class ValidationResult:
             {
                 "file": binding.file,
                 "policy": binding.policy,
+                "semantic_role": binding.semantic_policy,
                 "entries": sum(
                     entry.path == binding.file for entry in self.active_entries
                 )
@@ -328,6 +335,7 @@ def load_manifest(root: Path) -> tuple[str, str, str, str, list[Binding]]:
                 policy=str(item["policy"]),
                 description=str(item.get("description", "")),
                 type=str(item.get("type", "DOMAIN-SET")),
+                semantic_role=str(item.get("semantic_role", item["policy"])),
             )
         except (AttributeError, KeyError, TypeError) as exc:
             raise ConfigurationError(f"invalid active binding: {exc}") from exc
@@ -338,6 +346,7 @@ def load_manifest(root: Path) -> tuple[str, str, str, str, list[Binding]]:
             or file_path.suffix != ".conf"
             or binding.file in seen_files
             or not binding.policy
+            or not binding.semantic_role
             or binding.type not in {"DOMAIN-SET", "RULE-SET"}
         ):
             raise ConfigurationError(f"invalid active binding: {binding}")
@@ -360,6 +369,13 @@ def _safe_repository_path(root: Path, relative: str) -> Path:
     if candidate.is_symlink():
         raise ConfigurationError(f"symbolic links are not accepted: {relative}")
     return candidate
+
+
+def normalize_policy_name(value: str) -> str:
+    """Normalize the optional Surge quotes used by policy names with spaces."""
+    if len(value) >= 2 and value.startswith('"') and value.endswith('"'):
+        return value[1:-1]
+    return value
 
 
 def validate_domain(raw: str) -> str | None:
@@ -1161,7 +1177,7 @@ def validate_main_rules(
                 f"{binding.file} is referenced {len(found)} times",
             )
         for line_number, policy in found:
-            if policy != binding.policy:
+            if normalize_policy_name(policy) != binding.policy:
                 _diag(
                     diagnostics,
                     "error",
@@ -1275,7 +1291,7 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
                 parse_domain_set(
                     root,
                     binding.file,
-                    binding.policy,
+                    binding.semantic_policy,
                     archive=False,
                     diagnostics=diagnostics,
                 )
@@ -1285,7 +1301,7 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
                 parse_rule_set(
                     root,
                     binding.file,
-                    binding.policy,
+                    binding.semantic_policy,
                     diagnostics=diagnostics,
                 )
             )

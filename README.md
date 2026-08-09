@@ -32,43 +32,39 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
-| `google-voice.conf` | `GoogleVoice-Control` | Google Voice 页面、信令与呼叫控制 |
-| `google-voice-media.conf` | `GoogleVoice-Media` | Google Voice STUN 主机 |
-| `google-voice-media-rules.conf` | `GoogleVoice-Media` | Google Voice UDP 媒体 IP/端口逻辑规则 |
+| `google-voice.conf` | `Res-Frontier` | Google Voice 页面、信令与呼叫控制 |
+| `google-voice-media.conf` | `DIRECT` | Google Voice STUN 主机 |
+| `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
-| `apple-ai.conf` | `AIGC` | Apple Intelligence、Siri、PCC |
+| `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
-| `hk-finance.conf` | `HK-FINANCE` | 香港金融 |
-| `hk-finance-context.conf` | `HK-FINANCE` | 当前账户的香港汇丰及香港券商共享基础设施 |
-| `sg-finance.conf` | `SG-FINANCE` | 新加坡金融 |
-| `jp-finance.conf` | `JP-FINANCE` | 日本金融 |
-| `kr-finance.conf` | `KR-FINANCE` | 韩国金融 |
-| `uk-finance.conf` | `UK-FINANCE` | 英国金融 |
+| `hk-finance.conf` | `Hong Kong` | 香港金融 |
+| `hk-finance-context.conf` | `Hong Kong` | 当前账户的香港汇丰及香港券商共享基础设施 |
+| `sg-finance.conf` | `Singapore` | 新加坡金融 |
+| `jp-finance.conf` | `Japan` | 日本金融 |
+| `kr-finance.conf` | `Korea` | 韩国金融 |
+| `uk-finance.conf` | `United Kingdom` | 英国金融 |
 | `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
-| `finance-context.conf` | `Finance` | 无法仅按域名判断地区的金融服务 |
-| `identity-context.conf` | `Identity` | KYC 与身份验证服务 |
-| `risk-context.conf` | `Identity` | 保守的设备情报与指纹服务活动集 |
-| `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立 fail-closed 策略 |
+| `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
+| `identity-context.conf` | `Res-Frontier` | KYC 与身份验证服务 |
+| `risk-context.conf` | `Res-Frontier` | 保守的设备情报与指纹服务活动集 |
+| `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
-| `apple-push.conf` | `Apple-Push` | APNs 长连接，优先于内建 `SYSTEM` |
-| `apple-push-rules.conf` | `Apple-Push` | Apple 公布网段上的 APNs TCP 5223 逻辑规则 |
+| `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
+| `apple-push-rules.conf` | `United States` | Apple 公布网段上的 APNs TCP 5223 逻辑规则 |
 | `adblock4limbo-supplement.conf` | `REJECT` | Adblock4limbo 经清洗、去重并减去 SKK 覆盖后的补集 |
 
 `archive/` 中的文件永远不被主规则加载。当前没有任何被确认停用的域名。
 
 ## 接入
 
-1. 确认现有配置已经定义表格及主 Rule 使用的所有策略名。
-2. 确认 `Apple`、`AIGC`、`Res-Frontier`、`Identity`、
-   `GoogleVoice-Control`、`GoogleVoice-Media`、`Apple-Push`、`Private`、`Bybit` 和各地区金融组
-   已选中所需出口。
-   `Identity` 的稳定 `select` 定义可直接使用
-   [snippets/identity-policy-groups.conf](snippets/identity-policy-groups.conf)；
-   实时通信组见
-   [snippets/service-policy-groups.conf](snippets/service-policy-groups.conf)。
+1. 确认现有配置已经定义主 Rule 使用的固定策略：`Res-Frontier`、`PROXY`、
+   `Hong Kong`、`Singapore`、`Japan`、`Korea`、`United Kingdom`、
+   `United States`、`Bybit`、`Crypto` 与 `Web3`。
+2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
    - 推荐：[surge-main.conf](surge-main.conf)，通过 24 个远程本仓库规则文件（22 个 `DOMAIN-SET`、2 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
@@ -97,8 +93,8 @@ python3 scripts/build_expanded.py --write
 https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 ```
 
-Private Relay 使用不含住宅 SOCKS5 的独立 `Private` 策略。
-Apple Intelligence 严格使用 `AIGC`。
+Private Relay 与 Apple Intelligence 固定使用普通 `United States` 节点；住宅
+SOCKS5 不参与 Private Relay 的 UDP/QUIC 路径。
 Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
 `us-residential.conf`，命中 `Res-Frontier`；这些服务本身并非天然只属于美国。
 
@@ -121,20 +117,21 @@ python3 scripts/check_biliuniverse.py --timeout 30
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 
-核对完整 Surge 配置中的策略是否存在，并确认敏感金融策略、Google Voice 与
-`Apple-Push` 使用固定代理或手动 `select`。APNs 是 TCP 5223 长连接，普通 HTTP
+核对完整 Surge 配置中的策略是否存在，并确认地区、住宅与加密资产策略使用固定代理
+或手动 `select`。APNs 是 TCP 5223 长连接，普通 HTTP
 健康检查不能证明该端口可用，所以仓库不再使用自动 `fallback`：
 
 ```bash
 python3 scripts/check_profile_policies.py \
   --profile /path/to/profile.conf \
-  --supplement snippets/identity-policy-groups.conf \
-  --supplement snippets/service-policy-groups.conf \
   --require-stable \
-  Finance HK-FINANCE SG-FINANCE JP-FINANCE KR-FINANCE UK-FINANCE \
-  Res-Frontier "United States" Identity GoogleVoice-Control GoogleVoice-Media \
-  Apple-Push Private Bybit
+  Res-Frontier PROXY "Hong Kong" Singapore Japan Korea \
+  "United Kingdom" "United States" Bybit Crypto Web3
 ```
+
+该检查器也可将 Surge 导出的“修改后配置”同时作为 `--profile` 和
+`--rules`；它会识别模块的 `#!FROM-MODULE`、逻辑规则与 `pre-matching`，
+避免把嵌套条件或选项误报为策略名。
 
 生成机器可读报告：
 
@@ -187,9 +184,10 @@ SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → 
 
 ## Identity 与 Risk 的边界
 
-跨地区第一方金融仍进入 `Finance`。KYC/身份验证进入
-`identity-context.conf`，设备情报与指纹服务进入 `risk-context.conf`，两者统一使用
-稳定的手动 `Identity` 策略。宽泛 Persona 根域和通用反欺诈 SaaS 不在活动文件中；
+跨地区第一方金融、KYC/身份验证、设备情报与指纹服务仍分别保留 Finance、Identity、
+Risk 三个语义层，但运行时直接固定到 `Res-Frontier`，不再为它们创建额外策略组。
+`rules-manifest.json` 的 `semantic_role` 继续让校验器按原边界检查。宽泛 Persona 根域和
+通用反欺诈 SaaS 不在活动文件中；
 验证码等未列入活动文件的共享服务仍按实际日志精确补充。
 
 本仓库只负责分流结构与规则数据，不包含节点、代理凭据或订阅。
@@ -198,13 +196,12 @@ SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → 
 
 ## 实时通信与 Apple 连续互通
 
-Google Voice 的页面、信令和呼叫控制进入 `GoogleVoice-Control`，默认可选择
-`Res-Frontier`；精确 STUN 主机以及 Google Workspace Voice 官方公布的 UDP
-端口和专用 IP 段进入 `GoogleVoice-Media`，其他 STUN 仍保持拒绝。仓库把
-`DIRECT` 放在媒体组首位，是基于当前用户网络已完成的直连拨号 A/B；它会形成
+Google Voice 的页面、信令和呼叫控制固定到 `Res-Frontier`；精确 STUN 主机以及
+Google Workspace Voice 官方公布的 UDP 端口和专用 IP 段固定到 `DIRECT`，其他
+STUN 仍保持拒绝。该配置基于当前用户网络已完成的直连拨号 A/B；它会形成
 美国控制面与本地媒体面的出口分离。若直连媒体异常，只切换
-`GoogleVoice-Media` 到已实测支持 UDP Relay 的固定美国节点，无需改变页面
-与账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
+对应三条媒体规则的策略到已实测支持 UDP Relay 的固定美国节点，无需改变页面与
+账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
 实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
 
 两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效。蜂窝网络需要
@@ -233,11 +230,11 @@ iOS/macOS 自身请求，但不包含 App Store、iTunes 等内容服务；这�
 按指定策略接管，也避免后面的 `.apple.com` / `.icloud.com` 聚合规则代理过多系统流量。
 
 Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配，并进入独立
-`Bybit` 组。该组默认 `REJECT`，只能加入与账户本人真实且受支持地区一致的策略；
+`Bybit` 组。该组只能加入与账户本人真实且受支持地区一致的策略；
 不得复用包含受限地区的宽泛 `Crypto` 组。
 
-模块会覆盖主 Profile，且启用状态不会跨设备同步。以稳定为目标的保留、禁用与
-条件启用清单见 [docs/module-baseline.md](docs/module-baseline.md)。
+模块会覆盖主 Profile，且启用状态不会跨设备同步。保留全部模块时的实际命中条件、
+已知不可覆盖冲突与逐设备检查见 [docs/module-baseline.md](docs/module-baseline.md)。
 
 ## 官方参考
 

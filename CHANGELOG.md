@@ -2,19 +2,34 @@
 
 ## Unreleased
 
-- Added a dedicated Hong Kong account-context layer for HSBC HK, Futu/Moomoo HK and Longbridge HK shared infrastructure, ahead of cross-region Finance.
-- Split Private Relay into an ordinary UDP/QUIC-capable `Private` group and Bybit into a compliant fail-closed `Bybit` group.
-- Added a per-device module baseline that removes overlapping HTTPDNS, ad blocking, Bilibili and YouTube rewrite chains and protects financial endpoints from broad MITM.
-- Documented the two deliberate SKK example deviations required by the tested Bilibili/Taobao allow paths and no-resolve Google Voice/APNs logical rules.
-- Split the mutually incompatible iOS capture settings into explicit APNs and Continuity snippets, rejected the ineffective `include-all-networks=true` plus `include-apns=false` middle state, and changed `Apple-Push` to a fixed manual selection because HTTP health checks do not verify TCP 5223.
-- Added Apple's recommended `17.0.0.0/8` APNs fallback while retaining the TCP 5223 constraint and the published narrow IPv4/IPv6 ranges.
-- Moved all 15 Google Voice and APNs logical `AND` declarations into two policy-free remote `RULE-SET` files and taught validation and expanded-rule generation to preserve their semantics.
-- Split Google Voice page/call-control traffic from its STUN and UDP media path so page access can use a stable United States or residential exit while calls default to `DIRECT`.
-- Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared reject stack without broadly allowing Taobao advertising hosts.
-- Split Bybit's documented application/API domains from the remaining centralized-exchange set so `api.bytick.com` no longer falls through to `FINAL`.
-- Added a dedicated APNs layer before `SYSTEM`, limited to push hostnames/CNAMEs and TCP 5223 on Apple's published APNs ranges.
-- Added copy-ready policy and iOS APNs-capture snippets, plus regression coverage for rule ordering and policy completeness.
-- Restored Telegram IP routing before the general IP rejection set.
+- Aligned the canonical Rule, contract, manifest and generated expanded file with the
+  fixed-policy profile: service traffic now uses existing residential or country groups
+  instead of sixteen additional wrapper groups.
+- Preserved Finance, Identity, Risk, regional-finance, Google Voice and APNs validation
+  boundaries through manifest `semantic_role` metadata while separating them from runtime
+  policy names.
+- Fixed quoting of policy names containing whitespace in generated expanded rules.
+- Taught the profile policy checker to parse modified/effective profiles, nested logical
+  rules, regular-expression commas, rule options and module provenance annotations.
+- Moved Telegram non-IP routing next to MTProto, before the shared reject stack, while
+  retaining Telegram IP routing before the general IP rejection set.
+- Added a per-device, all-modules-retained compatibility baseline with the exact Apple MITM
+  allowlist required by iRingo, WLOC and DualSubs, without weakening financial/KYC or raw-IP
+  exclusions.
+- Documented irreducible module-first conflicts, including WeatherKit QUIC versus Private
+  Relay and duplicate HTTPDNS/Bilibili/YouTube/Spotify processing chains.
+- Added a dedicated Hong Kong account-context layer for HSBC HK, Futu/Moomoo HK and
+  Longbridge HK shared infrastructure, ahead of cross-region Finance.
+- Added Apple's recommended `17.0.0.0/8` APNs fallback while retaining the TCP 5223
+  constraint and the published narrow IPv4/IPv6 ranges.
+- Moved all Google Voice and APNs logical `AND` declarations into policy-free remote
+  `RULE-SET` files and preserved their semantics during validation and expansion.
+- Fixed Google Voice page/call-control traffic to `Res-Frontier` and its documented UDP
+  media exceptions to `DIRECT`, ahead of the global STUN privacy rejection.
+- Restored the single Taobao/Tmall interactive mini-app runtime suffix before the shared
+  reject stack without broadly allowing Taobao advertising hosts.
+- Split Bybit's documented application/API domains from the remaining centralized-exchange
+  set so `api.bytick.com` no longer falls through to `FINAL`.
 
 ## 1.7.1 - 2026-08-04
 

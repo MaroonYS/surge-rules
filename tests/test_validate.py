@@ -155,10 +155,11 @@ class SemanticTests(unittest.TestCase):
     def test_selected_identity_layers_are_explicitly_allowed(self) -> None:
         diagnostics: list[validate.Diagnostic] = []
         entries = [
-            self.entry(path, index, f".{domain}", "Identity")
-            for path, domains in (
+            self.entry(path, index, f".{domain}", policy)
+            for path, policy, domains in (
                 (
                     "identity-context.conf",
+                    "Identity",
                     (
                         "socure.com",
                         "socure.co",
@@ -184,6 +185,7 @@ class SemanticTests(unittest.TestCase):
                 ),
                 (
                     "risk-context.conf",
+                    "Risk",
                     (
                         "online-metrix.net",
                         "threatmetrix.com",
@@ -351,6 +353,38 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(
             ["DOMAIN-SET", "RULE-SET"],
             [binding.type for binding in bindings],
+        )
+
+    def test_manifest_separates_runtime_policy_from_semantic_role(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = {
+                "repository": "owner/repository",
+                "branch": "main",
+                "main": "surge-main.conf",
+                "contract": "rules-contract.json",
+                "active": [
+                    {
+                        "file": "identity.conf",
+                        "policy": "Res-Frontier",
+                        "semantic_role": "Identity",
+                    },
+                    {"file": "direct.conf", "policy": "DIRECT"},
+                ],
+            }
+            (root / "rules-manifest.json").write_text(
+                json.dumps(manifest),
+                encoding="utf-8",
+            )
+            *_, bindings = validate.load_manifest(root)
+
+        self.assertEqual(
+            [("Res-Frontier", "Identity"), ("DIRECT", "DIRECT")],
+            [(binding.policy, binding.semantic_policy) for binding in bindings],
+        )
+        self.assertEqual(
+            "United States",
+            validate.normalize_policy_name('"United States"'),
         )
 
     def test_manifest_rejects_unknown_binding_type(self) -> None:

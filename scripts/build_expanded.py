@@ -14,6 +14,13 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_RULE_OPTIONS = {"extended-matching", "no-resolve"}
 
 
+def format_policy(policy: str) -> str:
+    """Render a policy name using Surge quoting when it contains whitespace."""
+    if any(character.isspace() for character in policy):
+        return f'"{policy}"'
+    return policy
+
+
 def load_configuration(root: Path) -> tuple[Path, Path, str, list[dict[str, str]]]:
     manifest_path = root / "rules-manifest.json"
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -102,7 +109,7 @@ def render_expanded(root: Path = REPOSITORY_ROOT) -> str:
             continue
 
         file_name = binding["file"]
-        policy = binding["policy"]
+        policy = format_policy(binding["policy"])
         binding_type = binding.get("type", "DOMAIN-SET")
         if binding_type == "RULE-SET" and fields[3:]:
             raise ValueError(

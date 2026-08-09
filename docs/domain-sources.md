@@ -60,13 +60,13 @@
 ## 无法靠域名自动判断的边界
 
 `bankofchina.com` 的不同国家页面共用一个根域并按路径分区，Surge 域名规则无法按
-URL 路径选择国家，因此该根域进入可手选的 `Finance`，而 `.boc.cn` 等大陆专用域
-继续 `DIRECT`。
+URL 路径选择国家，因此该根域保留在 Finance 语义文件并固定到 `Res-Frontier`，
+而 `.boc.cn` 等大陆专用域继续 `DIRECT`。
 
 Apple Pay 与 PayPal 是跨地区服务。本仓库仅因配置所有者明确使用美国账户而将其
 放入 `Res-Frontier`；其他账户地区不应照搬这一选择。
 
 当前配置所有者明确使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名被移动到
-`hk-finance-context.conf` 并在通用 `finance-context.conf` 之前进入 `HK-FINANCE`。
+`hk-finance-context.conf` 并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。

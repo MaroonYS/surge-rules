@@ -18,33 +18,115 @@ BUILT_IN_POLICIES = {
     "REJECT-TINYGIF",
 }
 POLICY_FIELD_BY_RULE = {
-    "AND": -1,
+    "AND": 2,
+    "BSSID": 2,
+    "CELLULAR-CARRIER": 2,
+    "CELLULAR-RADIO": 2,
+    "DEST-PORT": 2,
+    "DEVICE-NAME": 2,
     "DOMAIN": 2,
     "DOMAIN-KEYWORD": 2,
     "DOMAIN-SET": 2,
     "DOMAIN-SUFFIX": 2,
     "DOMAIN-WILDCARD": 2,
     "FINAL": 1,
+    "GEOIP": 2,
+    "HOSTNAME": 2,
+    "HTTP-METHOD": 2,
+    "IN-PORT": 2,
+    "IN-TYPE": 2,
     "IP-ASN": 2,
     "IP-CIDR": 2,
     "IP-CIDR6": 2,
-    "NOT": -1,
-    "OR": -1,
+    "NETWORK-FRAMEWORK": 2,
+    "NOT": 2,
+    "OR": 2,
+    "PROCESS-NAME": 2,
+    "PROCESS-NAME-REGEX": 2,
+    "PROCESS-PATH": 2,
+    "PROCESS-PATH-REGEX": 2,
     "PROTOCOL": 2,
     "RULE-SET": 2,
+    "SCRIPT": 2,
+    "SRC-IP": 2,
+    "SRC-PORT": 2,
+    "SSID": 2,
+    "SUBNET": 2,
+    "URL-REGEX": 2,
+    "USER-AGENT": 2,
 }
+RULE_OPTIONS = {
+    "dns-failed",
+    "extended-matching",
+    "no-resolve",
+    "pre-matching",
+}
+MODULE_ANNOTATION = "#!FROM-MODULE"
+
+
+def strip_module_annotation(line: str) -> str:
+    """Remove Surge's effective-profile provenance suffix, if present."""
+
+    return line.split(MODULE_ANNOTATION, 1)[0].rstrip()
+
+
+def split_top_level_fields(line: str) -> list[str]:
+    """Split a Surge record without splitting logical or regular-expression groups."""
+
+    fields: list[str] = []
+    current: list[str] = []
+    stack: list[str] = []
+    quote = ""
+    escaped = False
+    closing = {"(": ")", "[": "]", "{": "}"}
+
+    for character in line:
+        if escaped:
+            current.append(character)
+            escaped = False
+            continue
+        if character == "\\":
+            current.append(character)
+            escaped = True
+            continue
+        if quote:
+            current.append(character)
+            if character == quote:
+                quote = ""
+            continue
+        if character in {'"', "'"}:
+            current.append(character)
+            quote = character
+            continue
+        if character in closing:
+            current.append(character)
+            stack.append(closing[character])
+            continue
+        if stack and character == stack[-1]:
+            current.append(character)
+            stack.pop()
+            continue
+        if character == "," and not stack:
+            fields.append("".join(current).strip().strip('"'))
+            current = []
+            continue
+        current.append(character)
+
+    fields.append("".join(current).strip().strip('"'))
+    return fields
 
 
 def section_lines(text: str, section_name: str) -> list[tuple[int, str]]:
     active = False
     output: list[tuple[int, str]] = []
     for line_number, raw_line in enumerate(text.splitlines(), 1):
-        line = raw_line.strip()
+        cleaned_line = strip_module_annotation(raw_line)
+        line = cleaned_line.strip()
         if line.startswith("[") and line.endswith("]"):
             active = line == f"[{section_name}]"
             continue
         if active:
-            output.append((line_number, raw_line))
+            output.append((line_number, cleaned_line))
     return output
 
 
@@ -69,7 +151,7 @@ def profile_policy_types(text: str) -> dict[str, str]:
 def supplemental_group_types(text: str) -> dict[str, str]:
     policies: dict[str, str] = {}
     for raw_line in text.splitlines():
-        line = raw_line.strip()
+        line = strip_module_annotation(raw_line).strip()
         if (
             not line
             or line.startswith("#")
@@ -90,16 +172,14 @@ def referenced_policies(text: str) -> dict[str, list[int]]:
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
-        fields = [field.strip().strip('"') for field in line.split(",")]
+        fields = split_top_level_fields(line)
         policy_index = POLICY_FIELD_BY_RULE.get(fields[0].upper())
         if policy_index is None:
             continue
-        if policy_index < 0:
-            policy_index += len(fields)
-        if policy_index < 0 or len(fields) <= policy_index:
+        if len(fields) <= policy_index:
             continue
         policy = fields[policy_index]
-        if policy:
+        if policy and policy.casefold() not in RULE_OPTIONS:
             references.setdefault(policy, []).append(line_number)
     return references
 

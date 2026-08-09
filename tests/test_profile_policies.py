@@ -122,6 +122,63 @@ AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309)),GoogleVoice-Media
         self.assertEqual([], unstable)
         self.assertEqual(1, count)
 
+    def test_effective_profile_annotation_and_logical_options_are_ignored(self) -> None:
+        rules = """\
+[Rule]
+AND,((DOMAIN-KEYWORD,-ad-,extended-matching), (DOMAIN-SUFFIX,example.com,extended-matching)),REJECT,pre-matching #!FROM-MODULE:Example Filter
+OR,((IP-ASN,714,no-resolve), (IP-ASN,6185,no-resolve)),PROXY,no-resolve #!FROM-MODULE:Example Module
+NOT,((DOMAIN-SUFFIX,example.net,extended-matching)),DIRECT,extended-matching #!FROM-MODULE:Example Module
+"""
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+        )
+        self.assertEqual([], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(3, count)
+
+    def test_logical_policy_precedes_pre_matching_annotation(self) -> None:
+        rules = """\
+[Rule]
+AND,((DOMAIN-SUFFIX,example.com), (PROTOCOL,QUIC)),Missing,pre-matching #!FROM-MODULE:Example Filter
+"""
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+        )
+        self.assertEqual(["Missing"], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(1, count)
+
+    def test_top_level_split_handles_regex_commas_and_quoted_policy(self) -> None:
+        profile = self.PROFILE + '"Stable, US" = select, Residential\n'
+        rules = """\
+[Rule]
+URL-REGEX,^https://example\\.com/items/[a,b]/[0-9]{1,3}$,"Stable, US",extended-matching
+USER-AGENT,"Example, Client",PROXY
+"""
+        missing, unstable, count = check_profile_policies.check(
+            profile,
+            rules,
+        )
+        self.assertEqual([], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(2, count)
+
+    def test_rule_option_is_not_reported_as_a_policy(self) -> None:
+        rules = """\
+[Rule]
+AND,((PROTOCOL,UDP),(DEST-PORT,443)),pre-matching #!FROM-MODULE:Malformed
+DOMAIN,example.com,no-resolve
+"""
+        missing, unstable, count = check_profile_policies.check(
+            self.PROFILE,
+            rules,
+        )
+        self.assertEqual([], missing)
+        self.assertEqual([], unstable)
+        self.assertEqual(0, count)
+
 
 if __name__ == "__main__":
     unittest.main()

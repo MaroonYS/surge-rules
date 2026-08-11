@@ -12,6 +12,10 @@
   `YouTube双语翻译` 自身又要求位于去广告模块下方。
 - BiliUniverse 四个官方模块互无依赖，保留当前顺序。
 - iRingo TV 与 DualSubs Universal 只要求同时启用，没有硬性前后关系。
+- Mac 内置 `Disable HTTP Engine` 必须保持关闭。它会让 VIF 接管的明文 HTTP
+  跳过 HTTP Engine，因而无法仅靠 `force-http-engine-hosts` 恢复相关 Script、
+  Rewrite、URL-REGEX 与 Map Local；HTTPS MITM 和显式系统 HTTP Proxy 不受这一
+  限制。关闭该开关是让下列功能模块完整工作的前提，不代表删除模块。
 - 同一请求/响应只能执行一个匹配的 Script。YouTube、Spotify 与 Bili 的重叠脚本
   无法靠排序全部同时执行；下面的顺序只确定高优先实现，未重叠功能仍可工作。
 
@@ -24,7 +28,6 @@ Fix Windows No Network Alert
 HTTP Download Optimization
 router.com
 Google Home Devices
-Disable HTTP Engine
 AllInOne
 BoxJs
 Github Private
@@ -152,4 +155,3 @@ Apple WLOC 定位修改
 
 iPhone 的 DNS 顺序有意与 Mac 不同：`Fries DNS enhanced` 在上、
 `Sukka Local DNS Mapping` 在下，因此重复 Host 由 Sukka 获得更高有效优先级。
-

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Kept Apple Account PayPal linking on one United States residential path with a narrow
+  RULE-SET for the exact billing root and observed dynamic `*-buy.itunes.apple.com` shard family,
+  without widening the rule to shared Apple, iTunes or Braintree infrastructure.
 - Made the daily Adblock synchronization semantic-only: volatile source hashes are reported
   in the Actions summary and no longer rewrite or commit an unchanged effective supplement.
 - Added a machine-readable retained-module compatibility manifest and checker for the exact

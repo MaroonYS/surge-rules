@@ -87,6 +87,13 @@
       "description": "United Kingdom financial services"
     },
     {
+      "file": "apple-account-payment-rules.conf",
+      "type": "RULE-SET",
+      "policy": "Res-Frontier",
+      "semantic_role": "Apple-Account-Payment",
+      "description": "Observed Apple Account and App Store billing control-plane shards"
+    },
+    {
       "file": "us-residential.conf",
       "policy": "Res-Frontier",
       "description": "United States first-party financial services"

@@ -200,6 +200,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("DOMAIN-KEYWORD,cr18", main)
 
     def test_financial_domain_adjustments_are_exact(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         direct_cn = set(
             (ROOT / "direct-cn.conf").read_text(encoding="utf-8").splitlines()
         )
@@ -216,6 +217,25 @@ class RuleContractTests(unittest.TestCase):
                 ".login.gov",
             }.issubset(us_residential)
         )
+        payment_rules = {
+            line
+            for line in (ROOT / "apple-account-payment-rules.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {
+                "DOMAIN,buy.itunes.apple.com",
+                "DOMAIN-WILDCARD,*-buy.itunes.apple.com",
+            },
+            payment_rules,
+        )
+        payment_ref = "/apple-account-payment-rules.conf,Res-Frontier"
+        residential_ref = "/us-residential.conf,Res-Frontier"
+        system = "RULE-SET,SYSTEM,DIRECT"
+        self.assertLess(main.index(payment_ref), main.index(residential_ref))
+        self.assertLess(main.index(payment_ref), main.index(system))
 
     def test_identity_layers_are_exact_and_precede_crypto(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

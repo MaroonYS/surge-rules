@@ -50,6 +50,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `uk-finance.conf` | `United Kingdom` | 英国金融 |
+| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account/App Store 账单根域与动态 `*-buy` 分片 |
 | `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证服务 |
@@ -70,9 +71,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Bybit`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 24 个远程本仓库规则文件（22 个 `DOMAIN-SET`、2 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 25 个远程本仓库规则文件（22 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 24 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 25 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -100,7 +101,10 @@ https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 Private Relay 与 Apple Intelligence 固定使用普通 `United States` 节点；住宅
 SOCKS5 不参与 Private Relay 的 UDP/QUIC 路径。
 Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
-`us-residential.conf`，命中 `Res-Frontier`；这些服务本身并非天然只属于美国。
+`us-residential.conf`；Apple Account 账单根域与动态 `*-buy.itunes.apple.com`
+分片单独收录在 `apple-account-payment-rules.conf`。两层均命中
+`Res-Frontier`，但不扩大到整个 Apple/iTunes 或共享 Braintree 基础设施。
+这些服务本身并非天然只属于美国。
 
 ## 维护
 

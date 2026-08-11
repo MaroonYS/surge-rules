@@ -60,6 +60,7 @@
       "number": 7,
       "title": "美国住宅出口",
       "rules": [
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/us-residential.conf,Res-Frontier,extended-matching"
       ]
     },

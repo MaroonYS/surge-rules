@@ -363,37 +363,13 @@ class RuleContractTests(unittest.TestCase):
         reject = "/non_ip/reject-drop.conf,REJECT-DROP"
         self.assertLess(main.index(telegram), main.index(reject))
 
-    def test_identity_policy_group_snippet_is_copy_ready(self) -> None:
-        snippet = (
-            ROOT / "snippets" / "identity-policy-groups.conf"
-        ).read_text(encoding="utf-8")
-        self.assertIn(
-            "Identity = select, Res-Frontier, Finance, HK-FINANCE, "
-            "SG-FINANCE, JP-FINANCE, KR-FINANCE, UK-FINANCE, PROXY",
-            snippet,
+    def test_only_current_ios_mode_snippets_remain_copy_ready(self) -> None:
+        self.assertFalse(
+            (ROOT / "snippets" / "identity-policy-groups.conf").exists()
         )
-
-    def test_service_policy_group_snippet_is_copy_ready(self) -> None:
-        snippet = (
-            ROOT / "snippets" / "service-policy-groups.conf"
-        ).read_text(encoding="utf-8")
-        self.assertIn(
-            'GoogleVoice-Control = select, Res-Frontier, "United States"',
-            snippet,
+        self.assertFalse(
+            (ROOT / "snippets" / "service-policy-groups.conf").exists()
         )
-        self.assertIn(
-            'GoogleVoice-Media = select, DIRECT, "United States"',
-            snippet,
-        )
-        self.assertIn(
-            'Apple-Push = select, "United States", "Hong Kong", DIRECT',
-            snippet,
-        )
-        self.assertIn(
-            'Private = select, "United States", "Hong Kong", Singapore, DIRECT',
-            snippet,
-        )
-        self.assertIn("Bybit = select, REJECT, DIRECT", snippet)
         apns = (ROOT / "snippets" / "ios-apns-capture.conf").read_text(
             encoding="utf-8"
         )

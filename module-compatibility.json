@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "documentation": "docs/module-baseline.md",
+  "required_mitm_order": {
+    "positive_hosts": [
+      "weatherkit.apple.com",
+      "gspe1-ssl.ls.apple.com",
+      "gs-loc.apple.com",
+      "gs-loc-cn.apple.com",
+      "dispatcher.is.autonavi.com",
+      "configuration.ls.apple.com",
+      "gspe35-ssl.ls.apple.com",
+      "gspe35-ssl.ls.apple.cn",
+      "uts-api.itunes.apple.com",
+      "umc-tempo-api.apple.com",
+      "play-cdn.itunes.apple.com",
+      "play-edge-cdn.itunes.apple.com",
+      "news-edge.apple.com",
+      "news-todayconfig-edge.apple.com",
+      "news-events.apple.com",
+      "news-sports-events.apple.com",
+      "news-client.apple.com",
+      "news-client-search.apple.com",
+      "hls.itunes.apple.com",
+      "hls-svod.itunes.apple.com",
+      "vod-*.tv.apple.com"
+    ],
+    "negative_hosts": [
+      "-*.apple.com",
+      "-apple.com",
+      "-*.itunes.com",
+      "-itunes.com"
+    ]
+  },
+  "modules": [
+    {
+      "id": "iringo-weatherkit",
+      "required_mitm_hosts": [
+        "weatherkit.apple.com"
+      ]
+    },
+    {
+      "id": "iringo-location-service",
+      "required_mitm_hosts": [
+        "gspe1-ssl.ls.apple.com",
+        "dispatcher.is.autonavi.com"
+      ]
+    },
+    {
+      "id": "wloc",
+      "required_mitm_hosts": [
+        "gs-loc.apple.com",
+        "gs-loc-cn.apple.com"
+      ]
+    },
+    {
+      "id": "iringo-maps",
+      "required_mitm_hosts": [
+        "configuration.ls.apple.com",
+        "gspe35-ssl.ls.apple.com",
+        "gspe35-ssl.ls.apple.cn"
+      ]
+    },
+    {
+      "id": "iringo-news",
+      "required_mitm_hosts": [
+        "news-edge.apple.com",
+        "news-todayconfig-edge.apple.com",
+        "news-events.apple.com",
+        "news-sports-events.apple.com",
+        "news-client.apple.com",
+        "news-client-search.apple.com"
+      ]
+    },
+    {
+      "id": "iringo-tv",
+      "required_mitm_hosts": [
+        "uts-api.itunes.apple.com",
+        "umc-tempo-api.apple.com",
+        "play-cdn.itunes.apple.com",
+        "play-edge-cdn.itunes.apple.com"
+      ]
+    },
+    {
+      "id": "dualsubs-apple-tv",
+      "required_mitm_hosts": [
+        "hls.itunes.apple.com",
+        "hls-svod.itunes.apple.com",
+        "vod-*.tv.apple.com"
+      ]
+    }
+  ]
+}

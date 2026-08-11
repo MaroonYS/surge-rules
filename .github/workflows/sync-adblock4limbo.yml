@@ -34,13 +34,13 @@ jobs:
 
     steps:
       - name: Check out main
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: main
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
 
@@ -50,7 +50,10 @@ jobs:
 
           for attempt in 1 2 3
           do
-            if python scripts/sync_adblock4limbo.py --write --timeout 30
+            if python scripts/sync_adblock4limbo.py \
+              --write \
+              --timeout 30 \
+              --metadata-json "$RUNNER_TEMP/adblock-source-metadata.json"
             then
               break
             fi
@@ -65,6 +68,24 @@ jobs:
 
           python scripts/build_expanded.py --write
 
+          {
+            echo "### Adblock4limbo source provenance"
+            python - "$RUNNER_TEMP/adblock-source-metadata.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              metadata = json.load(handle)
+          for label, key in (
+              ("Source", "source"),
+              ("DOMAIN-SET baseline", "domain_set_baseline"),
+              ("RULE-SET baseline", "rule_set_baseline"),
+          ):
+              item = metadata[key]
+              print(f"- {label}: `{item['sha256']}` — {item['url']}")
+          PY
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Test and validate generated output
         run: |
           set -euo pipefail
@@ -74,6 +95,9 @@ jobs:
             --strict \
             --github-annotations \
             --json-out validation-report.json
+          python scripts/check_module_compatibility.py
+          python scripts/check_biliuniverse.py --timeout 30
+          python scripts/check_upstreams.py --timeout 15 --retries 2
           git diff --check
 
       - name: Detect generated changes
@@ -111,6 +135,7 @@ jobs:
           fi
 
       - name: Commit and fast-forward main
+        id: publish
         if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
@@ -147,8 +172,32 @@ jobs:
           fi
 
           git push origin "HEAD:refs/heads/${BASE_BRANCH}"
+          echo "published_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "Published verified generated files to main." \
             >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke-test the immutable published Raw files
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          PUBLISHED_SHA: ${{ steps.publish.outputs.published_sha }}
+        run: |
+          set -euo pipefail
+
+          for attempt in 1 2 3 4 5
+          do
+            if python scripts/check_upstreams.py \
+              --local-only \
+              --config-ref "$PUBLISHED_SHA" \
+              --timeout 15 \
+              --retries 2
+            then
+              echo "Published commit Raw smoke test passed." \
+                >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep $((attempt * 10))
+          done
+          exit 1
 
       - name: Queue bounded automatic retry
         if: ${{ failure() && !cancelled() }}

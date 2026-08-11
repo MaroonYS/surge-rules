@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +94,69 @@ class AdblockBuildTests(unittest.TestCase):
             sync_adblock4limbo.parse_ruleset_domains(
                 "DOMAIN-SUFFIX,example.com,REJECT\n"
             )
+
+    def test_write_ignores_provenance_only_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.conf"
+            baseline = root / "baseline.conf"
+            ruleset_baseline = root / "ruleset.conf"
+            output = root / "output.conf"
+            metadata = root / "metadata.json"
+            source.write_text(
+                "DOMAIN-SUFFIX,keep.example,reject\n",
+                encoding="utf-8",
+            )
+            baseline.write_text(".unrelated.example\n", encoding="utf-8")
+            ruleset_baseline.write_text(
+                "DOMAIN-SUFFIX,also-unrelated.example\n",
+                encoding="utf-8",
+            )
+            original = "# stale volatile hash\n.keep.example\n"
+            output.write_text(original, encoding="utf-8")
+
+            real_write_text = Path.write_text
+            written_paths: list[Path] = []
+
+            def tracked_write(path: Path, *args: object, **kwargs: object) -> int:
+                written_paths.append(path)
+                return real_write_text(path, *args, **kwargs)
+
+            with mock.patch.object(Path, "write_text", tracked_write):
+                result = sync_adblock4limbo.main(
+                    [
+                        "--write",
+                        "--source-file",
+                        str(source),
+                        "--baseline-file",
+                        str(baseline),
+                        "--ruleset-baseline-file",
+                        str(ruleset_baseline),
+                        "--output",
+                        str(output),
+                        "--metadata-json",
+                        str(metadata),
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual(original, output.read_text(encoding="utf-8"))
+            self.assertNotIn(output, written_paths)
+            self.assertIn(metadata, written_paths)
+            recorded = json.loads(metadata.read_text(encoding="utf-8"))
+            self.assertEqual(
+                sync_adblock4limbo.SOURCE_URL,
+                recorded["source"]["url"],
+            )
+            self.assertRegex(recorded["source"]["sha256"], r"^[0-9a-f]{64}$")
+
+    def test_rendered_header_has_no_volatile_hashes(self) -> None:
+        rendered, _ = sync_adblock4limbo.build(
+            "DOMAIN-SUFFIX,keep.example,reject\n",
+            ".unrelated.example\n",
+            "DOMAIN-SUFFIX,also-unrelated.example\n",
+        )
+        self.assertNotIn("SHA-256:", rendered)
 
 
 if __name__ == "__main__":

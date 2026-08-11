@@ -7,6 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "sync-adblock4limbo.yml"
+WORKFLOWS = ROOT / ".github" / "workflows"
+DEPENDABOT = ROOT / ".github" / "dependabot.yml"
 
 
 class AdblockWorkflowTests(unittest.TestCase):
@@ -21,17 +23,24 @@ class AdblockWorkflowTests(unittest.TestCase):
             "actions: write",
             "contents: write",
             "ref: main",
-            "python scripts/sync_adblock4limbo.py --write --timeout 30",
+            "python scripts/sync_adblock4limbo.py \\",
+            '--metadata-json "$RUNNER_TEMP/adblock-source-metadata.json"',
+            "Adblock4limbo source provenance",
             "for attempt in 1 2 3",
             "sleep $((attempt * 15))",
             "python scripts/build_expanded.py --write",
             "python -m unittest discover -s tests -v",
             "python scripts/build_expanded.py --check",
             "--strict",
+            "python scripts/check_module_compatibility.py",
+            "python scripts/check_biliuniverse.py --timeout 30",
+            "python scripts/check_upstreams.py --timeout 15 --retries 2",
             "git diff --check",
             "git diff --name-only",
             "git fetch --no-tags origin \"$BASE_BRANCH\"",
             'git push origin "HEAD:refs/heads/${BASE_BRANCH}"',
+            "Smoke-test the immutable published Raw files",
+            '--config-ref "$PUBLISHED_SHA"',
             "Queue bounded automatic retry",
             "if: ${{ failure() && !cancelled() }}",
             "gh workflow run sync-adblock4limbo.yml",
@@ -48,15 +57,19 @@ class AdblockWorkflowTests(unittest.TestCase):
         self.assertRegex(
             text,
             r"- name: Commit and fast-forward main\n"
+            r"\s+id: publish\n"
             r"\s+if: steps\.changes\.outputs\.changed == 'true'",
         )
 
         ordered_markers = (
-            "python scripts/sync_adblock4limbo.py --write --timeout 30",
+            "python scripts/sync_adblock4limbo.py \\",
             "python scripts/build_expanded.py --write",
             "python -m unittest discover -s tests -v",
             "python scripts/build_expanded.py --check",
             "python scripts/validate.py",
+            "python scripts/check_module_compatibility.py",
+            "python scripts/check_biliuniverse.py --timeout 30",
+            "python scripts/check_upstreams.py --timeout 15 --retries 2",
             "git diff --check",
             "git add --",
             "git commit -m \"chore: refresh Adblock4limbo supplement\"",
@@ -89,6 +102,21 @@ class AdblockWorkflowTests(unittest.TestCase):
             text,
         )
         self.assertIn("Unexpected staged files:", text)
+
+    def test_all_actions_are_immutable_and_dependabot_tracks_them(self) -> None:
+        action_refs: list[str] = []
+        for workflow in WORKFLOWS.glob("*.yml"):
+            text = workflow.read_text(encoding="utf-8")
+            action_refs.extend(
+                re.findall(r"^\s*uses:\s*([^\s#]+)", text, flags=re.MULTILINE)
+            )
+        self.assertGreater(len(action_refs), 0)
+        for action_ref in action_refs:
+            self.assertRegex(action_ref, r"^[^@]+@[0-9a-f]{40}$")
+
+        dependabot = DEPENDABOT.read_text(encoding="utf-8")
+        self.assertIn("package-ecosystem: github-actions", dependabot)
+        self.assertIn("interval: weekly", dependabot)
 
 
 if __name__ == "__main__":

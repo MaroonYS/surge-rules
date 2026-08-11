@@ -6,6 +6,8 @@
   in the Actions summary and no longer rewrite or commit an unchanged effective supplement.
 - Added a machine-readable retained-module compatibility manifest and checker for the exact
   21 Apple MITM hosts used by iRingo, WLOC and DualSubs Apple TV handling.
+- Documented separate evidence-based Mac and iPhone module orders while preserving all
+  retained modules and their device-specific DNS winner.
 - Hardened synchronization CI with the full validation, module-compatibility, BiliUniverse,
   upstream and immutable published-commit Raw checks before/after publication.
 - Pinned every third-party GitHub Action to a full commit SHA and enabled weekly Dependabot

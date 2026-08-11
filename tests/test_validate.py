@@ -228,6 +228,8 @@ class RuleSetSyntaxTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "local.conf").write_text(
+                "DOMAIN,buy.itunes.apple.com\n"
+                "DOMAIN-WILDCARD,*-buy.itunes.apple.com\n"
                 "DOMAIN-SUFFIX,example.com\n"
                 "IP-CIDR,192.0.2.0/24,no-resolve\n"
                 "AND,((PROTOCOL,UDP),(DEST-PORT,19302-19309),"
@@ -241,12 +243,48 @@ class RuleSetSyntaxTests(unittest.TestCase):
                 diagnostics,
             )
 
-        self.assertEqual(3, len(entries))
+        self.assertEqual(5, len(entries))
         self.assertEqual(
-            ["DOMAIN-SUFFIX", "IP-CIDR", "AND"],
+            [
+                "DOMAIN",
+                "DOMAIN-WILDCARD",
+                "DOMAIN-SUFFIX",
+                "IP-CIDR",
+                "AND",
+            ],
             [entry.rule_type for entry in entries],
         )
         self.assertEqual([], diagnostics)
+
+    def test_domain_wildcard_validation_is_strict(self) -> None:
+        valid = (
+            "DOMAIN-WILDCARD,*-buy.itunes.apple.com",
+            "DOMAIN-WILDCARD,api-??.example.com",
+            "DOMAIN-WILDCARD,*.example.com",
+        )
+        for rule in valid:
+            with self.subTest(rule=rule):
+                rule_type, problem = validate.validate_policy_free_rule(rule)
+                self.assertEqual("DOMAIN-WILDCARD", rule_type)
+                self.assertIsNone(problem)
+
+        invalid = {
+            "DOMAIN-WILDCARD,*": "at least two",
+            "DOMAIN-WILDCARD,*.com": "too broad",
+            "DOMAIN-WILDCARD,*.*": "too broad",
+            "DOMAIN-WILDCARD,*.apple.com": "too broad",
+            "DOMAIN-WILDCARD,API-*.example.com": "lowercase",
+            "DOMAIN-WILDCARD,https://*.example.com": "URLs",
+            "DOMAIN-WILDCARD,example.com": "must contain",
+            "DOMAIN-WILDCARD,*-buy.itunes.apple.com,DIRECT": (
+                "embedded policy"
+            ),
+        }
+        for rule, expected in invalid.items():
+            with self.subTest(rule=rule):
+                rule_type, problem = validate.validate_policy_free_rule(rule)
+                self.assertIsNone(rule_type)
+                self.assertIn(expected, problem or "")
 
     def test_embedded_policy_is_rejected(self) -> None:
         rule_type, problem = validate.validate_policy_free_rule(
@@ -295,7 +333,11 @@ class RepositoryTests(unittest.TestCase):
             report["files"]["domain_set"] + report["files"]["rule_set"],
         )
         self.assertEqual(
-            {"google-voice-media-rules.conf", "apple-push-rules.conf"},
+            {
+                "apple-account-payment-rules.conf",
+                "apple-push-rules.conf",
+                "google-voice-media-rules.conf",
+            },
             {
                 binding.file
                 for binding in result.bindings

@@ -138,6 +138,7 @@ LOCAL_RULE_TYPES = {
     "DEST-PORT",
     "DOMAIN",
     "DOMAIN-SUFFIX",
+    "DOMAIN-WILDCARD",
     "IP-CIDR",
     "IP-CIDR6",
     "PROTOCOL",
@@ -429,6 +430,37 @@ def validate_domain(raw: str) -> str | None:
     return None
 
 
+def validate_domain_wildcard(raw: str) -> str | None:
+    """Return an error for an unsafe DOMAIN-WILDCARD matcher, else None."""
+    if not any(character in raw for character in "*?"):
+        return "DOMAIN-WILDCARD matcher must contain * or ?"
+
+    literalized = raw.replace("*", "a").replace("?", "a")
+    problem = validate_domain(literalized)
+    if problem:
+        return problem
+
+    labels = raw.split(".")
+    fixed_suffix_labels: list[str] = []
+    for label in reversed(labels):
+        if "*" in label or "?" in label:
+            break
+        fixed_suffix_labels.append(label)
+    if len(fixed_suffix_labels) < 2:
+        return (
+            "DOMAIN-WILDCARD matcher is too broad; "
+            "at least two fixed suffix labels are required"
+        )
+
+    fixed_suffix = ".".join(reversed(fixed_suffix_labels))
+    wildcard_prefix = labels[: -len(fixed_suffix_labels)]
+    if fixed_suffix in FORBIDDEN_SUFFIXES and all(
+        set(label) <= {"*", "?"} for label in wildcard_prefix
+    ):
+        return f"wildcard suffix is too broad for precise routing: {raw}"
+    return None
+
+
 def parse_domain_set(
     root: Path,
     relative: str,
@@ -621,6 +653,10 @@ def validate_policy_free_rule(raw: str) -> tuple[str | None, str | None]:
         if matcher.startswith("."):
             return None, "DOMAIN matcher must not start with a dot"
         problem = validate_domain(matcher)
+        if problem:
+            return None, problem
+    elif rule_type == "DOMAIN-WILDCARD":
+        problem = validate_domain_wildcard(matcher)
         if problem:
             return None, problem
     elif rule_type == "DOMAIN-SUFFIX":

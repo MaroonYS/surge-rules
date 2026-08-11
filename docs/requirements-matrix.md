@@ -11,7 +11,7 @@
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |
 | 5 | 中国大陆银行 | `direct-cn.conf`，24 条，`DIRECT`；跨地区的 `bankofchina.com` 与宽泛 `.icbc.com` 不在此强制直连 |
 | 6 | 分地区金融 | HK 第一方 41、当前账户香港共享上下文 26、SG 21、JP 15、KR 10、UK 20，策略逐一固定；香港上下文覆盖 HSBC HK、Futu/Moomoo HK 与 Longbridge HK |
-| 7 | 美国住宅出口 | `us-residential.conf`，119 条；包括 Apple Cash/Pay、美国第一方金融、PayPal 及 4 个明确启用的美国身份/清算服务 |
+| 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 2 条规则覆盖精确账单根域及实测动态 `*-buy` 分片族；随后 `us-residential.conf` 119 条覆盖 Apple Cash/Pay、美国第一方金融、PayPal 及 4 个明确启用的美国身份/清算服务 |
 | 8 | 跨地区金融、身份与风控 | Finance 41、Identity 20、Risk 8；语义顺序固定为 Finance → Identity → Risk，运行时统一固定 `Res-Frontier` |
 | 9 | 中心化交易所 | `bybit.conf` 2 条先补齐 Bybit 已证实 App/API 域并进入独立受支持地区 `Bybit`，再加载 `crypto.conf` 14 条到 `Crypto` |
 | 10 | Web3 | `web3.conf`，168 条有效语义，`Web3` |

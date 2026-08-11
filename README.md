@@ -17,6 +17,8 @@
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
 - 将当前账户使用的 HSBC HK、Futu/Moomoo HK 与 Longbridge HK 共享基础设施固定到香港金融上下文。
 - 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
+- 用机器可读模块兼容清单固定全部保留模块所需的 21 个 Apple MITM 前置主机，
+  不从第三方脚本自动扩域。
 - 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
 
 Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合大量域名：
@@ -114,6 +116,7 @@ python3 scripts/validate.py --strict
 python3 scripts/build_expanded.py --check
 python3 -m unittest discover -s tests -v
 python3 scripts/check_biliuniverse.py --timeout 30
+python3 scripts/check_module_compatibility.py
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
 ```
 
@@ -147,6 +150,10 @@ python3 scripts/validate.py \
 python3 scripts/sync_adblock4limbo.py --write
 python3 scripts/sync_adblock4limbo.py --check
 ```
+
+同步器只在补集的有效规则发生变化时重写文件。上游与两个 SKK 基线的 SHA-256
+属于易变来源元数据，不再写入受版本控制的规则头；自动化会把它们写入 Actions
+Summary，避免“只有来源哈希变化”触发无意义提交。
 
 `check_upstreams.py` 会读取完整正文并检查 HTTPS、内容类型、UTF-8、
 Deprecated 标记、空文件、SKK 哨兵占位及外部 RULE-SET 的策略列，不再只探测 URL。

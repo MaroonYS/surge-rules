@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Made the daily Adblock synchronization semantic-only: volatile source hashes are reported
+  in the Actions summary and no longer rewrite or commit an unchanged effective supplement.
+- Added a machine-readable retained-module compatibility manifest and checker for the exact
+  21 Apple MITM hosts used by iRingo, WLOC and DualSubs Apple TV handling.
+- Hardened synchronization CI with the full validation, module-compatibility, BiliUniverse,
+  upstream and immutable published-commit Raw checks before/after publication.
+- Pinned every third-party GitHub Action to a full commit SHA and enabled weekly Dependabot
+  updates for GitHub Actions.
+- Removed obsolete copy-ready policy-group snippets that conflict with fixed-policy profiles;
+  Git history remains the archive for those inactive examples.
 - Aligned the canonical Rule, contract, manifest and generated expanded file with the
   fixed-policy profile: service traffic now uses existing residential or country groups
   instead of sixteen additional wrapper groups.

@@ -14,6 +14,7 @@ Surge 会把模块规则放到主 Profile 规则之前；模块的启用状态�
 - 只对实际保留模块的精确 Apple 主机开启 MITM。下列 21 项必须位于
   `-*.apple.com`、`-*.itunes.com` 等负向通配之前：
 
+<!-- module-compatibility:positive-hosts:start -->
 ```text
 weatherkit.apple.com
 gspe1-ssl.ls.apple.com
@@ -36,6 +37,16 @@ news-client-search.apple.com
 hls.itunes.apple.com
 hls-svod.itunes.apple.com
 vod-*.tv.apple.com
+```
+<!-- module-compatibility:positive-hosts:end -->
+
+这 21 项的模块归属和负项顺序同时记录在根目录的
+`module-compatibility.json`。该清单只固化当前实际模块依赖，不从脚本正则或网络请求
+自动猜测新域名。仓库检查器验证清单、本文和可选“修改后配置”三者一致：
+
+```bash
+python3 scripts/check_module_compatibility.py
+python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 ```
 
 - 不额外加入 `play.itunes.apple.com` 或 `play-edge.itunes.apple.com`。iRingo TV 先在

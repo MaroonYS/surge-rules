@@ -35,6 +35,14 @@ class RuleContractTests(unittest.TestCase):
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
 
+    def test_ntp_direct_precedes_google_voice_and_stun(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        ntp = "DEST-PORT,123,DIRECT"
+        voice = "/google-voice.conf,Res-Frontier,extended-matching"
+        stun = "PROTOCOL,STUN,REJECT"
+        self.assertLess(main.index(ntp), main.index(voice))
+        self.assertLess(main.index(ntp), main.index(stun))
+
     def test_google_voice_media_precedes_global_stun_block(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         control = (

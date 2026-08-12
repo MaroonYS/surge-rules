@@ -55,7 +55,7 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 - Apple 精确正项之后继续保留 Apple 通配负项、金融/KYC/风控负项和
   `-<ip-address>`。`api5.futunn.com` 没有对应的活动处理脚本，不应为了广域 MITM
   清单而解除券商端点保护。
-- Google Voice 的控制面和媒体例外必须位于全局 `PROTOCOL,STUN,REJECT` 之前。
+- NTP/UDP 123 必须先固定 `DIRECT`；Google Voice 的控制面和媒体例外必须位于全局 `PROTOCOL,STUN,REJECT` 之前。
   全局 STUN 拦截是隐私选择；改为 `DIRECT` 会恢复其他 WebRTC/游戏打洞，但也可能
   暴露公网地址，两种目标不能同时保证。
 - 主 Profile 不再复制 Sukka/Fries 模块注入的 `[Host]`、`always-real-ip` 或
@@ -106,7 +106,7 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 - 多套 HTTPDNS 模块存在相同的 pre-matching 拒绝，Sukka 与 Fries 还会对
   `dot.pub`、`doh.pub`、`doh.360.cn` 注入不同 Host 值。主 `[Host]` 排在模块之后，
   无法删除前面的条目；添加第三份只会增加歧义。
-- 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库 59 条主 Rule。
+- 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库 61 条主 Rule。
   被模块先行拒绝的连接不能再由 GitHub `DOMAIN-SET,DIRECT` 救回。
 - 一个前置模块已经产生最终 REJECT 时，后置模块的 Rewrite/Script 不再执行。这不等于
   后置模块整体失效，但意味着“全部模块的每一条声明都执行”在逻辑上不可实现。

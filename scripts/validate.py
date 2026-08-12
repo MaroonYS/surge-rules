@@ -1236,6 +1236,7 @@ def validate_main_rules(
         )
 
     anchors = [
+        ("NTP", lambda value: value == "DEST-PORT,123,DIRECT"),
         ("STUN", lambda value: value == "PROTOCOL,STUN,REJECT"),
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
         ("LAN", lambda value: value.startswith("RULE-SET,LAN,")),

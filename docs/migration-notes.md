@@ -37,7 +37,7 @@
 
 ## 有意调整
 
-- 按 17 段契约保留 `PROTOCOL,STUN,REJECT`。
+- 按 17 段契约保留 `PROTOCOL,STUN,REJECT`，并在其前将 NTP/UDP 123 固定 `DIRECT`，避免系统时间同步误入普通代理。
 - 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
   `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享
   Reject、Streaming、CDN 与 Global 规则命中。

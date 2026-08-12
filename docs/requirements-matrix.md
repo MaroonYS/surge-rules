@@ -5,7 +5,7 @@
 
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
-| 1 | Google Voice、STUN、MTProto、Telegram、LAN | Google Voice 的页面/控制域固定 `Res-Frontier`，STUN 域和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`，全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
+| 1 | NTP、Google Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`，避免 Apple 与系统时间同步误入不支持该协议的代理；Google Voice 的页面/控制域固定 `Res-Frontier`，STUN 域和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`，全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
 | 2 | 特殊服务最优先 | Bilibili 的 3 个精确视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；随后是 Polymarket 的 4 个精确目标，全部位于共享 Reject/CDN 规则之前 |
 | 3 | iCloud Private Relay | SKK DOMAIN-SET 固定到普通 `United States` 节点，不使用住宅 SOCKS5 |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |

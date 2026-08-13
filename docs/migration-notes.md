@@ -1,7 +1,8 @@
 # Migration notes
 
 本仓库的规则数据来自配置所有者提供的 555 行 `[Rule]` 清单，并按语义角色拆分。
-当前固定策略版不再为这些角色各建一个策略组；`rules-manifest.json` 用
+当前配置不再为每个语义角色创建策略组；仅 Identity/Risk 共享一个
+手动 `Verification` 组。`rules-manifest.json` 用
 `semantic_role` 保留验证边界，用 `policy` 记录实际运行出口。
 
 ## 已迁移覆盖
@@ -17,7 +18,7 @@
 | `UK-FINANCE` | `uk-finance.conf` | 全部迁移 |
 | `Res-Frontier` | `polymarket.conf`、`us-residential.conf` | Polymarket（含实测 S3 上传主机）；美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
-| `Identity` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层 |
+| `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；运行时共用 `Verification` |
 | `Bybit` / `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立限定受支持地区；其余中心化交易所保留通用手动组 |
 | `Web3` | `web3.conf` | 全部有效语义迁移 |
 | `AIGC` | `apple-ai.conf` | 全部迁移；运行时固定 `United States` |
@@ -54,12 +55,13 @@
   `pingan.com` 收窄为 `bank.pingan.com`。
 - 美国住宅文件移除共享清算、身份、征信及反欺诈基础设施，补充 11 个第一方区域银行。
 - KYC/身份验证与设备指纹/反欺诈供应商不混入 Finance 语义文件，分别进入
-  `identity-context.conf` 与 `risk-context.conf`；三个语义层运行时统一固定
-  `Res-Frontier`。
+  `identity-context.conf` 与 `risk-context.conf`；Finance 运行时固定 `Res-Frontier`，
+  Identity/Risk 共用 `Verification`，由用户手动选择与当次合规业务一致的组。
 - Identity 删除宽泛 `.persona.com`，保留产品域 `.withpersona.com`；Risk 收窄为
   8 个设备情报、设备信誉、行为生物识别与指纹域名。
-- 固定策略版不再保留 `Identity` 包装组，避免登录过程中误切出口；相关请求直接使用
-  `Res-Frontier`，不进入 Smart、url-test 或 load-balance。
+- `Verification` 只允许 `Res-Frontier`、`Bybit`、`Crypto`、`Web3` 与 `REJECT`
+  手动候选；默认保持现有美国金融使用的 `Res-Frontier`，不进入 Smart、url-test 或
+  load-balance。加密业务验证前必须手动切到对应业务组，避免验证过程静默跨国。
 - HSBC HK、Futu/Moomoo HK 与 Longbridge HK 的共享基础设施从
   `finance-context.conf` 移入 `hk-finance-context.conf`，避免当前账户误走美国住宅。
 - Bybit 从通用 `Crypto` 拆为独立策略；只有账户本人真实且受支持

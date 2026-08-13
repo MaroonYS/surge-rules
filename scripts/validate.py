@@ -31,7 +31,13 @@ FORBIDDEN_SUFFIXES = {
     "microsoft.com",
 }
 ALLOWED_KEYWORD_RULES: set[str] = set()
-SENSITIVE_POLICIES = {"Finance", "Identity", "Risk", "Res-Frontier"}
+SENSITIVE_POLICIES = {
+    "Finance",
+    "Identity",
+    "Risk",
+    "Verification",
+    "Res-Frontier",
+}
 ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("us-residential.conf", "Res-Frontier", "apexclearing.com"),
     ("us-residential.conf", "Res-Frontier", "earlywarning.com"),
@@ -41,6 +47,7 @@ ALLOWED_SENSITIVE_SHARED_SUFFIX_ENTRIES = {
     ("identity-context.conf", "Identity", "socure.co"),
     ("identity-context.conf", "Identity", "withpersona.com"),
     ("identity-context.conf", "Identity", "jumio.com"),
+    ("identity-context.conf", "Identity", "jumio.ai"),
     ("identity-context.conf", "Identity", "netverify.com"),
     ("identity-context.conf", "Identity", "onfido.com"),
     ("identity-context.conf", "Identity", "trulioo.com"),
@@ -95,6 +102,7 @@ SHARED_INFRASTRUCTURE_SUFFIXES = {
     "incognia.com",
     "iovation.com",
     "iovation.io",
+    "jumio.ai",
     "jumio.com",
     "lexisnexisrisk.com",
     "login.gov",

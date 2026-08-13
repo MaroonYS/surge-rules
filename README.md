@@ -11,6 +11,7 @@
 - 仅恢复淘宝/天猫品牌互动页依赖的 mini-app 运行时，不对整个淘宝广告域放行。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
 - 在全局 STUN 拦截前精确放行 Google Voice 的控制与媒体通道。
+- 将 Google Account 登录、账户管理与 OAuth 控制面收口到稳定住宅出口。
 - 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出。
 - 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
 - 将 Google Voice 与 APNs 的逻辑 `AND` 规则移入独立、无策略列的远程 `RULE-SET`。
@@ -36,6 +37,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
+| `google-account.conf` | `Res-Frontier` | Google Account 登录、账户管理与 OAuth 控制面 |
 | `google-voice.conf` | `Res-Frontier` | Google Voice 页面、信令与呼叫控制 |
 | `google-voice-media.conf` | `DIRECT` | Google Voice STUN 主机 |
 | `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
@@ -50,11 +52,11 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `uk-finance.conf` | `United Kingdom` | 英国金融 |
-| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account/App Store 账单根域与动态 `*-buy` 分片 |
+| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account 登录控制面、App Store 账单根域与动态 `*-buy` 分片 |
 | `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
-| `identity-context.conf` | `Res-Frontier` | KYC 与身份验证服务 |
-| `risk-context.conf` | `Res-Frontier` | 保守的设备情报与指纹服务活动集 |
+| `identity-context.conf` | `Verification` | KYC 与身份验证服务 |
+| `risk-context.conf` | `Verification` | 保守的设备情报与指纹服务活动集 |
 | `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
@@ -68,12 +70,12 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 1. 确认现有配置已经定义主 Rule 使用的固定策略：`Res-Frontier`、`PROXY`、
    `Hong Kong`、`Singapore`、`Japan`、`Korea`、`United Kingdom`、
-   `United States`、`Bybit`、`Crypto` 与 `Web3`。
+   `United States`、`Bybit`、`Crypto`、`Web3` 与 `Verification`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 25 个远程本仓库规则文件（22 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 26 个远程本仓库规则文件（23 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 25 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 26 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -101,8 +103,9 @@ https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
 Private Relay 与 Apple Intelligence 固定使用普通 `United States` 节点；住宅
 SOCKS5 不参与 Private Relay 的 UDP/QUIC 路径。
 Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
-`us-residential.conf`；Apple Account 账单根域与动态 `*-buy.itunes.apple.com`
-分片单独收录在 `apple-account-payment-rules.conf`。两层均命中
+`us-residential.conf`；Apple Account 的 4 个精确登录控制主机、账单根域与动态
+`*-buy.itunes.apple.com` 分片单独收录在
+`apple-account-payment-rules.conf`。两层均命中
 `Res-Frontier`，但不扩大到整个 Apple/iTunes 或共享 Braintree 基础设施。
 这些服务本身并非天然只属于美国。
 
@@ -135,7 +138,7 @@ python3 scripts/check_profile_policies.py \
   --profile /path/to/profile.conf \
   --require-stable \
   Res-Frontier PROXY "Hong Kong" Singapore Japan Korea \
-  "United Kingdom" "United States" Bybit Crypto Web3
+  "United Kingdom" "United States" Bybit Crypto Web3 Verification
 ```
 
 该检查器也可将 Surge 导出的“修改后配置”同时作为 `--profile` 和
@@ -198,7 +201,11 @@ SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → 
 ## Identity 与 Risk 的边界
 
 跨地区第一方金融、KYC/身份验证、设备情报与指纹服务仍分别保留 Finance、Identity、
-Risk 三个语义层，但运行时直接固定到 `Res-Frontier`，不再为它们创建额外策略组。
+Risk 三个语义层。Finance 继续固定到 `Res-Frontier`；Identity 与 Risk 在运行时统一
+进入手动 `Verification` 组，以便与当次 Bybit、Crypto 或 Web3 业务保持同一合规地区出口。
+`Verification` 默认保持 `Res-Frontier`，以延续现有美国金融流程；进行 Bybit、Crypto
+或 Web3 的登录、实名与高风险操作前，应手动选择对应业务组，也可用 `REJECT` 暂停共享
+验证域。它不能自动判断调用 App，也不应用于伪装账户地区。
 `rules-manifest.json` 的 `semantic_role` 继续让校验器按原边界检查。宽泛 Persona 根域和
 通用反欺诈 SaaS 不在活动文件中；
 验证码等未列入活动文件的共享服务仍按实际日志精确补充。
@@ -209,7 +216,9 @@ Risk 三个语义层，但运行时直接固定到 `Res-Frontier`，不再为它
 
 ## 实时通信与 Apple 连续互通
 
-Google Voice 的页面、信令和呼叫控制固定到 `Res-Frontier`；精确 STUN 主机以及
+Google Account 的 6 个精确登录、管理与 OAuth 主机在 Google Voice 之前固定到
+`Res-Frontier`。Google Voice 的页面、信令和呼叫控制同样固定到
+`Res-Frontier`；5 个精确 STUN 主机以及
 Google Workspace Voice 官方公布的 UDP 端口和专用 IP 段固定到 `DIRECT`，其他
 STUN 仍保持拒绝。该配置基于当前用户网络已完成的直连拨号 A/B；它会形成
 美国控制面与本地媒体面的出口分离。若直连媒体异常，只切换

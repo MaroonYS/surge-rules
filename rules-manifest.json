@@ -6,6 +6,12 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "google-account.conf",
+      "policy": "Res-Frontier",
+      "semantic_role": "Google-Account",
+      "description": "Google Account sign-in, account management and OAuth control-plane hosts"
+    },
+    {
       "file": "google-voice.conf",
       "policy": "Res-Frontier",
       "semantic_role": "GoogleVoice-Control",
@@ -15,7 +21,7 @@
       "file": "google-voice-media.conf",
       "policy": "DIRECT",
       "semantic_role": "GoogleVoice-Media",
-      "description": "Google Voice STUN host routed with the Workspace-published UDP media path"
+      "description": "Google Voice STUN hosts routed with the Workspace-published UDP media path"
     },
     {
       "file": "google-voice-media-rules.conf",
@@ -91,7 +97,7 @@
       "type": "RULE-SET",
       "policy": "Res-Frontier",
       "semantic_role": "Apple-Account-Payment",
-      "description": "Observed Apple Account and App Store billing control-plane shards"
+      "description": "Apple Account sign-in and App Store billing control-plane hosts"
     },
     {
       "file": "us-residential.conf",
@@ -106,13 +112,13 @@
     },
     {
       "file": "identity-context.conf",
-      "policy": "Res-Frontier",
+      "policy": "Verification",
       "semantic_role": "Identity",
       "description": "Shared KYC and identity verification services"
     },
     {
       "file": "risk-context.conf",
-      "policy": "Res-Frontier",
+      "policy": "Verification",
       "semantic_role": "Risk",
       "description": "Conservative shared device intelligence and fingerprinting set"
     },

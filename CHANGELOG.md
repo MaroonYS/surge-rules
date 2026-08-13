@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Added a six-host Google Account sign-in/account/OAuth DOMAIN-SET ahead of Google Voice
+  and kept both control planes on `Res-Frontier`.
+- Expanded the narrow Apple Account payment RULE-SET with four exact sign-in control-plane
+  hosts while retaining the exact billing root and dynamic `*-buy` shard family.
+- Completed the direct Google Voice STUN host family (`stun` and `stun1` through `stun4`),
+  added Jumio's current `.jumio.ai` namespace and WalletConnect's `.walletconnect.network`.
+- Routed shared Identity and Risk layers through one manual `Verification` policy while
+  preserving their distinct validation semantics and the existing US-finance default.
 - Kept Apple Account PayPal linking on one United States residential path with a narrow
   RULE-SET for the exact billing root and observed dynamic `*-buy.itunes.apple.com` shard family,
   without widening the rule to shared Apple, iTunes or Braintree infrastructure.

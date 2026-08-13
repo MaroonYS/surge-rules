@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fixed X account, API, Money, redirect, static-media and Live first-party traffic to the
+  residential path without widening X MITM, and documented that routing cannot replace
+  X Money identity or residency eligibility.
+- Added Gate's current first-party `gate.com`, `gate.io` and `gateio.ws` namespaces to a
+  dedicated fail-closed set because every currently available jurisdiction is restricted,
+  preventing silent fallback through the generic proxy policy.
 - Added a six-host Google Account sign-in/account/OAuth DOMAIN-SET ahead of Google Voice
   and kept both control planes on `Res-Frontier`.
 - Expanded the narrow Apple Account payment RULE-SET with four exact sign-in control-plane

@@ -1,7 +1,7 @@
 # Domain source notes
 
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
-登记册用于确认机构身份，具体主机以机构官网为最终依据。核对日期：2026-07-30。
+登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；X/Gate 补充核对日期：2026-08-13。
 
 ## 监管目录
 
@@ -83,3 +83,20 @@ Apple Account 绑定 PayPal 的登录与账单控制面会使用
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名被移动到
 `hk-finance-context.conf` 并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。
+
+## X 与 Gate 的当前第一方命名空间
+
+- X 官方 API 文档使用 `api.x.com`，官方帮助文档分别确认
+  [`t.co` 链接缩短](https://help.x.com/en/using-x/url-shortener)、
+  [`twimg.com` 媒体](https://help.x.com/en/using-x/x-videos) 以及
+  [X Live / Periscope](https://help.x.com/en/using-x/periscope-faq) 的现行关系。
+  因此 `x-residential.conf` 只收录 `.x.com`、`.twitter.com`、`.t.co`、
+  `.twimg.com`、`.pscp.tv`、`.periscope.tv`，不猜测 `xpayments.com`
+  或共享第三方 KYC/银行联接域。
+- [X Money FAQ](https://money.x.com/en/i/faq) 明确要求真实美国居民、
+  已验证美国手机号和身份验证。路由绑定只用于稳定出口，不代替开户资格。
+- [Gate API v4 官方文档](https://www.gate.com/docs/developers/apiv4/en/)
+  在 `gate.com` 发布并明确列出 `api.gateio.ws` 与 `fx-api.gateio.ws`
+  生产 API；`.gateio.ws` 因此与 `.gate.io` 一并进入 `gate.conf`。
+  Gate 当前受限地区清单覆盖本配置的全部非美候选，所以该文件先固定
+  `REJECT`，而不是把已知受限地区包装成“全功能”线路。

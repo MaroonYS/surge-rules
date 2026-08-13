@@ -6,6 +6,12 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "x-residential.conf",
+      "policy": "Res-Frontier",
+      "semantic_role": "X-Residential",
+      "description": "X account, API, Money, redirects, static media and Live first-party domains"
+    },
+    {
       "file": "google-account.conf",
       "policy": "Res-Frontier",
       "semantic_role": "Google-Account",
@@ -126,6 +132,12 @@
       "file": "bybit.conf",
       "policy": "Bybit",
       "description": "Bybit first-party application and documented API domains"
+    },
+    {
+      "file": "gate.conf",
+      "policy": "REJECT",
+      "semantic_role": "Gate",
+      "description": "Gate first-party website and production API namespaces, failed closed while every available jurisdiction is restricted"
     },
     {
       "file": "crypto.conf",

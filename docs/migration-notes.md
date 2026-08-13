@@ -9,6 +9,7 @@
 
 | 来源策略 / 语义角色 | 仓库位置 | 处理 |
 | --- | --- | --- |
+| `Res-Frontier`（X） | `x-residential.conf` | X 第一方账户、API、Money、跳转、媒体与 Live 统一住宅出口 |
 | `DIRECT` | `direct-cn.conf` | 中国大陆银行与银联迁移 |
 | `DIRECT`（Bilibili） | `bilibili-direct.conf` | 原宽泛关键词收窄为 3 个视频 CDN 后缀并恢复前置优先级 |
 | `HK-FINANCE` | `hk-finance.conf`、`hk-finance-context.conf` | 香港第一方域名迁移；当前账户的香港汇丰及香港券商共享基础设施从跨地区集合固定到香港上下文 |
@@ -19,7 +20,7 @@
 | `Res-Frontier` | `polymarket.conf`、`us-residential.conf` | Polymarket（含实测 S3 上传主机）；美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
 | `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；运行时共用 `Verification` |
-| `Bybit` / `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立限定受支持地区；其余中心化交易所保留通用手动组 |
+| `Bybit` / Gate / `Crypto` | `bybit.conf`、`gate.conf`、`crypto.conf` | Bybit 独立限定受支持地区；Gate 在现有候选全部受限时失败关闭；其余中心化交易所保留通用手动组 |
 | `Web3` | `web3.conf` | 全部有效语义迁移 |
 | `AIGC` | `apple-ai.conf` | 全部迁移；运行时固定 `United States` |
 
@@ -39,6 +40,8 @@
 ## 有意调整
 
 - 按 17 段契约保留 `PROTOCOL,STUN,REJECT`，并在其前将 NTP/UDP 123 固定 `DIRECT`，避免系统时间同步误入普通代理。
+- X 六个第一方后缀在 Google/Reject/CDN/Global 之前固定住宅出口；不扩大 X MITM，也不把路由当作 X Money 居住或身份资格。
+- Gate 的 `.gate.com`、`.gate.io`、`.gateio.ws` 单独失败关闭，因当前可选地区全在其官方受限清单；它不再漏入 `PROXY`，也不伪装成“全功能”节点。
 - 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
   `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享
   Reject、Streaming、CDN 与 Global 规则命中。

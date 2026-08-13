@@ -56,8 +56,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account 登录控制面、App Store 账单根域与动态 `*-buy` 分片 |
 | `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
 | `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
-| `identity-context.conf` | `Verification` | KYC 与身份验证服务 |
-| `risk-context.conf` | `Verification` | 保守的设备情报与指纹服务活动集 |
+| `identity-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户 KYC 与身份验证服务 |
+| `risk-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户设备情报与指纹服务 |
 | `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
 | `gate.conf` | `REJECT` | Gate 当前官网/API；现有候选地区全部受限时失败关闭 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
@@ -72,7 +72,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 1. 确认现有配置已经定义主 Rule 使用的固定策略：`Res-Frontier`、`PROXY`、
    `Hong Kong`、`Singapore`、`Japan`、`Korea`、`United Kingdom`、
-   `United States`、`Bybit`、`Crypto`、`Web3` 与 `Verification`。
+   `United States`、`Bybit`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
    - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
@@ -140,7 +140,7 @@ python3 scripts/check_profile_policies.py \
   --profile /path/to/profile.conf \
   --require-stable \
   Res-Frontier PROXY "Hong Kong" Singapore Japan Korea \
-  "United Kingdom" "United States" Bybit Crypto Web3 Verification
+  "United Kingdom" "United States" Bybit Crypto Web3
 ```
 
 该检查器也可将 Surge 导出的“修改后配置”同时作为 `--profile` 和
@@ -203,15 +203,18 @@ SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → 
 ## Identity 与 Risk 的边界
 
 跨地区第一方金融、KYC/身份验证、设备情报与指纹服务仍分别保留 Finance、Identity、
-Risk 三个语义层。Finance 继续固定到 `Res-Frontier`；Identity 与 Risk 在运行时统一
-进入手动 `Verification` 组，以便与当次 Bybit、Crypto 或 Web3 业务保持同一合规地区出口。
-`Verification` 默认保持 `Res-Frontier`，以延续现有美国金融流程；候选还包括 Bybit、
-Crypto、Web3、Hong Kong、Singapore、Japan、Korea、United Kingdom 与 `REJECT`，使
-加密业务和地区银行验证可以与第一方流量保持同一合规地区。iOS 可用 Surge 的快捷指令
-动作在打开敏感 App 时进行粘性切换，但不应在离开 App 时复位，以免跳转 Safari、相机或
-第三方 KYC 页面时中途换出口。它不能自动判断共享域的调用 App，也不应用于伪装账户地区。
-长期应依据真实请求日志，把可以证明租户归属的精确 hostname 放在共享 Identity/Risk
-后缀之前；无法证明归属的域仍由 `Verification` 保守兜底。
+Risk 三个语义层。三层运行时均固定到 `Res-Frontier`，不再需要手动切换验证上下文，
+也不会因自动测速或可用性检查改变账户出口。
+
+中国、香港、新加坡、日本、韩国与英国银行的第一方集合仍先命中并固定到各自的
+`DIRECT` 或地区策略；Bybit、Crypto 与 Web3 第一方集合也继续使用各自的非美策略。
+Identity/Risk 中的根域属于共享多租户基础设施，仅凭 SNI/Host 无法判断调用它的是哪家
+银行、交易所或钱包，因此住宅出口是明确的“美国金融优先”确定性兜底，并不宣称共享
+KYC 会自动继承前一个业务请求的策略。
+
+长期应依据真实请求日志，把能够证明租户归属的精确 hostname 放在共享 Identity/Risk
+后缀之前，并直接指向对应银行地区、Bybit、Crypto 或 Web3；未经证明的共享根域不得
+复制到业务集合中。
 `rules-manifest.json` 的 `semantic_role` 继续让校验器按原边界检查。宽泛 Persona 根域和
 通用反欺诈 SaaS 不在活动文件中；
 验证码等未列入活动文件的共享服务仍按实际日志精确补充。

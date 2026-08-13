@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 import tempfile
@@ -27,6 +28,51 @@ class RuleContractTests(unittest.TestCase):
             )
             result = validate.validate_repository(copied)
         return {item.code for item in result.diagnostics}
+
+    def test_financial_and_crypto_runtime_policies_are_fully_static(self) -> None:
+        manifest = json.loads(
+            (ROOT / "rules-manifest.json").read_text(encoding="utf-8")
+        )
+        policies = {
+            entry["file"]: entry["policy"] for entry in manifest["active"]
+        }
+        self.assertEqual(
+            {
+                "direct-cn.conf": "DIRECT",
+                "hk-finance.conf": "Hong Kong",
+                "hk-finance-context.conf": "Hong Kong",
+                "sg-finance.conf": "Singapore",
+                "jp-finance.conf": "Japan",
+                "kr-finance.conf": "Korea",
+                "uk-finance.conf": "United Kingdom",
+                "us-residential.conf": "Res-Frontier",
+                "finance-context.conf": "Res-Frontier",
+                "identity-context.conf": "Res-Frontier",
+                "risk-context.conf": "Res-Frontier",
+                "bybit.conf": "Bybit",
+                "gate.conf": "REJECT",
+                "crypto.conf": "Crypto",
+                "web3.conf": "Web3",
+            },
+            {name: policies[name] for name in (
+                "direct-cn.conf",
+                "hk-finance.conf",
+                "hk-finance-context.conf",
+                "sg-finance.conf",
+                "jp-finance.conf",
+                "kr-finance.conf",
+                "uk-finance.conf",
+                "us-residential.conf",
+                "finance-context.conf",
+                "identity-context.conf",
+                "risk-context.conf",
+                "bybit.conf",
+                "gate.conf",
+                "crypto.conf",
+                "web3.conf",
+            )},
+        )
+        self.assertNotIn("Verification", policies.values())
 
     def test_removing_stun_rule_fails_contract(self) -> None:
         codes = self.validate_modified_main(
@@ -354,22 +400,15 @@ class RuleContractTests(unittest.TestCase):
 
         hk_context = '/hk-finance-context.conf,"Hong Kong",extended-matching'
         finance = "/finance-context.conf,Res-Frontier,extended-matching"
-        identity = "/identity-context.conf,Verification,extended-matching"
-        risk = "/risk-context.conf,Verification,extended-matching"
+        identity = "/identity-context.conf,Res-Frontier,extended-matching"
+        risk = "/risk-context.conf,Res-Frontier,extended-matching"
         crypto = "/crypto.conf,Crypto,extended-matching"
         positions = [
             main.index(fragment)
             for fragment in (hk_context, finance, identity, risk, crypto)
         ]
         self.assertEqual(sorted(positions), positions)
-        self.assertNotIn(
-            "/identity-context.conf,Res-Frontier,extended-matching",
-            main,
-        )
-        self.assertNotIn(
-            "/risk-context.conf,Res-Frontier,extended-matching",
-            main,
-        )
+        self.assertNotIn("Verification", main)
 
         hk_context_entries = active_entries("hk-finance-context.conf")
         self.assertTrue(

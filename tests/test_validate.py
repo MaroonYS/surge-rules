@@ -222,10 +222,10 @@ class SemanticTests(unittest.TestCase):
             [item.code for item in diagnostics],
         )
 
-    def test_verification_runtime_policy_is_sensitive(self) -> None:
+    def test_residential_runtime_policy_is_sensitive(self) -> None:
         diagnostics: list[validate.Diagnostic] = []
         validate.detect_shared_infrastructure(
-            [self.entry("unscoped.conf", 1, ".jumio.ai", "Verification")],
+            [self.entry("unscoped.conf", 1, ".jumio.ai", "Res-Frontier")],
             diagnostics,
         )
         self.assertEqual(
@@ -420,7 +420,7 @@ class RepositoryTests(unittest.TestCase):
                 "active": [
                     {
                         "file": "identity.conf",
-                        "policy": "Verification",
+                        "policy": "Res-Frontier",
                         "semantic_role": "Identity",
                     },
                     {"file": "direct.conf", "policy": "DIRECT"},
@@ -433,7 +433,7 @@ class RepositoryTests(unittest.TestCase):
             *_, bindings = validate.load_manifest(root)
 
         self.assertEqual(
-            [("Verification", "Identity"), ("DIRECT", "DIRECT")],
+            [("Res-Frontier", "Identity"), ("DIRECT", "DIRECT")],
             [(binding.policy, binding.semantic_policy) for binding in bindings],
         )
         self.assertEqual(

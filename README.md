@@ -205,9 +205,13 @@ SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → 
 跨地区第一方金融、KYC/身份验证、设备情报与指纹服务仍分别保留 Finance、Identity、
 Risk 三个语义层。Finance 继续固定到 `Res-Frontier`；Identity 与 Risk 在运行时统一
 进入手动 `Verification` 组，以便与当次 Bybit、Crypto 或 Web3 业务保持同一合规地区出口。
-`Verification` 默认保持 `Res-Frontier`，以延续现有美国金融流程；进行 Bybit、Crypto
-或 Web3 的登录、实名与高风险操作前，应手动选择对应业务组，也可用 `REJECT` 暂停共享
-验证域。它不能自动判断调用 App，也不应用于伪装账户地区。
+`Verification` 默认保持 `Res-Frontier`，以延续现有美国金融流程；候选还包括 Bybit、
+Crypto、Web3、Hong Kong、Singapore、Japan、Korea、United Kingdom 与 `REJECT`，使
+加密业务和地区银行验证可以与第一方流量保持同一合规地区。iOS 可用 Surge 的快捷指令
+动作在打开敏感 App 时进行粘性切换，但不应在离开 App 时复位，以免跳转 Safari、相机或
+第三方 KYC 页面时中途换出口。它不能自动判断共享域的调用 App，也不应用于伪装账户地区。
+长期应依据真实请求日志，把可以证明租户归属的精确 hostname 放在共享 Identity/Risk
+后缀之前；无法证明归属的域仍由 `Verification` 保守兜底。
 `rules-manifest.json` 的 `semantic_role` 继续让校验器按原边界检查。宽泛 Persona 根域和
 通用反欺诈 SaaS 不在活动文件中；
 验证码等未列入活动文件的共享服务仍按实际日志精确补充。

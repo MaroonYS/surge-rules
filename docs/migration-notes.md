@@ -62,9 +62,11 @@
   Identity/Risk 共用 `Verification`，由用户手动选择与当次合规业务一致的组。
 - Identity 删除宽泛 `.persona.com`，保留产品域 `.withpersona.com`；Risk 收窄为
   8 个设备情报、设备信誉、行为生物识别与指纹域名。
-- `Verification` 只允许 `Res-Frontier`、`Bybit`、`Crypto`、`Web3` 与 `REJECT`
-  手动候选；默认保持现有美国金融使用的 `Res-Frontier`，不进入 Smart、url-test 或
-  load-balance。加密业务验证前必须手动切到对应业务组，避免验证过程静默跨国。
+- `Verification` 允许 `Res-Frontier`、`Bybit`、`Crypto`、`Web3`、`Hong Kong`、
+  `Singapore`、`Japan`、`Korea`、`United Kingdom` 与 `REJECT` 手动候选；默认保持
+  现有美国金融使用的 `Res-Frontier`，不进入 Smart、url-test 或 load-balance。iOS 可
+  通过打开敏感 App 时的粘性快捷指令切换对应上下文，但不在离开 App 时自动复位；共享
+  KYC 域仍无法由 iOS 可靠识别调用 App。
 - HSBC HK、Futu/Moomoo HK 与 Longbridge HK 的共享基础设施从
   `finance-context.conf` 移入 `hk-finance-context.conf`，避免当前账户误走美国住宅。
 - Bybit 从通用 `Crypto` 拆为独立策略；只有账户本人真实且受支持

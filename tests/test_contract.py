@@ -35,12 +35,32 @@ class RuleContractTests(unittest.TestCase):
         )
         self.assertIn("RULE_CONTRACT_MISMATCH", codes)
 
-    def test_ntp_direct_precedes_google_voice_and_stun(self) -> None:
+    def test_ntp_and_google_account_precede_google_voice_and_stun(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         ntp = "DEST-PORT,123,DIRECT"
+        google_account = "/google-account.conf,Res-Frontier,extended-matching"
         voice = "/google-voice.conf,Res-Frontier,extended-matching"
         stun = "PROTOCOL,STUN,REJECT"
+        self.assertEqual(
+            {
+                "accounts.google.com",
+                "myaccount.google.com",
+                "oauth2.googleapis.com",
+                "oauthaccountmanager.googleapis.com",
+                "openidconnect.googleapis.com",
+                "oauth-redirect.googleusercontent.com",
+            },
+            {
+                line
+                for line in (ROOT / "google-account.conf").read_text(
+                    encoding="utf-8"
+                ).splitlines()
+                if line and not line.startswith("#")
+            },
+        )
         self.assertLess(main.index(ntp), main.index(voice))
+        self.assertLess(main.index(ntp), main.index(google_account))
+        self.assertLess(main.index(google_account), main.index(voice))
         self.assertLess(main.index(ntp), main.index(stun))
 
     def test_google_voice_media_precedes_global_stun_block(self) -> None:
@@ -93,7 +113,13 @@ class RuleContractTests(unittest.TestCase):
             if line and not line.startswith("#")
         }
         self.assertEqual(
-            {"stun.l.google.com"},
+            {
+                "stun.l.google.com",
+                "stun1.l.google.com",
+                "stun2.l.google.com",
+                "stun3.l.google.com",
+                "stun4.l.google.com",
+            },
             media_entries,
         )
         remote_media_rules = [
@@ -234,6 +260,10 @@ class RuleContractTests(unittest.TestCase):
         }
         self.assertEqual(
             {
+                "DOMAIN,account.apple.com",
+                "DOMAIN,appleid.cdn-apple.com",
+                "DOMAIN,idmsa.apple.com",
+                "DOMAIN,gsa.apple.com",
                 "DOMAIN,buy.itunes.apple.com",
                 "DOMAIN-WILDCARD,*-buy.itunes.apple.com",
             },
@@ -252,6 +282,7 @@ class RuleContractTests(unittest.TestCase):
             ".socure.co",
             ".withpersona.com",
             ".jumio.com",
+            ".jumio.ai",
             ".netverify.com",
             ".onfido.com",
             ".trulioo.com",
@@ -292,14 +323,22 @@ class RuleContractTests(unittest.TestCase):
 
         hk_context = '/hk-finance-context.conf,"Hong Kong",extended-matching'
         finance = "/finance-context.conf,Res-Frontier,extended-matching"
-        identity = "/identity-context.conf,Res-Frontier,extended-matching"
-        risk = "/risk-context.conf,Res-Frontier,extended-matching"
+        identity = "/identity-context.conf,Verification,extended-matching"
+        risk = "/risk-context.conf,Verification,extended-matching"
         crypto = "/crypto.conf,Crypto,extended-matching"
         positions = [
             main.index(fragment)
             for fragment in (hk_context, finance, identity, risk, crypto)
         ]
         self.assertEqual(sorted(positions), positions)
+        self.assertNotIn(
+            "/identity-context.conf,Res-Frontier,extended-matching",
+            main,
+        )
+        self.assertNotIn(
+            "/risk-context.conf,Res-Frontier,extended-matching",
+            main,
+        )
 
         hk_context_entries = active_entries("hk-finance-context.conf")
         self.assertTrue(
@@ -327,6 +366,22 @@ class RuleContractTests(unittest.TestCase):
         self.assertLess(
             main.index("/bybit.conf,Bybit,extended-matching"),
             main.index("/crypto.conf,Crypto,extended-matching"),
+        )
+
+    def test_walletconnect_current_namespace_is_in_web3(self) -> None:
+        entries = {
+            line
+            for line in (ROOT / "web3.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertTrue(
+            {
+                ".walletconnect.com",
+                ".walletconnect.network",
+                ".walletconnect.org",
+            }.issubset(entries)
         )
 
     def test_apple_push_override_precedes_system(self) -> None:

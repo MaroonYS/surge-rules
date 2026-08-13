@@ -165,6 +165,7 @@ class SemanticTests(unittest.TestCase):
                         "socure.co",
                         "withpersona.com",
                         "jumio.com",
+                        "jumio.ai",
                         "netverify.com",
                         "onfido.com",
                         "trulioo.com",
@@ -214,6 +215,17 @@ class SemanticTests(unittest.TestCase):
                     "Identity",
                 )
             ],
+            diagnostics,
+        )
+        self.assertEqual(
+            ["SHARED_INFRASTRUCTURE"],
+            [item.code for item in diagnostics],
+        )
+
+    def test_verification_runtime_policy_is_sensitive(self) -> None:
+        diagnostics: list[validate.Diagnostic] = []
+        validate.detect_shared_infrastructure(
+            [self.entry("unscoped.conf", 1, ".jumio.ai", "Verification")],
             diagnostics,
         )
         self.assertEqual(
@@ -408,7 +420,7 @@ class RepositoryTests(unittest.TestCase):
                 "active": [
                     {
                         "file": "identity.conf",
-                        "policy": "Res-Frontier",
+                        "policy": "Verification",
                         "semantic_role": "Identity",
                     },
                     {"file": "direct.conf", "policy": "DIRECT"},
@@ -421,7 +433,7 @@ class RepositoryTests(unittest.TestCase):
             *_, bindings = validate.load_manifest(root)
 
         self.assertEqual(
-            [("Res-Frontier", "Identity"), ("DIRECT", "DIRECT")],
+            [("Verification", "Identity"), ("DIRECT", "DIRECT")],
             [(binding.policy, binding.semantic_policy) for binding in bindings],
         )
         self.assertEqual(

@@ -66,14 +66,16 @@ URL 路径选择国家，因此该根域保留在 Finance 语义文件并固定�
 Apple Pay 与 PayPal 是跨地区服务。本仓库仅因配置所有者明确使用美国账户而将其
 放入 `Res-Frontier`；其他账户地区不应照搬这一选择。
 
-Apple Account 绑定 PayPal 的账单控制面会使用 `p*-buy.itunes.apple.com`。配置所有者
+Apple Account 绑定 PayPal 的登录与账单控制面会使用
+`account.apple.com`、`appleid.cdn-apple.com`、`idmsa.apple.com`、`gsa.apple.com` 以及
+`p*-buy.itunes.apple.com`。配置所有者
 的 Surge 会话在 2026-08-09 与 2026-08-11 观察到
 `p100-buy.itunes.apple.com` 经 `DIRECT` 返回空 DNS 结果，同时 PayPal 主链经
 `Res-Frontier`，形成同一授权流程的出口分裂。由于 `p100-buy` 是完整 DNS 标签，
-普通后缀 `.buy.itunes.apple.com` 无法命中；因此使用独立 RULE-SET 中的根域
-`DOMAIN` 与精确 `DOMAIN-WILDCARD,*-buy.itunes.apple.com`，使动态分片与 PayPal
+普通后缀 `.buy.itunes.apple.com` 无法命中；因此使用独立 RULE-SET 中的 5 条精确
+`DOMAIN` 与 `DOMAIN-WILDCARD,*-buy.itunes.apple.com`，使登录与动态分片与 PayPal
 保持同一住宅出口；
-不加入 `.apple.com`、`.itunes.apple.com`、Apple ID 通用登录域或共享 Braintree
+不加入 `.apple.com`、`.itunes.apple.com`、其他 Apple ID 通用域或共享 Braintree
 基础设施。美国 Apple Account 当前支持 PayPal，但账户地区、账单资料和支付服务商
 验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
 

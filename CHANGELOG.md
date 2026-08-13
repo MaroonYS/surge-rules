@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Expanded the manual `Verification` context with Hong Kong, Singapore, Japan, Korea and
+  United Kingdom country groups, so regional-bank KYC can retain the same jurisdiction as
+  its first-party traffic instead of falling back to the United States residential path.
+- Documented sticky app-open automation as an optional iOS convenience layer while keeping
+  exact observed tenant hostnames ahead of shared KYC/risk suffixes as the long-term design.
 - Fixed X account, API, Money, redirect, static-media and Live first-party traffic to the
   residential path without widening X MITM, and documented that routing cannot replace
   X Money identity or residency eligibility.

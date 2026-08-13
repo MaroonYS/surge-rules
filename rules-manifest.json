@@ -118,15 +118,15 @@
     },
     {
       "file": "identity-context.conf",
-      "policy": "Verification",
+      "policy": "Res-Frontier",
       "semantic_role": "Identity",
-      "description": "Shared KYC and identity verification services"
+      "description": "Shared multi-tenant KYC and identity services using the deterministic United States residential fallback"
     },
     {
       "file": "risk-context.conf",
-      "policy": "Verification",
+      "policy": "Res-Frontier",
       "semantic_role": "Risk",
-      "description": "Conservative shared device intelligence and fingerprinting set"
+      "description": "Shared multi-tenant device intelligence and fingerprinting services using the deterministic United States residential fallback"
     },
     {
       "file": "bybit.conf",

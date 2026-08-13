@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- Expanded the manual `Verification` context with Hong Kong, Singapore, Japan, Korea and
-  United Kingdom country groups, so regional-bank KYC can retain the same jurisdiction as
-  its first-party traffic instead of falling back to the United States residential path.
-- Documented sticky app-open automation as an optional iOS convenience layer while keeping
-  exact observed tenant hostnames ahead of shared KYC/risk suffixes as the long-term design.
+- Replaced the manual `Verification` selector with deterministic rule routing: shared
+  Identity and Risk infrastructure now uses `Res-Frontier`, while regional banks,
+  Bybit, Crypto and Web3 retain their earlier first-party country or business policies.
+- Documented that multi-tenant KYC roots cannot infer the calling app and may only be
+  overridden by evidence-backed tenant-specific hostnames placed before the shared fallback.
 - Fixed X account, API, Money, redirect, static-media and Live first-party traffic to the
   residential path without widening X MITM, and documented that routing cannot replace
   X Money identity or residency eligibility.
@@ -19,8 +19,6 @@
   hosts while retaining the exact billing root and dynamic `*-buy` shard family.
 - Completed the direct Google Voice STUN host family (`stun` and `stun1` through `stun4`),
   added Jumio's current `.jumio.ai` namespace and WalletConnect's `.walletconnect.network`.
-- Routed shared Identity and Risk layers through one manual `Verification` policy while
-  preserving their distinct validation semantics and the existing US-finance default.
 - Kept Apple Account PayPal linking on one United States residential path with a narrow
   RULE-SET for the exact billing root and observed dynamic `*-buy.itunes.apple.com` shard family,
   without widening the rule to shared Apple, iTunes or Braintree infrastructure.

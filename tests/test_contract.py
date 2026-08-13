@@ -38,6 +38,7 @@ class RuleContractTests(unittest.TestCase):
     def test_ntp_and_google_account_precede_google_voice_and_stun(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         ntp = "DEST-PORT,123,DIRECT"
+        x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
         google_account = "/google-account.conf,Res-Frontier,extended-matching"
         voice = "/google-voice.conf,Res-Frontier,extended-matching"
         stun = "PROTOCOL,STUN,REJECT"
@@ -59,9 +60,39 @@ class RuleContractTests(unittest.TestCase):
             },
         )
         self.assertLess(main.index(ntp), main.index(voice))
+        self.assertLess(main.index(ntp), main.index(x_residential))
+        self.assertLess(main.index(x_residential), main.index(google_account))
         self.assertLess(main.index(ntp), main.index(google_account))
         self.assertLess(main.index(google_account), main.index(voice))
         self.assertLess(main.index(ntp), main.index(stun))
+
+    def test_x_first_party_surface_uses_early_residential_route(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        entries = {
+            line
+            for line in (ROOT / "x-residential.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertEqual(
+            {
+                ".x.com",
+                ".twitter.com",
+                ".twimg.com",
+                ".t.co",
+                ".pscp.tv",
+                ".periscope.tv",
+            },
+            entries,
+        )
+        x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
+        reject = "/domainset/reject.conf,REJECT,extended-matching"
+        cdn = "/domainset/cdn.conf,PROXY"
+        global_rule = "/non_ip/global.conf,PROXY"
+        self.assertLess(main.index(x_residential), main.index(reject))
+        self.assertLess(main.index(x_residential), main.index(cdn))
+        self.assertLess(main.index(x_residential), main.index(global_rule))
 
     def test_google_voice_media_precedes_global_stun_block(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -367,6 +398,29 @@ class RuleContractTests(unittest.TestCase):
             main.index("/bybit.conf,Bybit,extended-matching"),
             main.index("/crypto.conf,Crypto,extended-matching"),
         )
+
+    def test_gate_current_namespaces_fail_closed_before_crypto(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        gate_entries = {
+            line
+            for line in (ROOT / "gate.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        crypto_entries = {
+            line
+            for line in (ROOT / "crypto.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        expected_gate = {".gate.com", ".gate.io", ".gateio.ws"}
+        self.assertEqual(expected_gate, gate_entries)
+        self.assertTrue(expected_gate.isdisjoint(crypto_entries))
+        gate = "/gate.conf,REJECT,extended-matching"
+        crypto = "/crypto.conf,Crypto,extended-matching"
+        self.assertLess(main.index(gate), main.index(crypto))
 
     def test_walletconnect_current_namespace_is_in_web3(self) -> None:
         entries = {

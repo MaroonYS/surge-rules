@@ -37,6 +37,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
+| `x-residential.conf` | `Res-Frontier` | X 账户、API、Money、跳转、媒体与 Live 第一方域 |
 | `google-account.conf` | `Res-Frontier` | Google Account 登录、账户管理与 OAuth 控制面 |
 | `google-voice.conf` | `Res-Frontier` | Google Voice 页面、信令与呼叫控制 |
 | `google-voice-media.conf` | `DIRECT` | Google Voice STUN 主机 |
@@ -58,6 +59,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `identity-context.conf` | `Verification` | KYC 与身份验证服务 |
 | `risk-context.conf` | `Verification` | 保守的设备情报与指纹服务活动集 |
 | `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
+| `gate.conf` | `REJECT` | Gate 当前官网/API；现有候选地区全部受限时失败关闭 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
@@ -73,9 +75,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Bybit`、`Crypto`、`Web3` 与 `Verification`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 26 个远程本仓库规则文件（23 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 26 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 28 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -213,6 +215,25 @@ Risk 三个语义层。Finance 继续固定到 `Res-Frontier`；Identity 与 Ris
 本仓库只负责分流结构与规则数据，不包含节点、代理凭据或订阅。
 它不能保证银行或支付服务不触发风控；稳定、固定的账户地区和正常使用行为
 比持续扩大共享验证规则更重要。
+
+## X 与加密业务边界
+
+X 的 `x.com`、`twitter.com`、`t.co`、`twimg.com`、`pscp.tv` 与
+`periscope.tv` 第一方后缀统一固定到 `Res-Frontier`，并先于 Reject、CDN、
+Global 与 FINAL 匹配。这会让账户、Money、API、静态媒体和 Live 共用同一
+住宅出口，但也会让媒体放弃 QUIC，在 TCP/HTTP2 上运行。不扩大 X 的 MITM；
+X Money 子域不受只匹配精确 `x.com` Timeline 端点的网页去广告脚本处理。
+
+X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美国居民、
+已验证的美国手机号及身份验证；住宅 IP 只能减少出口漂移，不能替代
+这些资格。以 [X Money FAQ](https://money.x.com/en/i/faq) 为准。
+
+`Bybit`、`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
+Gate 当前的 `gate.com`、`gate.io` 与 `gateio.ws` 命名空间单独进入
+`REJECT`，因为当前可选的英国、韩国、日本、香港、新加坡均在 Gate 受限清单。
+这既避免 API 落入普通 `PROXY`，也不伪装成“全功能”线路；以后只能在具备与
+真实账户/KYC 一致的受支持地区节点后，再建立独立 Gate 策略。其他交易所同样
+必须使用与真实账户/KYC 地区一致且受支持的节点。
 
 ## 实时通信与 Apple 连续互通
 

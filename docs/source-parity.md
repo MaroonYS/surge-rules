@@ -67,22 +67,24 @@
 | 项目 | 净变化 | 说明 |
 | --- | ---: | --- |
 | Google Account 控制面 | +6 | 新增 6 个精确 `DOMAIN-SET` 主机 |
+| X 第一方业务 | +6 | 账户、API、Money、跳转、媒体与 Live 后缀统一住宅出口 |
 | Google Voice STUN | +4 | 在原 `stun.l.google.com` 基础上补齐 `stun1` 至 `stun4` |
 | Apple Account 控制面 | +4 | 在原 2 条账单 `RULE-SET` 规则上补 4 个精确登录主机 |
 | Identity / Web3 | +2 | 分别补 `.jumio.ai` 与 `.walletconnect.network` |
-| 当前 DOMAIN-SET 条目 | 785 | 23 个本仓库 `DOMAIN-SET` |
+| Gate 当前命名空间 | +2 | 补 `.gate.com` 与 `.gateio.ws`，避免官网/API 落入普通策略 |
+| 当前 DOMAIN-SET 条目 | 793 | 25 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 21 | 3 个无策略列 `RULE-SET` |
-| 当前活动条目 | 806 | 26 个本仓库活动文件 |
+| 当前活动条目 | 814 | 28 个本仓库活动文件 |
 
 [surge-expanded.conf](../surge-expanded.conf) 将当前自维护活动规则全部内联。
-当前远程版共加载 26 个本仓库文件：23 个域名 `DOMAIN-SET`，以及承载
+当前远程版共加载 28 个本仓库文件：25 个域名 `DOMAIN-SET`，以及承载
 Apple Account 6 条、Google Voice 5 条和 APNs 10 条逻辑规则的 3 个
 无策略列 `RULE-SET`。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：通过 26 个远程文件加载当前活动规则。
+- `surge-main.conf`：通过 28 个远程文件加载当前活动规则。
 - `surge-expanded.conf`：由生成器将同样的活动规则全部展开。
 
 两者的自维护活动规则语义一致，不能同时加载。

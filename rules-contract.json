@@ -5,6 +5,7 @@
       "title": "协议和局域网",
       "rules": [
         "DEST-PORT,123,DIRECT",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/x-residential.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-account.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media.conf,DIRECT,extended-matching",
@@ -80,6 +81,7 @@
       "title": "中心化交易所",
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Bybit,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/gate.conf,REJECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
       ]
     },

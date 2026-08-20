@@ -107,5 +107,6 @@ App API 使用无法从域名判断地区的共享基础设施，因此这些既
 
 - [Polymarket 官方地域说明](https://help.polymarket.com/en/articles/13364163-geographic-restrictions)
   明确国际 `.com` 会按请求 IP 执行地域限制；美国用户使用的是独立 `.us` 产品。
-- 因此 `.polymarket.com`、精确 Auth0 租户与上传主机固定 `DIRECT`；仅
+- 因此 `.polymarket.com`、精确 Auth0 租户与上传主机固定到当前实测可达的
+  `Hong Kong`，且仅应在与配置所有者真实所在地及账户资格一致时使用；仅
   `.polymarket.us` 固定 `Res-Frontier`。路由保持真实产品边界，不用于绕过限制。

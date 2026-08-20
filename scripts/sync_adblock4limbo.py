@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Sequence
 
 import validate
+from skk_markers import is_domain_set_marker, is_rule_set_marker
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -24,7 +25,6 @@ BASELINE_URL = "https://ruleset.skk.moe/List/domainset/reject.conf"
 RULESET_BASELINE_URL = "https://ruleset.skk.moe/List/non_ip/reject.conf"
 OUTPUT_PATH = REPOSITORY_ROOT / "adblock4limbo-supplement.conf"
 MAX_DOWNLOAD_BYTES = 16 * 1024 * 1024
-SKK_SENTINEL = "7h1s_rul35et_i5_mad3_by_5ukk4w-ruleset.skk.moe"
 # These are malformed pseudo-domains rather than registrable DNS names. Keep
 # the list explicit so upstream changes cannot silently reintroduce them.
 EXCLUDED_DOMAIN_NAMES = frozenset({"ingest.sentry", "sentry"})
@@ -122,12 +122,15 @@ def parse_adblock(text: str) -> tuple[set[DomainRule], dict[str, int]]:
 def parse_domain_set(text: str) -> tuple[set[str], set[str]]:
     exact: set[str] = set()
     suffix: set[str] = set()
+    first_effective = True
     for line_number, raw_line in enumerate(text.splitlines(), 1):
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
-        if line == SKK_SENTINEL:
+        if first_effective and is_domain_set_marker(line):
+            first_effective = False
             continue
+        first_effective = False
         domain = line[1:] if line.startswith(".") else line
         if (
             not domain
@@ -154,10 +157,15 @@ def parse_ruleset_domains(text: str) -> tuple[set[str], set[str]]:
     """Extract policy-free DOMAIN records from a mixed Surge RULE-SET."""
     exact: set[str] = set()
     suffix: set[str] = set()
+    first_effective = True
     for line_number, raw_line in enumerate(text.splitlines(), 1):
         line = raw_line.strip()
-        if not line or line.startswith("#") or line == SKK_SENTINEL:
+        if not line or line.startswith("#"):
             continue
+        if first_effective and is_rule_set_marker(line):
+            first_effective = False
+            continue
+        first_effective = False
         fields = [field.strip() for field in line.split(",")]
         rule_type = fields[0].upper()
         if rule_type not in {"DOMAIN", "DOMAIN-SUFFIX"}:
@@ -167,8 +175,6 @@ def parse_ruleset_domains(text: str) -> tuple[set[str], set[str]]:
                 f"invalid baseline RULE-SET line {line_number}: {raw_line}"
             )
         domain = fields[1].lower()
-        if domain == SKK_SENTINEL:
-            continue
         if (
             not domain
             or domain.startswith(".")

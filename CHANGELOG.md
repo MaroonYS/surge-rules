@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fixed Sukka marker rotation handling with exact historical markers and provider-shape
+  validation, preventing empty resources and real keyword rules from being misclassified.
+- Added the official ChatGPT Voice IP RULE-SET ahead of the global STUN rejection without
+  DNS expansion, and pinned the international Polymarket product to the reachability-tested
+  Hong Kong context instead of the locally poisoned or blocked direct path.
 - Split Polymarket by product: the international `.com` control plane now uses the real
   location while the separate US `.us` product retains the residential route.
 - Replaced Gate's whole-brand rejection with deterministic `DIRECT` routing so its website,

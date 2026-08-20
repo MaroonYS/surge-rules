@@ -19,14 +19,14 @@ from typing import Sequence
 from urllib.parse import urlsplit
 
 import validate as repository_validator
+from skk_markers import (
+    is_domain_set_marker,
+    is_rule_set_marker,
+    is_skk_list_url,
+)
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-SKK_SENTINEL = "7h1s_rul35et_i5_mad3_by_5ukk4w-ruleset.skk.moe"
-SKK_SENTINEL_ALIASES = (
-    "7h1s_rul35et_i5_mad3_by_5ukk4w",
-    "this_rule_set_is_made_by_sukkaw",
-)
 POLICY_TOKENS = {
     "direct",
     "proxy",
@@ -161,11 +161,6 @@ def effective_lines(text: str) -> list[str]:
     ]
 
 
-def is_skk_sentinel(line: str) -> bool:
-    normalized = line.casefold()
-    return any(alias in normalized for alias in SKK_SENTINEL_ALIASES)
-
-
 def validate_upstream_domain(raw: str) -> str | None:
     if raw != raw.casefold():
         return "domain must be lowercase"
@@ -256,9 +251,21 @@ def validate_payload(
     lines = effective_lines(text)
     if not lines:
         return 0, "resource contains no effective rules"
-    business_lines = [line for line in lines if not is_skk_sentinel(line)]
+    skk_resource = is_skk_list_url(resource.url)
+    if skk_resource:
+        marker_predicate = (
+            is_domain_set_marker
+            if resource.rule_type == "DOMAIN-SET"
+            else is_rule_set_marker
+        )
+        has_leading_marker = marker_predicate(lines[0])
+        business_lines = lines[1:] if has_leading_marker else lines
+    else:
+        has_leading_marker = False
+        business_lines = lines
+
     if not business_lines:
-        return 0, "resource contains only the SKK sentinel rule"
+        return 0, "resource contains only the SKK marker rule"
 
     if resource.rule_type == "DOMAIN-SET":
         problem = validate_domain_set(business_lines)
@@ -275,7 +282,14 @@ def validate_payload(
                         f"{local_problem}: {line!r}"
                     )
                     break
-    return len(business_lines), problem or ""
+    if problem:
+        return len(business_lines), problem
+
+    if skk_resource:
+        if not has_leading_marker:
+            return len(business_lines), "SKK List resource is missing a known marker"
+
+    return len(business_lines), ""
 
 
 def read_http(

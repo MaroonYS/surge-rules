@@ -226,7 +226,10 @@ class RuleContractTests(unittest.TestCase):
 
     def test_polymarket_uses_precise_domain_set(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        self.assertIn("/polymarket-global.conf,DIRECT,extended-matching", main)
+        self.assertIn(
+            '/polymarket-global.conf,"Hong Kong",extended-matching',
+            main,
+        )
         self.assertIn("/polymarket.conf,Res-Frontier,extended-matching", main)
         self.assertNotIn("DOMAIN-KEYWORD,polymarket", main)
         global_entries = {
@@ -272,7 +275,9 @@ class RuleContractTests(unittest.TestCase):
         )
 
         bilibili = "/bilibili-direct.conf,DIRECT,extended-matching"
-        polymarket_global = "/polymarket-global.conf,DIRECT,extended-matching"
+        polymarket_global = (
+            '/polymarket-global.conf,"Hong Kong",extended-matching'
+        )
         polymarket_us = "/polymarket.conf,Res-Frontier,extended-matching"
         reject = "/domainset/reject.conf,REJECT,extended-matching"
         cdn = "/domainset/cdn.conf,PROXY"
@@ -606,6 +611,14 @@ class RuleContractTests(unittest.TestCase):
         ]
         self.assertTrue(ip_rules)
         self.assertTrue(all(",no-resolve" not in line for line in ip_rules))
+
+    def test_chatgpt_voice_ip_rules_precede_global_stun_rejection(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        google_voice = "/google-voice-media-rules.conf,DIRECT"
+        ai = '/List/ip/ai.conf,"United States"'
+        stun = "PROTOCOL,STUN,REJECT"
+        positions = [main.index(item) for item in (google_voice, ai, stun)]
+        self.assertEqual(sorted(positions), positions)
 
 
 if __name__ == "__main__":

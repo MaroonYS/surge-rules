@@ -73,7 +73,7 @@
 | Identity / Web3 | +2 | 分别补 `.jumio.ai` 与 `.walletconnect.network` |
 | Gate 当前命名空间 | +2 | 补 `.gate.com` 与 `.gateio.ws`；保持真实地点而不整域拒绝 |
 | Capital One / Equifax | +3 | 两个 Capital One 专属 Medallia 主机与 `.myequifax.com` |
-| Polymarket 产品拆分 | 0 | 4 条不扩容，拆成国际 `DIRECT` 与美国住宅两个集合 |
+| Polymarket 产品拆分 | 0 | 4 条不扩容，拆成国际 `Hong Kong` 与美国住宅两个集合 |
 | 当前 DOMAIN-SET 条目 | 796 | 26 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 21 | 3 个无策略列 `RULE-SET` |
 | 当前活动条目 | 817 | 29 个本仓库活动文件 |

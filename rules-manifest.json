@@ -48,9 +48,9 @@
     },
     {
       "file": "polymarket-global.conf",
-      "policy": "DIRECT",
+      "policy": "Hong Kong",
       "semantic_role": "Polymarket-Global",
-      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host"
+      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host in the fixed Hong Kong context"
     },
     {
       "file": "polymarket.conf",

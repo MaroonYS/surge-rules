@@ -10,12 +10,25 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import check_upstreams  # noqa: E402
+import skk_markers  # noqa: E402
 
 
 class PayloadTests(unittest.TestCase):
     def resource(self, rule_type: str = "RULE-SET") -> check_upstreams.Resource:
         return check_upstreams.Resource(
             "https://example.com/rules.conf",
+            rule_type,
+            1,
+        )
+
+    def skk_resource(self, rule_type: str = "RULE-SET") -> check_upstreams.Resource:
+        suffix = (
+            "domainset/example.conf"
+            if rule_type == "DOMAIN-SET"
+            else "non_ip/example.conf"
+        )
+        return check_upstreams.Resource(
+            f"https://ruleset.skk.moe/List/{suffix}",
             rule_type,
             1,
         )
@@ -38,22 +51,93 @@ class PayloadTests(unittest.TestCase):
 
     def test_sentinel_only_resource_is_rejected(self) -> None:
         count, problem = check_upstreams.validate_payload(
-            self.resource(),
-            f"DOMAIN,{check_upstreams.SKK_SENTINEL}\n",
+            self.skk_resource(),
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n",
         )
         self.assertEqual(0, count)
-        self.assertIn("sentinel", problem)
+        self.assertIn("marker", problem)
 
     def test_sentinel_is_ignored_when_real_rules_exist(self) -> None:
         count, problem = check_upstreams.validate_payload(
-            self.resource(),
+            self.skk_resource(),
             (
-                f"DOMAIN,{check_upstreams.SKK_SENTINEL}\n"
+                f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
                 "IP-CIDR,192.0.2.0/24,no-resolve\n"
             ),
         )
         self.assertEqual(1, count)
         self.assertEqual("", problem)
+
+    def test_domain_set_marker_is_ignored(self) -> None:
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource("DOMAIN-SET"),
+            f"{skk_markers.CURRENT_SKK_MARKER}\n.example.com\n",
+        )
+        self.assertEqual(1, count)
+        self.assertEqual("", problem)
+
+    def test_all_known_historical_markers_are_supported(self) -> None:
+        for marker in skk_markers.SKK_MARKER_DOMAINS:
+            with self.subTest(marker=marker):
+                count, problem = check_upstreams.validate_payload(
+                    self.skk_resource(),
+                    f"DOMAIN,{marker}\nIP-CIDR,192.0.2.0/24,no-resolve\n",
+                )
+                self.assertEqual(1, count)
+                self.assertEqual("", problem)
+
+    def test_marker_like_business_rules_are_not_filtered(self) -> None:
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource(),
+            (
+                f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
+                "DOMAIN-KEYWORD,this_rule_set_is_made_by_sukkaw\n"
+            ),
+        )
+        self.assertEqual(1, count)
+        self.assertEqual("", problem)
+
+    def test_third_party_marker_domain_is_business_data(self) -> None:
+        count, problem = check_upstreams.validate_payload(
+            self.resource(),
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n",
+        )
+        self.assertEqual(1, count)
+        self.assertEqual("", problem)
+
+    def test_skk_marker_must_be_first(self) -> None:
+        marker = f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}"
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource(),
+            f"IP-CIDR,192.0.2.0/24,no-resolve\n{marker}\n",
+        )
+        self.assertEqual(2, count)
+        self.assertIn("missing", problem)
+
+    def test_later_marker_domains_remain_business_rules(self) -> None:
+        marker = f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}"
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource(),
+            f"{marker}\n{marker}\nIP-CIDR,192.0.2.0/24,no-resolve\n",
+        )
+        self.assertEqual(2, count)
+        self.assertEqual("", problem)
+
+    def test_skk_resource_requires_a_known_marker(self) -> None:
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource(),
+            "DOMAIN,unknown-marker.example\n",
+        )
+        self.assertEqual(1, count)
+        self.assertIn("missing", problem)
+
+    def test_malformed_marker_rule_is_not_hidden(self) -> None:
+        count, problem = check_upstreams.validate_payload(
+            self.skk_resource(),
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER},REJECT\n",
+        )
+        self.assertEqual(1, count)
+        self.assertIn("embedded policy", problem)
 
     def test_embedded_ruleset_policy_is_rejected(self) -> None:
         count, problem = check_upstreams.validate_payload(

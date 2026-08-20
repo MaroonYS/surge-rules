@@ -44,7 +44,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
-| `polymarket-global.conf` | `DIRECT` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
+| `polymarket-global.conf` | `Hong Kong` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 美国独立产品 |
 | `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
@@ -242,9 +242,11 @@ Gate 当前的 `gate.com`、`gate.io` 与 `gateio.ws` 固定 `DIRECT`：这不�
 错误伪装成网络故障。Gate 交易资格仍由真实所在地、账户实体和 KYC 决定；其他
 交易所同样必须使用与真实账户/KYC 地区一致且受支持的节点。
 
-Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机固定 `DIRECT`，避免
-美国住宅出口触发其官方美国 IP 限制；美国独立产品 `.polymarket.us` 才进入
-`Res-Frontier`。两者是不同产品，不能放在同一个美国规则集里。
+Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机固定到当前已实测
+可达的 `Hong Kong`；该选择仅应在与配置所有者真实所在地及账户资格一致时使用。
+美国独立产品
+`.polymarket.us` 才进入 `Res-Frontier`。两者是不同产品，不能放在同一个美国
+规则集里，也不得用该策略规避服务的地域资格要求。
 
 ## 实时通信与 Apple 连续互通
 
@@ -257,6 +259,12 @@ STUN 仍保持拒绝。该配置基于当前用户网络已完成的直连拨号
 对应三条媒体规则的策略到已实测支持 UDP Relay 的固定美国节点，无需改变页面与
 账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
 实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
+
+ChatGPT 的域名控制面继续由 SKK `non_ip/ai.conf` 固定到 `United States`；IP
+区另加载同源 `ip/ai.conf`，只补充 OpenAI 官方发布的 Voice 精确 `/32` 媒体
+地址。该规则与 Google Voice 的精确媒体例外一样前置于全局 STUN 拒绝，避免
+Voice 被迫只走 TCP 回落；每条 IP 都自带 `no-resolve`，不增加 DNS 查询，也不
+扩大普通网页或 API 的匹配范围。
 
 两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效；
 `include-apns=true` 必须与 `include-all-networks=true` 同时使用。主规则覆盖

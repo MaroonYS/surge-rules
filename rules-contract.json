@@ -10,6 +10,7 @@
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media.conf,DIRECT,extended-matching",
         "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice-media-rules.conf,DIRECT",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/ai.conf,\"United States\"",
         "PROTOCOL,STUN,REJECT",
         "PROTOCOL,MTProto,Singapore",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore",
@@ -23,7 +24,7 @@
       "rules": [
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bilibili-direct.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/taobao-functional.conf,DIRECT,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket-global.conf,DIRECT,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket-global.conf,\"Hong Kong\",extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket.conf,Res-Frontier,extended-matching"
       ]
     },

@@ -12,9 +12,60 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import sync_adblock4limbo  # noqa: E402
+import skk_markers  # noqa: E402
 
 
 class AdblockBuildTests(unittest.TestCase):
+    def test_current_skk_markers_are_not_baseline_business_domains(self) -> None:
+        exact, suffix = sync_adblock4limbo.parse_domain_set(
+            f"{skk_markers.CURRENT_SKK_MARKER}\n.example.com\n"
+        )
+        self.assertEqual(set(), exact)
+        self.assertEqual({"example.com"}, suffix)
+
+        exact, suffix = sync_adblock4limbo.parse_ruleset_domains(
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
+            "DOMAIN-SUFFIX,example.com\n"
+        )
+        self.assertEqual(set(), exact)
+        self.assertEqual({"example.com"}, suffix)
+
+    def test_marker_only_baselines_fail_closed(self) -> None:
+        with self.assertRaisesRegex(ValueError, "no usable entries"):
+            sync_adblock4limbo.parse_domain_set(
+                f"{skk_markers.CURRENT_SKK_MARKER}\n"
+            )
+        with self.assertRaisesRegex(ValueError, "no usable DOMAIN records"):
+            sync_adblock4limbo.parse_ruleset_domains(
+                f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
+            )
+
+    def test_marker_substrings_and_malformed_rules_are_not_hidden(self) -> None:
+        exact, _ = sync_adblock4limbo.parse_domain_set(
+            f"child.{skk_markers.CURRENT_SKK_MARKER}\n"
+        )
+        self.assertEqual(
+            {f"child.{skk_markers.CURRENT_SKK_MARKER}"},
+            exact,
+        )
+        with self.assertRaisesRegex(ValueError, "invalid baseline RULE-SET"):
+            sync_adblock4limbo.parse_ruleset_domains(
+                f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER},REJECT\n"
+            )
+
+    def test_only_the_leading_marker_is_provenance(self) -> None:
+        exact, _ = sync_adblock4limbo.parse_domain_set(
+            f"{skk_markers.CURRENT_SKK_MARKER}\n"
+            f"{skk_markers.CURRENT_SKK_MARKER}\n"
+        )
+        self.assertEqual({skk_markers.CURRENT_SKK_MARKER}, exact)
+
+        exact, _ = sync_adblock4limbo.parse_ruleset_domains(
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
+            f"DOMAIN,{skk_markers.CURRENT_SKK_MARKER}\n"
+        )
+        self.assertEqual({skk_markers.CURRENT_SKK_MARKER}, exact)
+
     def test_builds_minimal_policy_free_domain_set(self) -> None:
         source = "\n".join(
             [

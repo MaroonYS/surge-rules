@@ -29,7 +29,25 @@
       "-*.apple.com",
       "-apple.com",
       "-*.itunes.com",
-      "-itunes.com"
+      "-itunes.com",
+      "-capitalone.md-apis.medallia.com",
+      "-capitalone-resources.digital-cloud.medallia.com",
+      "-*.equifax.com",
+      "-equifax.com",
+      "-*.myequifax.com",
+      "-myequifax.com",
+      "-*.polymarket.com",
+      "-polymarket.com",
+      "-*.polymarket.us",
+      "-polymarket.us",
+      "-pmx-prod.us.auth0.com",
+      "-polymarket-upload.s3.us-east-2.amazonaws.com",
+      "-*.gate.com",
+      "-gate.com",
+      "-*.gate.io",
+      "-gate.io",
+      "-*.gateio.ws",
+      "-gateio.ws"
     ]
   },
   "modules": [

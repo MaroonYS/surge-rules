@@ -47,9 +47,16 @@
       "description": "Taobao/Tmall interactive mini-app runtime restored before the shared reject stack"
     },
     {
+      "file": "polymarket-global.conf",
+      "policy": "DIRECT",
+      "semantic_role": "Polymarket-Global",
+      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host"
+    },
+    {
       "file": "polymarket.conf",
       "policy": "Res-Frontier",
-      "description": "Polymarket first-party domains, exact authentication tenant and observed S3 upload host"
+      "semantic_role": "Polymarket-US",
+      "description": "Polymarket US product namespace"
     },
     {
       "file": "apple-ai.conf",
@@ -108,7 +115,7 @@
     {
       "file": "us-residential.conf",
       "policy": "Res-Frontier",
-      "description": "United States first-party financial services"
+      "description": "United States financial services plus exact, observed service-specific tenant hosts"
     },
     {
       "file": "finance-context.conf",
@@ -135,9 +142,9 @@
     },
     {
       "file": "gate.conf",
-      "policy": "REJECT",
+      "policy": "DIRECT",
       "semantic_role": "Gate",
-      "description": "Gate first-party website and production API namespaces, failed closed while every available jurisdiction is restricted"
+      "description": "Gate global website, help pages and production API namespaces using the real location"
     },
     {
       "file": "crypto.conf",

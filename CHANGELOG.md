@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Split Polymarket by product: the international `.com` control plane now uses the real
+  location while the separate US `.us` product retains the residential route.
+- Replaced Gate's whole-brand rejection with deterministic `DIRECT` routing so its website,
+  help and API return real eligibility results instead of a synthetic network failure.
+- Added the two observed Capital One Medallia tenant hosts and the official myEquifax portal
+  to the US residential set without widening shared Medallia infrastructure.
+- Added an iOS complete-routing mode (`include-all-networks=true`, `include-apns=false`) and
+  documented APNs capture as a separate, evidence-driven option.
 - Replaced the manual `Verification` selector with deterministic rule routing: shared
   Identity and Risk infrastructure now uses `Res-Frontier`, while regional banks,
   Bybit, Crypto and Web3 retain their earlier first-party country or business policies.

@@ -44,7 +44,8 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
-| `polymarket.conf` | `Res-Frontier` | Polymarket 官方域、精确 Auth0 租户及实测 S3 上传主机 |
+| `polymarket-global.conf` | `DIRECT` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
+| `polymarket.conf` | `Res-Frontier` | Polymarket 美国独立产品 |
 | `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `hk-finance.conf` | `Hong Kong` | 香港金融 |
@@ -54,12 +55,12 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `uk-finance.conf` | `United Kingdom` | 英国金融 |
 | `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account 登录控制面、App Store 账单根域与动态 `*-buy` 分片 |
-| `us-residential.conf` | `Res-Frontier` | 美国第一方金融、Apple Cash/Pay 与 PayPal |
+| `us-residential.conf` | `Res-Frontier` | 美国金融、Apple Cash/Pay、PayPal 与已实测的精确专属租户主机 |
 | `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
 | `identity-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户 KYC 与身份验证服务 |
 | `risk-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户设备情报与指纹服务 |
 | `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
-| `gate.conf` | `REJECT` | Gate 当前官网/API；现有候选地区全部受限时失败关闭 |
+| `gate.conf` | `DIRECT` | Gate 全球站、帮助页与生产 API；保留真实所在地判定 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
@@ -75,9 +76,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Bybit`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 29 个远程本仓库规则文件（26 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 28 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 29 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -236,11 +237,14 @@ X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美�
 这些资格。以 [X Money FAQ](https://money.x.com/en/i/faq) 为准。
 
 `Bybit`、`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
-Gate 当前的 `gate.com`、`gate.io` 与 `gateio.ws` 命名空间单独进入
-`REJECT`，因为当前可选的英国、韩国、日本、香港、新加坡均在 Gate 受限清单。
-这既避免 API 落入普通 `PROXY`，也不伪装成“全功能”线路；以后只能在具备与
-真实账户/KYC 一致的受支持地区节点后，再建立独立 Gate 策略。其他交易所同样
-必须使用与真实账户/KYC 地区一致且受支持的节点。
+Gate 当前的 `gate.com`、`gate.io` 与 `gateio.ws` 固定 `DIRECT`：这不会把任何
+受限地区包装成“全功能”线路，而是避免整域 `REJECT` 把官网、帮助和明确的资格
+错误伪装成网络故障。Gate 交易资格仍由真实所在地、账户实体和 KYC 决定；其他
+交易所同样必须使用与真实账户/KYC 地区一致且受支持的节点。
+
+Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机固定 `DIRECT`，避免
+美国住宅出口触发其官方美国 IP 限制；美国独立产品 `.polymarket.us` 才进入
+`Res-Frontier`。两者是不同产品，不能放在同一个美国规则集里。
 
 ## 实时通信与 Apple 连续互通
 
@@ -254,25 +258,23 @@ STUN 仍保持拒绝。该配置基于当前用户网络已完成的直连拨号
 账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
 实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
 
-两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效。蜂窝网络需要
-同时开启 `include-all-networks` 与 `include-apns`。将
-[snippets/ios-apns-capture.conf](snippets/ios-apns-capture.conf) 中的键合并到现有
-`[General]`，不要新建第二个同名段；改动后开启飞行模式数秒，让原有 APNs
-长连接断开并重建。主规则覆盖 `*.push.apple.com`、其 CNAME、Apple 公布的窄网段，
-并以 Apple 建议的整个 `17.0.0.0/8` 作为仅限 TCP 5223 的 IPv4 兜底。它不会代理
-17/8 上的普通 HTTPS 或整个 Apple 规则集。
+两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效；
+`include-apns=true` 必须与 `include-all-networks=true` 同时使用。主规则覆盖
+`*.push.apple.com`、实际 CNAME、Apple 公布的窄网段，并以 Apple 建议的
+`17.0.0.0/8` 作为仅限 TCP 5223 的 IPv4 兜底，不会代理 17/8 普通 HTTPS。
 
-Surge 官方明确警告 `include-all-networks=true` 可能影响 AirDrop。不要使用
-`include-all-networks=true`、`include-apns=false` 这个中间态：它承担 Continuity
-副作用，却没有让 APNs 进入规则系统。仓库提供两个互斥片段：
+`include-all-networks=true` 本身还能防止 App 绑定物理接口绕过 VIF，因此
+`true/false` 是有效的“业务完整接管、APNs 系统直连”模式，不是无效中间态。
+Surge 同时警告它可能影响 AirDrop、Xcode 和 USB Dashboard。仓库提供三种片段：
 
 - [ios-continuity.conf](snippets/ios-continuity.conf)：AirDrop/Handoff 优先，APNs 直连。
+- [ios-complete-routing.conf](snippets/ios-complete-routing.conf)：金融/Web3 分流完整性优先，APNs 仍由系统直连；当前推荐。
 - [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
   的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
 
-先用 Continuity 模式确认 AirDrop/Handoff；只有在多款国际 App 都不能推送时才切换
-APNs 模式。若其他推送正常，仅 Telegram 官方客户端无横幅/声音或打开 App 后才出现，
-则属于 Telegram/iOS 独立故障，不应继续扩大 Apple 代理范围。
+当前以完整业务分流为目标时使用 complete-routing；若 AirDrop/Xcode 出现问题退回
+Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。单独 Telegram
+无横幅/声音不应继续扩大 Apple 代理范围。
 
 `RULE-SET,SYSTEM,DIRECT` 保留在 Private Relay、Apple Intelligence/Siri 与 APNs
 三个精确例外之后、宽泛 Apple Services 之前。Surge 的内建 `SYSTEM` 覆盖大多数

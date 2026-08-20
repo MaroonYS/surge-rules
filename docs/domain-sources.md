@@ -1,7 +1,7 @@
 # Domain source notes
 
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
-登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；X/Gate 补充核对日期：2026-08-13。
+登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket/Gate 补充核对日期：2026-08-20。
 
 ## 监管目录
 
@@ -56,6 +56,8 @@
 | US | Early Warning | `.earlywarning.com` | [earlywarning.com](https://www.earlywarning.com/) |
 | US | ID.me | `.id.me` | [id.me](https://www.id.me/) |
 | US | Login.gov | `.login.gov` | [login.gov](https://www.login.gov/) |
+| US | Capital One Medallia 租户 | `capitalone.md-apis.medallia.com`、`capitalone-resources.digital-cloud.medallia.com` | [Medallia API hosts](https://docs.medallia.com/en/medallia-experience-cloud/integration/apis/api-hosts)；用户 Surge 会话实测 |
+| US | myEquifax 消费者门户 | `.myequifax.com` | [Equifax 官方发布](https://investor.equifax.com/news-events/press-releases/detail/101/equifax-launches-core-credit) |
 
 ## 无法靠域名自动判断的边界
 
@@ -98,5 +100,12 @@ App API 使用无法从域名判断地区的共享基础设施，因此这些既
 - [Gate API v4 官方文档](https://www.gate.com/docs/developers/apiv4/en/)
   在 `gate.com` 发布并明确列出 `api.gateio.ws` 与 `fx-api.gateio.ws`
   生产 API；`.gateio.ws` 因此与 `.gate.io` 一并进入 `gate.conf`。
-  Gate 当前受限地区清单覆盖本配置的全部非美候选，所以该文件先固定
-  `REJECT`，而不是把已知受限地区包装成“全功能”线路。
+  Gate 当前受限地区清单覆盖本配置的全部非美候选，因此不自动轮换节点；该文件
+  固定 `DIRECT`，保留真实地点并让官网/服务端返回明确的资格结果。
+
+## Polymarket 产品边界
+
+- [Polymarket 官方地域说明](https://help.polymarket.com/en/articles/13364163-geographic-restrictions)
+  明确国际 `.com` 会按请求 IP 执行地域限制；美国用户使用的是独立 `.us` 产品。
+- 因此 `.polymarket.com`、精确 Auth0 租户与上传主机固定 `DIRECT`；仅
+  `.polymarket.us` 固定 `Res-Frontier`。路由保持真实产品边界，不用于绕过限制。

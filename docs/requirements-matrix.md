@@ -6,14 +6,14 @@
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
 | 1 | NTP、X、Google Account、Google Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`；X 的 6 个第一方后缀随后固定 `Res-Frontier`；Google Account 的 6 个精确登录/管理/OAuth 主机在 Google Voice 之前固定 `Res-Frontier`；Google Voice 的页面/控制域固定 `Res-Frontier`，5 个 STUN 主机和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`，全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
-| 2 | 特殊服务最优先 | Bilibili 的 3 个精确视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；随后是 Polymarket 的 4 个精确目标，全部位于共享 Reject/CDN 规则之前 |
+| 2 | 特殊服务最优先 | Bilibili 的 3 个精确视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；Polymarket 国际 3 条固定 `DIRECT`、美国 1 条固定住宅，全部位于共享 Reject/CDN 规则之前 |
 | 3 | iCloud Private Relay | SKK DOMAIN-SET 固定到普通 `United States` 节点，不使用住宅 SOCKS5 |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |
 | 5 | 中国大陆银行 | `direct-cn.conf`，24 条，`DIRECT`；跨地区的 `bankofchina.com` 与宽泛 `.icbc.com` 不在此强制直连 |
 | 6 | 分地区金融 | HK 第一方 41、当前账户香港共享上下文 26、SG 21、JP 15、KR 10、UK 20，策略逐一固定；香港上下文覆盖 HSBC HK、Futu/Moomoo HK 与 Longbridge HK |
-| 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 6 条规则覆盖 4 个精确 Apple Account 登录控制主机、账单根域及动态 `*-buy` 分片族；随后 `us-residential.conf` 119 条覆盖 Apple Cash/Pay、美国第一方金融、PayPal 及 4 个明确启用的美国身份/清算服务 |
+| 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 6 条规则覆盖 Apple 登录与账单分片；随后 `us-residential.conf` 精确补齐 Capital One 两个专属 Medallia 租户与 myEquifax 入口，不扩大共享 Medallia 后缀 |
 | 8 | 跨地区金融、身份与风控 | Finance 41、Identity 21、Risk 8；语义顺序固定为 Finance → Identity → Risk，三层运行时均固定 `Res-Frontier`，不再依赖手动 `Verification`；地区银行与 Bybit/Crypto/Web3 的第一方规则仍在各自静态策略中，共享多租户 KYC 域明确作为美国金融优先的住宅兜底 |
-| 9 | 中心化交易所 | `bybit.conf` 2 条先补齐 Bybit 已证实 App/API 域并进入独立受支持地区 `Bybit`；Gate 的 3 个当前官网/API 后缀单独 `REJECT`，因当前全部可选地区均受限；其余 `crypto.conf` 13 条进入 `Crypto` |
+| 9 | 中心化交易所 | `bybit.conf` 2 条进入独立受支持地区 `Bybit`；Gate 的 3 个官网/API 后缀固定 `DIRECT`，保留真实地区判定与明确错误；其余 `crypto.conf` 13 条进入 `Crypto` |
 | 10 | Web3 | `web3.conf`，169 条有效语义，`Web3` |
 | 11 | Apple Push 与剩余系统服务 | APNs 的 3 个精确域/CNAME 及 10 条 TCP 5223 规则先固定到 `United States`；其后保留 `RULE-SET,SYSTEM,DIRECT` |
 | 12 | 广告和恶意域名 | reject-drop 不使用 `pre-matching`，保证前置业务规则优先；随后为 reject DOMAIN-SET → 精简补集 → reject → reject-no-drop |
@@ -34,6 +34,7 @@
 | `google-voice-media-rules.conf` | `RULE-SET` | `DIRECT` |
 | `bilibili-direct.conf` | `DOMAIN-SET` | `DIRECT` |
 | `taobao-functional.conf` | `DOMAIN-SET` | `DIRECT` |
+| `polymarket-global.conf` | `DOMAIN-SET` | `DIRECT` |
 | `polymarket.conf` | `DOMAIN-SET` | `Res-Frontier` |
 | `apple-ai.conf` | `DOMAIN-SET` | `United States` |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` |
@@ -49,7 +50,7 @@
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier`（语义角色 `Identity`） |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier`（语义角色 `Risk`） |
 | `bybit.conf` | `DOMAIN-SET` | `Bybit` |
-| `gate.conf` | `DOMAIN-SET` | `REJECT` |
+| `gate.conf` | `DOMAIN-SET` | `DIRECT` |
 | `crypto.conf` | `DOMAIN-SET` | `Crypto` |
 | `web3.conf` | `DOMAIN-SET` | `Web3` |
 | `apple-push.conf` | `DOMAIN-SET` | `United States` |

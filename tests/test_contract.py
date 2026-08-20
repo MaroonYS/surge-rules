@@ -50,7 +50,7 @@ class RuleContractTests(unittest.TestCase):
                 "identity-context.conf": "Res-Frontier",
                 "risk-context.conf": "Res-Frontier",
                 "bybit.conf": "Bybit",
-                "gate.conf": "REJECT",
+                "gate.conf": "DIRECT",
                 "crypto.conf": "Crypto",
                 "web3.conf": "Web3",
             },
@@ -226,9 +226,17 @@ class RuleContractTests(unittest.TestCase):
 
     def test_polymarket_uses_precise_domain_set(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        self.assertIn("/polymarket-global.conf,DIRECT,extended-matching", main)
         self.assertIn("/polymarket.conf,Res-Frontier,extended-matching", main)
         self.assertNotIn("DOMAIN-KEYWORD,polymarket", main)
-        entries = {
+        global_entries = {
+            line
+            for line in (ROOT / "polymarket-global.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        us_entries = {
             line
             for line in (ROOT / "polymarket.conf").read_text(
                 encoding="utf-8"
@@ -238,12 +246,12 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(
             {
                 ".polymarket.com",
-                ".polymarket.us",
                 "pmx-prod.us.auth0.com",
                 "polymarket-upload.s3.us-east-2.amazonaws.com",
             },
-            entries,
+            global_entries,
         )
+        self.assertEqual({".polymarket.us"}, us_entries)
 
     def test_bilibili_uses_early_precise_domain_set(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -264,10 +272,14 @@ class RuleContractTests(unittest.TestCase):
         )
 
         bilibili = "/bilibili-direct.conf,DIRECT,extended-matching"
-        polymarket = "/polymarket.conf,Res-Frontier,extended-matching"
+        polymarket_global = "/polymarket-global.conf,DIRECT,extended-matching"
+        polymarket_us = "/polymarket.conf,Res-Frontier,extended-matching"
         reject = "/domainset/reject.conf,REJECT,extended-matching"
         cdn = "/domainset/cdn.conf,PROXY"
-        positions = [main.index(item) for item in (bilibili, polymarket, reject, cdn)]
+        positions = [
+            main.index(item)
+            for item in (bilibili, polymarket_global, polymarket_us, reject, cdn)
+        ]
         self.assertEqual(sorted(positions), positions)
         self.assertNotIn("DOMAIN-KEYWORD,bilivideo", main)
 
@@ -326,8 +338,12 @@ class RuleContractTests(unittest.TestCase):
                 ".earlywarning.com",
                 ".id.me",
                 ".login.gov",
+                ".myequifax.com",
+                "capitalone.md-apis.medallia.com",
+                "capitalone-resources.digital-cloud.medallia.com",
             }.issubset(us_residential)
         )
+        self.assertNotIn(".medallia.com", us_residential)
         payment_rules = {
             line
             for line in (ROOT / "apple-account-payment-rules.conf").read_text(
@@ -438,7 +454,7 @@ class RuleContractTests(unittest.TestCase):
             main.index("/crypto.conf,Crypto,extended-matching"),
         )
 
-    def test_gate_current_namespaces_fail_closed_before_crypto(self) -> None:
+    def test_gate_current_namespaces_use_real_location_before_crypto(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         gate_entries = {
             line
@@ -457,7 +473,7 @@ class RuleContractTests(unittest.TestCase):
         expected_gate = {".gate.com", ".gate.io", ".gateio.ws"}
         self.assertEqual(expected_gate, gate_entries)
         self.assertTrue(expected_gate.isdisjoint(crypto_entries))
-        gate = "/gate.conf,REJECT,extended-matching"
+        gate = "/gate.conf,DIRECT,extended-matching"
         crypto = "/crypto.conf,Crypto,extended-matching"
         self.assertLess(main.index(gate), main.index(crypto))
 
@@ -552,6 +568,9 @@ class RuleContractTests(unittest.TestCase):
         continuity = (ROOT / "snippets" / "ios-continuity.conf").read_text(
             encoding="utf-8"
         )
+        complete = (ROOT / "snippets" / "ios-complete-routing.conf").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("include-all-networks = true", apns)
         self.assertIn("include-apns = true", apns)
         self.assertIn("include-local-networks = false", apns)
@@ -560,6 +579,10 @@ class RuleContractTests(unittest.TestCase):
         self.assertIn("include-apns = false", continuity)
         self.assertIn("include-local-networks = false", continuity)
         self.assertIn("include-cellular-services = false", continuity)
+        self.assertIn("include-all-networks = true", complete)
+        self.assertIn("include-apns = false", complete)
+        self.assertIn("include-local-networks = false", complete)
+        self.assertIn("include-cellular-services = false", complete)
 
     def test_reject_drop_does_not_use_pre_matching(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

@@ -1,7 +1,7 @@
 # Domain source notes
 
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
-登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket/Gate 补充核对日期：2026-08-20。
+登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20。
 
 ## 监管目录
 
@@ -86,7 +86,7 @@ App API 使用无法从域名判断地区的共享基础设施，因此这些既
 `hk-finance-context.conf` 并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。
 
-## X 与 Gate 的当前第一方命名空间
+## X 的当前第一方命名空间
 
 - X 官方 API 文档使用 `api.x.com`，官方帮助文档分别确认
   [`t.co` 链接缩短](https://help.x.com/en/using-x/url-shortener)、
@@ -97,12 +97,6 @@ App API 使用无法从域名判断地区的共享基础设施，因此这些既
   或共享第三方 KYC/银行联接域。
 - [X Money FAQ](https://money.x.com/en/i/faq) 明确要求真实美国居民、
   已验证美国手机号和身份验证。路由绑定只用于稳定出口，不代替开户资格。
-- [Gate API v4 官方文档](https://www.gate.com/docs/developers/apiv4/en/)
-  在 `gate.com` 发布并明确列出 `api.gateio.ws` 与 `fx-api.gateio.ws`
-  生产 API；`.gateio.ws` 因此与 `.gate.io` 一并进入 `gate.conf`。
-  Gate 当前受限地区清单覆盖本配置的全部非美候选，因此不自动轮换节点；该文件
-  固定 `DIRECT`，保留真实地点并让官网/服务端返回明确的资格结果。
-
 ## Polymarket 产品边界
 
 - [Polymarket 官方地域说明](https://help.polymarket.com/en/articles/13364163-geographic-restrictions)

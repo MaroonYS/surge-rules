@@ -50,7 +50,6 @@ class RuleContractTests(unittest.TestCase):
                 "identity-context.conf": "Res-Frontier",
                 "risk-context.conf": "Res-Frontier",
                 "bybit.conf": "Bybit",
-                "gate.conf": "DIRECT",
                 "crypto.conf": "Crypto",
                 "web3.conf": "Web3",
             },
@@ -67,7 +66,6 @@ class RuleContractTests(unittest.TestCase):
                 "identity-context.conf",
                 "risk-context.conf",
                 "bybit.conf",
-                "gate.conf",
                 "crypto.conf",
                 "web3.conf",
             )},
@@ -459,28 +457,14 @@ class RuleContractTests(unittest.TestCase):
             main.index("/crypto.conf,Crypto,extended-matching"),
         )
 
-    def test_gate_current_namespaces_use_real_location_before_crypto(self) -> None:
+    def test_unused_gate_override_is_not_reintroduced(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        gate_entries = {
-            line
-            for line in (ROOT / "gate.conf").read_text(
-                encoding="utf-8"
-            ).splitlines()
-            if line and not line.startswith("#")
-        }
-        crypto_entries = {
-            line
-            for line in (ROOT / "crypto.conf").read_text(
-                encoding="utf-8"
-            ).splitlines()
-            if line and not line.startswith("#")
-        }
-        expected_gate = {".gate.com", ".gate.io", ".gateio.ws"}
-        self.assertEqual(expected_gate, gate_entries)
-        self.assertTrue(expected_gate.isdisjoint(crypto_entries))
-        gate = "/gate.conf,DIRECT,extended-matching"
-        crypto = "/crypto.conf,Crypto,extended-matching"
-        self.assertLess(main.index(gate), main.index(crypto))
+        manifest = (ROOT / "rules-manifest.json").read_text(encoding="utf-8")
+        contract = (ROOT / "rules-contract.json").read_text(encoding="utf-8")
+        self.assertFalse((ROOT / "gate.conf").exists())
+        self.assertNotIn("/gate.conf", main)
+        self.assertNotIn('"file": "gate.conf"', manifest)
+        self.assertNotIn("/gate.conf", contract)
 
     def test_walletconnect_current_namespace_is_in_web3(self) -> None:
         entries = {

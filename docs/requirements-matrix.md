@@ -13,7 +13,7 @@
 | 6 | 分地区金融 | HK 第一方 41、当前账户香港共享上下文 26、SG 21、JP 15、KR 10、UK 20，策略逐一固定；香港上下文覆盖 HSBC HK、Futu/Moomoo HK 与 Longbridge HK |
 | 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 6 条规则覆盖 Apple 登录与账单分片；随后 `us-residential.conf` 精确补齐 Capital One 两个专属 Medallia 租户与 myEquifax 入口，不扩大共享 Medallia 后缀 |
 | 8 | 跨地区金融、身份与风控 | Finance 41、Identity 21、Risk 8；语义顺序固定为 Finance → Identity → Risk，三层运行时均固定 `Res-Frontier`，不再依赖手动 `Verification`；地区银行与 Bybit/Crypto/Web3 的第一方规则仍在各自静态策略中，共享多租户 KYC 域明确作为美国金融优先的住宅兜底 |
-| 9 | 中心化交易所 | `bybit.conf` 2 条进入独立受支持地区 `Bybit`；Gate 的 3 个官网/API 后缀固定 `DIRECT`，保留真实地区判定与明确错误；其余 `crypto.conf` 13 条进入 `Crypto` |
+| 9 | 中心化交易所 | `bybit.conf` 2 条进入独立受支持地区 `Bybit`；其余已维护的中心化交易所由 `crypto.conf` 13 条进入 `Crypto`；未使用交易所不建立专用覆盖 |
 | 10 | Web3 | `web3.conf`，169 条有效语义，`Web3` |
 | 11 | Apple Push 与剩余系统服务 | APNs 的 3 个精确域/CNAME 及 10 条 TCP 5223 规则先固定到 `United States`；其后保留 `RULE-SET,SYSTEM,DIRECT` |
 | 12 | 广告和恶意域名 | reject-drop 不使用 `pre-matching`，保证前置业务规则优先；随后为 reject DOMAIN-SET → 精简补集 → reject → reject-no-drop |
@@ -50,7 +50,6 @@
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier`（语义角色 `Identity`） |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier`（语义角色 `Risk`） |
 | `bybit.conf` | `DOMAIN-SET` | `Bybit` |
-| `gate.conf` | `DOMAIN-SET` | `DIRECT` |
 | `crypto.conf` | `DOMAIN-SET` | `Crypto` |
 | `web3.conf` | `DOMAIN-SET` | `Web3` |
 | `apple-push.conf` | `DOMAIN-SET` | `United States` |

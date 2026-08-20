@@ -20,7 +20,7 @@
 | `Hong Kong` / `Res-Frontier` | `polymarket-global.conf`、`polymarket.conf`、`us-residential.conf` | Polymarket 国际产品使用当前已实测可达且须与真实资格一致的香港上下文、美国独立产品走住宅；美国第一方金融、Apple Cash/Pay 与 PayPal 走住宅 |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
 | `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；共享多租户域固定使用 `Res-Frontier` 兜底 |
-| `Bybit` / Gate / `Crypto` | `bybit.conf`、`gate.conf`、`crypto.conf` | Bybit 独立限定受支持地区；Gate 保持真实地点并由服务端判定资格；其余中心化交易所保留通用手动组 |
+| `Bybit` / `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立限定受支持地区；其余已维护的中心化交易所保留通用手动组；未使用交易所不建立专用覆盖 |
 | `Web3` | `web3.conf` | 全部有效语义迁移 |
 | `AIGC` | `apple-ai.conf` | 全部迁移；运行时固定 `United States` |
 
@@ -41,7 +41,6 @@
 
 - 按 17 段契约保留 `PROTOCOL,STUN,REJECT`，并在其前将 NTP/UDP 123 固定 `DIRECT`，避免系统时间同步误入普通代理。
 - X 六个第一方后缀在 Google/Reject/CDN/Global 之前固定住宅出口；不扩大 X MITM，也不把路由当作 X Money 居住或身份资格。
-- Gate 的 `.gate.com`、`.gate.io`、`.gateio.ws` 固定 `DIRECT`，避免整域拒绝把官网、帮助和资格错误伪装成网络故障；真实地点与账户/KYC 资格仍由 Gate 判定。
 - 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
   `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享
   Reject、Streaming、CDN 与 Global 规则命中。

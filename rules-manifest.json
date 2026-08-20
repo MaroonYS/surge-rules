@@ -141,12 +141,6 @@
       "description": "Bybit first-party application and documented API domains"
     },
     {
-      "file": "gate.conf",
-      "policy": "DIRECT",
-      "semantic_role": "Gate",
-      "description": "Gate global website, help pages and production API namespaces using the real location"
-    },
-    {
       "file": "crypto.conf",
       "policy": "Crypto",
       "description": "Remaining centralized cryptocurrency exchanges"

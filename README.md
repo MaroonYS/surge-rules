@@ -60,7 +60,6 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `identity-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户 KYC 与身份验证服务 |
 | `risk-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户设备情报与指纹服务 |
 | `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
-| `gate.conf` | `DIRECT` | Gate 全球站、帮助页与生产 API；保留真实所在地判定 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
@@ -76,9 +75,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Bybit`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 29 个远程本仓库规则文件（26 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 29 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 28 个本仓库规则文件均成功加载。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -237,10 +236,8 @@ X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美�
 这些资格。以 [X Money FAQ](https://money.x.com/en/i/faq) 为准。
 
 `Bybit`、`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
-Gate 当前的 `gate.com`、`gate.io` 与 `gateio.ws` 固定 `DIRECT`：这不会把任何
-受限地区包装成“全功能”线路，而是避免整域 `REJECT` 把官网、帮助和明确的资格
-错误伪装成网络故障。Gate 交易资格仍由真实所在地、账户实体和 KYC 决定；其他
-交易所同样必须使用与真实账户/KYC 地区一致且受支持的节点。
+未实际使用的交易所不建立专用覆盖；其请求继续由通用规则处理。所有交易所仍须
+使用与真实账户/KYC 地区一致且受支持的出口。
 
 Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机固定到当前已实测
 可达的 `Hong Kong`；该选择仅应在与配置所有者真实所在地及账户资格一致时使用。

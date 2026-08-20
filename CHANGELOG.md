@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Removed the unused Gate-specific routing override and resource so any incidental Gate
+  traffic follows the normal rule stack, while retaining its TLS MITM exclusions.
 - Fixed Sukka marker rotation handling with exact historical markers and provider-shape
   validation, preventing empty resources and real keyword rules from being misclassified.
 - Added the official ChatGPT Voice IP RULE-SET ahead of the global STUN rejection without

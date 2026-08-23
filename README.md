@@ -12,7 +12,8 @@
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
 - 在全局 STUN 拦截前精确放行 Google Voice 的控制与媒体通道。
 - 将 Google Account 登录、账户管理与 OAuth 控制面收口到稳定住宅出口。
-- 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出。
+- 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出维护，同时复用
+  iPhone 已存在的固定 `Crypto` 出口。
 - 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
 - 将 Google Voice 与 APNs 的逻辑 `AND` 规则移入独立、无策略列的远程 `RULE-SET`。
 - 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
@@ -59,7 +60,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
 | `identity-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户 KYC 与身份验证服务 |
 | `risk-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户设备情报与指纹服务 |
-| `bybit.conf` | `Bybit` | Bybit 官方 App/API 域名，独立受支持地区策略 |
+| `bybit.conf` | `Crypto` | Bybit 官方 App/API 域名，独立维护并复用固定 Crypto 出口 |
 | `crypto.conf` | `Crypto` | 中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
@@ -72,12 +73,15 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 1. 确认现有配置已经定义主 Rule 使用的固定策略：`Res-Frontier`、`PROXY`、
    `Hong Kong`、`Singapore`、`Japan`、`Korea`、`United Kingdom`、
-   `United States`、`Bybit`、`Crypto` 与 `Web3`。
+   `United States`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
    - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
 4. 在 Surge 的外部资源页面刷新，确认 28 个本仓库规则文件均成功加载。
+
+香港金融与账户上下文资源单独使用一小时更新间隔，减少 Futu 等紧急修订发布后
+仍命中旧缓存的时间；其余资源保持 Surge 默认更新节奏，避免无意义轮询。
 
 展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
 它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
@@ -140,7 +144,7 @@ python3 scripts/check_profile_policies.py \
   --profile /path/to/profile.conf \
   --require-stable \
   Res-Frontier PROXY "Hong Kong" Singapore Japan Korea \
-  "United Kingdom" "United States" Bybit Crypto Web3
+  "United Kingdom" "United States" Crypto Web3
 ```
 
 该检查器也可将 Surge 导出的“修改后配置”同时作为 `--profile` 和
@@ -207,7 +211,8 @@ Risk 三个语义层。三层运行时均固定到 `Res-Frontier`，不再需要
 也不会因自动测速或可用性检查改变账户出口。
 
 中国、香港、新加坡、日本、韩国与英国银行的第一方集合仍先命中并固定到各自的
-`DIRECT` 或地区策略；Bybit、Crypto 与 Web3 第一方集合也继续使用各自的非美策略。
+`DIRECT` 或地区策略；Bybit 与其余 Crypto 复用固定非美 `Crypto` 出口，Web3 继续
+使用独立非美策略。
 Identity/Risk 中的根域属于共享多租户基础设施，仅凭 SNI/Host 无法判断调用它的是哪家
 银行、交易所或钱包，因此住宅出口是明确的“美国金融优先”确定性兜底，并不宣称共享
 KYC 会自动继承前一个业务请求的策略。
@@ -235,7 +240,7 @@ X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美�
 已验证的美国手机号及身份验证；住宅 IP 只能减少出口漂移，不能替代
 这些资格。以 [X Money FAQ](https://money.x.com/en/i/faq) 为准。
 
-`Bybit`、`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
+`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
 未实际使用的交易所不建立专用覆盖；其请求继续由通用规则处理。所有交易所仍须
 使用与真实账户/KYC 地区一致且受支持的出口。
 
@@ -286,9 +291,9 @@ Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。�
 iOS/macOS 自身请求，但不包含 App Store、iTunes 等内容服务；这个位置既让三个例外
 按指定策略接管，也避免后面的 `.apple.com` / `.icloud.com` 聚合规则代理过多系统流量。
 
-Bybit 规则只修复官方 `.bytick.com` API 落入 `FINAL` 的漏匹配，并进入独立
-`Bybit` 组。该组只能加入与账户本人真实且受支持地区一致的策略；
-不得复用包含受限地区的宽泛 `Crypto` 组。
+Bybit 规则独立维护完整首方 App/API 域名边界，但按 iPhone 现有配置进入同一个
+固定 `Crypto` 组。该组只能保留与账户本人真实且受支持地区一致的候选，不能加入
+美国等受限地区线路。
 
 模块会覆盖主 Profile，且启用状态不会跨设备同步。保留全部模块时的实际命中条件、
 已知不可覆盖冲突与逐设备检查见 [docs/module-baseline.md](docs/module-baseline.md)。

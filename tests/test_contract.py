@@ -49,7 +49,7 @@ class RuleContractTests(unittest.TestCase):
                 "finance-context.conf": "Res-Frontier",
                 "identity-context.conf": "Res-Frontier",
                 "risk-context.conf": "Res-Frontier",
-                "bybit.conf": "Bybit",
+                "bybit.conf": "Crypto",
                 "crypto.conf": "Crypto",
                 "web3.conf": "Web3",
             },
@@ -133,7 +133,7 @@ class RuleContractTests(unittest.TestCase):
         x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
         reject = "/domainset/reject.conf,REJECT,extended-matching"
         cdn = "/domainset/cdn.conf,PROXY"
-        global_rule = "/non_ip/global.conf,PROXY"
+        global_rule = '/non_ip/global.conf,"United States"'
         self.assertLess(main.index(x_residential), main.index(reject))
         self.assertLess(main.index(x_residential), main.index(cdn))
         self.assertLess(main.index(x_residential), main.index(global_rule))
@@ -286,6 +286,14 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(sorted(positions), positions)
         self.assertNotIn("DOMAIN-KEYWORD,bilivideo", main)
 
+    def test_iphone_brawl_direct_exceptions_precede_shared_rules(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        brawl = "DOMAIN-SUFFIX,brawlstarsgame.com,DIRECT"
+        collector = "DOMAIN,collector.snowplow.supercell.com,DIRECT"
+        bilibili = "/bilibili-direct.conf,DIRECT,extended-matching"
+        self.assertLess(main.index(brawl), main.index(collector))
+        self.assertLess(main.index(collector), main.index(bilibili))
+
     def test_taobao_miniapp_runtime_precedes_shared_reject(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         entries = {
@@ -436,7 +444,40 @@ class RuleContractTests(unittest.TestCase):
                 ".futunn.com",
                 ".moomoo.com",
                 ".longbridge.com",
+                ".futuhk8.com",
+                ".futuhongkong.com",
+                ".futunh.com",
             }.issubset(hk_context_entries)
+        )
+        self.assertTrue(
+            {
+                ".futu.com",
+                ".futu0.com",
+                ".futu1.com",
+                ".futu2.com",
+                ".futu3.com",
+                ".futu4.com",
+                ".futu6.com",
+                ".futu7.com",
+                ".futu9.com",
+                ".futuinc.com",
+                ".futuau.com",
+                ".moomootrustee.com",
+            }.isdisjoint(hk_context_entries)
+        )
+        self.assertIn(
+            ".moomootrustee.com",
+            active_entries("sg-finance.conf"),
+        )
+        self.assertIn(
+            '/hk-finance.conf,"Hong Kong",extended-matching,'
+            "update-interval=3600",
+            main,
+        )
+        self.assertIn(
+            '/hk-finance-context.conf,"Hong Kong",extended-matching,'
+            "update-interval=3600",
+            main,
         )
         finance_entries = active_entries("finance-context.conf")
         self.assertTrue(hk_context_entries.isdisjoint(finance_entries))
@@ -450,10 +491,29 @@ class RuleContractTests(unittest.TestCase):
             ).splitlines()
             if line and not line.startswith("#")
         }
-        self.assertEqual({".bybit.com", ".bytick.com"}, entries)
+        self.assertEqual(
+            {
+                ".byabcde.com",
+                ".byapis.com",
+                ".byapps.net",
+                ".bybdc6.com",
+                ".bybit-aws.com",
+                ".bybit-global.com",
+                ".bybit.biz",
+                ".bybit.cloud",
+                ".bybit.com",
+                ".bybitglobal.com",
+                ".bycbe.com",
+                ".bycsi.com",
+                ".byd3c3.com",
+                ".bymj.io",
+                ".bytick.com",
+            },
+            entries,
+        )
         self.assertNotIn(".bybit.com", (ROOT / "crypto.conf").read_text(encoding="utf-8"))
         self.assertLess(
-            main.index("/bybit.conf,Bybit,extended-matching"),
+            main.index("/bybit.conf,Crypto,extended-matching"),
             main.index("/crypto.conf,Crypto,extended-matching"),
         )
 
@@ -465,6 +525,24 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("/gate.conf", main)
         self.assertNotIn('"file": "gate.conf"', manifest)
         self.assertNotIn("/gate.conf", contract)
+        crypto_entries = {
+            line
+            for line in (ROOT / "crypto.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertTrue(
+            {
+                ".gate.com",
+                ".gate.io",
+                ".gateio.ws",
+                ".gatedata.org",
+                ".gateimg.com",
+                ".gateio.live",
+                ".gateio.services",
+            }.isdisjoint(crypto_entries)
+        )
 
     def test_walletconnect_current_namespace_is_in_web3(self) -> None:
         entries = {

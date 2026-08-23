@@ -1,7 +1,7 @@
 # Domain source notes
 
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
-登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20。
+登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
 ## 监管目录
 
@@ -85,6 +85,14 @@ Apple Account 绑定 PayPal 的登录与账单控制面会使用
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名被移动到
 `hk-finance-context.conf` 并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。
+
+FUTU HK 官方下载页当前加载的前端包将 `futuhk8.com`、`futuhongkong.com` 与
+`futunh.com` 列入开户、登录、资金及账户管理兼容域，因此只补入这三个可验证后缀。
+`futuau.com` 属澳洲业务，不固定香港；`moomootrustee.com` 对应新加坡实体，归入
+`sg-finance.conf`。没有官方页面或 iPhone 失败日志证明的数字域名、通用 Tencent
+Cloud 网段及裸 IP 均不作为兜底加入，避免把其他 App 的共享云流量误送香港。
+[FUTU HK 官方前端包](https://static.futunn.com/futuhk_common/dist/futuhkHeadFoot-d147c85d53fba81cc550.js)
+与 [Moomoo 持牌实体列表](https://www.moomoo.com/sg/licensedentities) 用于这次地区核对。
 
 ## X 的当前第一方命名空间
 

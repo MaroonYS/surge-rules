@@ -20,7 +20,7 @@
 | `Hong Kong` / `Res-Frontier` | `polymarket-global.conf`、`polymarket.conf`、`us-residential.conf` | Polymarket 国际产品使用当前已实测可达且须与真实资格一致的香港上下文、美国独立产品走住宅；美国第一方金融、Apple Cash/Pay 与 PayPal 走住宅 |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
 | `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；共享多租户域固定使用 `Res-Frontier` 兜底 |
-| `Bybit` / `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立限定受支持地区；其余已维护的中心化交易所保留通用手动组；未使用交易所不建立专用覆盖 |
+| `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立维护域名边界，但与其余已维护中心化交易所共同使用 iPhone 固定 Crypto 出口；Gate 不建立专用覆盖 |
 | `Web3` | `web3.conf` | 全部有效语义迁移 |
 | `AIGC` | `apple-ai.conf` | 全部迁移；运行时固定 `United States` |
 
@@ -62,13 +62,13 @@
 - Identity 删除宽泛 `.persona.com`，保留产品域 `.withpersona.com`；Risk 收窄为
   8 个设备情报、设备信誉、行为生物识别与指纹域名。
 - 中国、香港、新加坡、日本、韩国、英国银行第一方集合继续优先命中各自静态地区策略；
-  Bybit、Crypto 与 Web3 第一方集合也继续使用各自非美策略。共享 KYC/风控根域无法由
+  Bybit 与其余 Crypto 共同使用固定非美 `Crypto` 出口，Web3 使用独立非美策略。共享 KYC/风控根域无法由
   iOS 识别调用 App，因此固定住宅仅是美国金融优先的确定性兜底。只有能由真实日志证明
   租户归属的精确 hostname 才能在共享层之前增加对应地区或加密业务覆盖。
 - HSBC HK、Futu/Moomoo HK 与 Longbridge HK 的共享基础设施从
   `finance-context.conf` 移入 `hk-finance-context.conf`，避免当前账户误走美国住宅。
-- Bybit 从通用 `Crypto` 拆为独立策略；只有账户本人真实且受支持
-  地区一致的线路才能由用户显式加入，是否保留 `REJECT` 由各设备的组定义决定。
+- Bybit 从通用文件拆成独立维护集合，但运行时复用 iPhone 已有的固定 `Crypto`
+  出口；该出口仍须与账户本人真实且受支持地区一致。
 - 美国住宅文件明确补回 Apex Clearing、Early Warning、ID.me 与 Login.gov。
 - 删除宽泛 `.icbc.com`，保留大陆专用 `.icbc.com.cn` 与香港 `.icbcasia.com`。
 - Apple CDN 从已废弃的 `non_ip` 占位切换至有效 DOMAIN-SET。

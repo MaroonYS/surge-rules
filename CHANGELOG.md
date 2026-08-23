@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Repaired the user-edited CEX expansion by moving every Bybit namespace into its dedicated
+  file on the iPhone's existing Crypto policy, removing the accidentally restored Gate
+  override, and rebuilding the stale expanded profile.
+- Tightened the Futu/Moomoo Hong Kong context with three official compatibility domains,
+  removed unrelated regional and parked namespaces, reassigned Moomoo Trustee to Singapore,
+  and reduced the two Hong Kong resource refresh intervals to one hour.
+- Aligned the canonical rule skeleton with the iPhone's Brawl exceptions and United States
+  global fallback while retaining the non-US Hong Kong route required by Polymarket Global.
 - Removed the unused Gate-specific routing override and resource so any incidental Gate
   traffic follows the normal rule stack, while retaining its TLS MITM exclusions.
 - Fixed Sukka marker rotation handling with exact historical markers and provider-shape

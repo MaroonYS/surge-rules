@@ -22,6 +22,8 @@
       "number": 2,
       "title": "必须最优先匹配的特殊服务",
       "rules": [
+        "DOMAIN-SUFFIX,brawlstarsgame.com,DIRECT",
+        "DOMAIN,collector.snowplow.supercell.com,DIRECT",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bilibili-direct.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/taobao-functional.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket-global.conf,\"Hong Kong\",extended-matching",
@@ -53,8 +55,8 @@
       "number": 6,
       "title": "分地区金融",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,\"Hong Kong\",extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance-context.conf,\"Hong Kong\",extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance.conf,\"Hong Kong\",extended-matching,update-interval=3600",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/hk-finance-context.conf,\"Hong Kong\",extended-matching,update-interval=3600",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/sg-finance.conf,Singapore,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,Japan,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,Korea,extended-matching",
@@ -82,7 +84,7 @@
       "number": 9,
       "title": "中心化交易所",
       "rules": [
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Bybit,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bybit.conf,Crypto,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
       ]
     },
@@ -152,7 +154,7 @@
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/domestic.conf,DIRECT",
         "RULE-SET,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/WeChat/WeChat.list,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/direct.conf,DIRECT",
-        "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,PROXY"
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,\"United States\""
       ]
     },
     {

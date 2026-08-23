@@ -137,7 +137,7 @@
     },
     {
       "file": "bybit.conf",
-      "policy": "Bybit",
+      "policy": "Crypto",
       "description": "Bybit first-party application and documented API domains"
     },
     {

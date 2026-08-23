@@ -48,9 +48,9 @@
     },
     {
       "file": "polymarket-global.conf",
-      "policy": "Hong Kong",
+      "policy": "Res-Frontier",
       "semantic_role": "Polymarket-Global",
-      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host in the fixed Hong Kong context"
+      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host on the owner's fixed residential context"
     },
     {
       "file": "polymarket.conf",

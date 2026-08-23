@@ -72,7 +72,7 @@
 | Apple Account 控制面 | +4 | 在原 2 条账单 `RULE-SET` 规则上补 4 个精确登录主机 |
 | Identity / Web3 | +2 | 分别补 `.jumio.ai` 与 `.walletconnect.network` |
 | Capital One / Equifax | +3 | 两个 Capital One 专属 Medallia 主机与 `.myequifax.com` |
-| Polymarket 产品拆分 | 0 | 4 条不扩容，拆成国际 `Hong Kong` 与美国住宅两个集合 |
+| Polymarket 产品拆分 | 0 | 4 条不扩容，国际与美国产品分文件维护并统一固定家宽 |
 | Futu / Moomoo 地区校正 | +7 | 香港上下文净增 6 条，新加坡 Trustee 增 1 条；剔除异地区域和无官方/日志依据的停放域 |
 | Bybit / 其余 CEX | +46 | Bybit 扩为 15 条并独立维护；其余 CEX 扩为 46 条，删除重复 Bybit 与已取消的 Gate 覆盖 |
 | Web3 精准扩展 | +26 | 新增钱包、RPC、DeFi 与链上基础设施第一方后缀 |

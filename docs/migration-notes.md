@@ -17,7 +17,7 @@
 | `JP-FINANCE` | `jp-finance.conf` | 全部迁移 |
 | `KR-FINANCE` | `kr-finance.conf` | 全部迁移 |
 | `UK-FINANCE` | `uk-finance.conf` | 全部迁移 |
-| `Hong Kong` / `Res-Frontier` | `polymarket-global.conf`、`polymarket.conf`、`us-residential.conf` | Polymarket 国际产品使用当前已实测可达且须与真实资格一致的香港上下文、美国独立产品走住宅；美国第一方金融、Apple Cash/Pay 与 PayPal 走住宅 |
+| `Res-Frontier` | `polymarket-global.conf`、`polymarket.conf`、`us-residential.conf` | Polymarket 国际与美国产品按配置所有者最新决定统一走固定家宽；美国第一方金融、Apple Cash/Pay 与 PayPal 同样走住宅 |
 | `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
 | `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；共享多租户域固定使用 `Res-Frontier` 兜底 |
 | `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立维护域名边界，但与其余已维护中心化交易所共同使用 iPhone 固定 Crypto 出口；Gate 不建立专用覆盖 |
@@ -51,8 +51,8 @@
   `United States` 节点；Private Relay 不使用住宅 SOCKS5。
 - Apple Cash/Pay 与 PayPal 归入 `us-residential.conf`。
 - Polymarket 从宽泛 `DOMAIN-KEYWORD` 收窄并按产品拆分：国际 `.com`、精确 Auth0
-  租户及上传主机进入 `polymarket-global.conf,Hong Kong`；美国 `.us` 单独进入
-  `polymarket.conf,Res-Frontier`。
+  租户及上传主机保留在 `polymarket-global.conf`，美国 `.us` 保留在
+  `polymarket.conf`；两个集合按配置所有者决定统一固定 `Res-Frontier` 家宽。
 - `bankofchina.com` 因不同国家站点共用根域且按路径分区，从大陆直连移到 `Finance`；
   `pingan.com` 收窄为 `bank.pingan.com`。
 - 美国住宅文件移除共享清算、身份、征信及反欺诈基础设施，补充 11 个第一方区域银行。

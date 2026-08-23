@@ -225,7 +225,7 @@ class RuleContractTests(unittest.TestCase):
     def test_polymarket_uses_precise_domain_set(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         self.assertIn(
-            '/polymarket-global.conf,"Hong Kong",extended-matching',
+            "/polymarket-global.conf,Res-Frontier,extended-matching",
             main,
         )
         self.assertIn("/polymarket.conf,Res-Frontier,extended-matching", main)
@@ -274,7 +274,7 @@ class RuleContractTests(unittest.TestCase):
 
         bilibili = "/bilibili-direct.conf,DIRECT,extended-matching"
         polymarket_global = (
-            '/polymarket-global.conf,"Hong Kong",extended-matching'
+            "/polymarket-global.conf,Res-Frontier,extended-matching"
         )
         polymarket_us = "/polymarket.conf,Res-Frontier,extended-matching"
         reject = "/domainset/reject.conf,REJECT,extended-matching"

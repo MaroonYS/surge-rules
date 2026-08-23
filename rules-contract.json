@@ -26,7 +26,7 @@
         "DOMAIN,collector.snowplow.supercell.com,DIRECT",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/bilibili-direct.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/taobao-functional.conf,DIRECT,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket-global.conf,\"Hong Kong\",extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket-global.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/polymarket.conf,Res-Frontier,extended-matching"
       ]
     },

@@ -109,6 +109,6 @@ Cloud 网段及裸 IP 均不作为兜底加入，避免把其他 App 的共享�
 
 - [Polymarket 官方地域说明](https://help.polymarket.com/en/articles/13364163-geographic-restrictions)
   明确国际 `.com` 会按请求 IP 执行地域限制；美国用户使用的是独立 `.us` 产品。
-- 因此 `.polymarket.com`、精确 Auth0 租户与上传主机固定到当前实测可达的
-  `Hong Kong`，且仅应在与配置所有者真实所在地及账户资格一致时使用；仅
-  `.polymarket.us` 固定 `Res-Frontier`。路由保持真实产品边界，不用于绕过限制。
+- `.polymarket.com`、精确 Auth0 租户、上传主机与 `.polymarket.us` 仍按产品拆分，
+  但依据配置所有者最新决定统一固定 `Res-Frontier` 家宽。路由只保持出口稳定，
+  不改变真实地区及账户资格，也不用于绕过限制。

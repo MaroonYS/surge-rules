@@ -45,7 +45,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
 | `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
-| `polymarket-global.conf` | `Hong Kong` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
+| `polymarket-global.conf` | `Res-Frontier` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 美国独立产品 |
 | `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
@@ -244,11 +244,10 @@ X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美�
 未实际使用的交易所不建立专用覆盖；其请求继续由通用规则处理。所有交易所仍须
 使用与真实账户/KYC 地区一致且受支持的出口。
 
-Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机固定到当前已实测
-可达的 `Hong Kong`；该选择仅应在与配置所有者真实所在地及账户资格一致时使用。
-美国独立产品
-`.polymarket.us` 才进入 `Res-Frontier`。两者是不同产品，不能放在同一个美国
-规则集里，也不得用该策略规避服务的地域资格要求。
+Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机与美国独立产品
+`.polymarket.us` 仍分文件维护，但按配置所有者最新决定统一进入固定
+`Res-Frontier` 家宽。统一出口只减少会话漂移，不改变两个产品的地区资格，也不得
+用于规避服务限制。
 
 ## 实时通信与 Apple 连续互通
 

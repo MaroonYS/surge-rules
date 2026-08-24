@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added an exact Singapore exception for the observed `nano.cr18.eu.org` Emby host
+  ahead of the broader SKK global rule, without routing the shared `eu.org` suffix.
 - Pinned both Polymarket product rule sets to the owner's fixed residential policy while
   retaining separate international and US domain boundaries.
 - Repaired the user-edited CEX expansion by moving every Bybit namespace into its dedicated

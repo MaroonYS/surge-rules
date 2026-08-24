@@ -324,11 +324,22 @@ class RuleContractTests(unittest.TestCase):
 
     def test_service_specific_rules_are_precise_and_ordered(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        nano_emby = "DOMAIN,nano.cr18.eu.org,Singapore"
+        upstream_emby = (
+            "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/"
+            "Filter/master/Emby.list,Singapore"
+        )
         github = "DOMAIN,api.github.com,PROXY,extended-matching"
         ai = (
             'RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,'
             '"United States"'
         )
+        global_rule = (
+            "RULE-SET,https://ruleset.skk.moe/List/non_ip/global.conf,"
+        )
+        self.assertEqual(1, main.count(nano_emby))
+        self.assertLess(main.index(nano_emby), main.index(upstream_emby))
+        self.assertLess(main.index(nano_emby), main.index(global_rule))
         self.assertIn(github, main)
         self.assertLess(main.index(github), main.index(ai))
         self.assertNotIn("DOMAIN-KEYWORD,cr18", main)

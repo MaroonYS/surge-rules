@@ -17,7 +17,7 @@
 | 10 | Web3 | `web3.conf`，195 条有效语义，`Web3` |
 | 11 | Apple Push 与剩余系统服务 | APNs 的 3 个精确域/CNAME 及 10 条 TCP 5223 规则先固定到 `United States`；其后保留 `RULE-SET,SYSTEM,DIRECT` |
 | 12 | 广告和恶意域名 | reject-drop 不使用 `pre-matching`，保证前置业务规则优先；随后为 reject DOMAIN-SET → 精简补集 → reject → reject-no-drop |
-| 13 | 服务专用 | Emby 固定 `Singapore`，GitHub API 精确例外进入 `PROXY`，AI 与聚合 Streaming 固定 `United States`；Telegram 非 IP 已前移到第 1 段 |
+| 13 | 服务专用 | `nano.cr18.eu.org` 作为上游清单漏项精确固定 `Singapore`，其余 Emby 继续使用上游列表；GitHub API 精确例外进入 `PROXY`，AI 与聚合 Streaming 固定 `United States`；Telegram 非 IP 已前移到第 1 段 |
 | 14 | Apple / Microsoft | Apple/Microsoft CDN 保持 `DIRECT`；其余 Apple/Microsoft 服务固定 `United States` |
 | 15 | 下载和 CDN | Speedtest/CDN 使用 `PROXY`，两组 Download 固定 `Hong Kong` |
 | 16 | 国内和海外基础规则 | Domestic、WeChat、Direct、Global 顺序固定；Global 按 iPhone 当前语义进入固定 `United States`，业务专用非美规则必须位于其前 |

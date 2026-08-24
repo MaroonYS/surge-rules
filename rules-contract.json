@@ -119,6 +119,7 @@
       "number": 13,
       "title": "服务专用",
       "rules": [
+        "DOMAIN,nano.cr18.eu.org,Singapore",
         "RULE-SET,https://raw.githubusercontent.com/ddgksf2013/Filter/master/Emby.list,Singapore",
         "DOMAIN,api.github.com,PROXY,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,\"United States\"",

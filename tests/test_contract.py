@@ -30,6 +30,62 @@ class RuleContractTests(unittest.TestCase):
             result = validate.validate_repository(copied)
         return {item.code for item in result.diagnostics}
 
+    def test_current_documentation_tracks_manifest_inventory(self) -> None:
+        manifest = json.loads(
+            (ROOT / "rules-manifest.json").read_text(encoding="utf-8")
+        )
+        active = manifest["active"]
+        domain_sets = [
+            entry for entry in active if entry.get("type", "DOMAIN-SET") == "DOMAIN-SET"
+        ]
+        rule_sets = [entry for entry in active if entry.get("type") == "RULE-SET"]
+        total_entries = 0
+        domain_entries = 0
+        rule_entries = 0
+        for entry in active:
+            count = sum(
+                1
+                for line in (ROOT / entry["file"]).read_text(
+                    encoding="utf-8"
+                ).splitlines()
+                if line and not line.startswith("#")
+            )
+            total_entries += count
+            if entry.get("type", "DOMAIN-SET") == "DOMAIN-SET":
+                domain_entries += count
+            else:
+                rule_entries += count
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        matrix = (ROOT / "docs" / "requirements-matrix.md").read_text(
+            encoding="utf-8"
+        )
+        parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
+        self.assertIn(
+            f"通过 {len(active)} 个远程本仓库规则文件"
+            f"（{len(domain_sets)} 个 `DOMAIN-SET`、{len(rule_sets)} 个 `RULE-SET`）",
+            readme,
+        )
+        self.assertIn(f"确认 {len(active)} 个本仓库规则文件均成功加载", readme)
+        self.assertIn(
+            f"| 当前 DOMAIN-SET 条目 | {domain_entries} | "
+            f"{len(domain_sets)} 个本仓库 `DOMAIN-SET` |",
+            parity,
+        )
+        self.assertIn(
+            f"| 当前 RULE-SET 条目 | {rule_entries} | "
+            f"{len(rule_sets)} 个无策略列 `RULE-SET` |",
+            parity,
+        )
+        self.assertIn(
+            f"| 当前活动条目 | {total_entries} | {len(active)} 个本仓库活动文件 |",
+            parity,
+        )
+        for entry in active:
+            marker = f"`{entry['file']}`"
+            self.assertIn(marker, readme)
+            self.assertIn(marker, matrix)
+
     def test_financial_and_crypto_runtime_policies_are_fully_static(self) -> None:
         manifest = json.loads(
             (ROOT / "rules-manifest.json").read_text(encoding="utf-8")

@@ -11,7 +11,7 @@
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |
 | 5 | 中国大陆银行 | `direct-cn.conf`，24 条，`DIRECT`；跨地区的 `bankofchina.com` 与宽泛 `.icbc.com` 不在此强制直连 |
 | 6 | 分地区金融 | HK 第一方 41、当前账户香港共享上下文 32、SG 22、JP 15、KR 10、UK 20，策略逐一固定；FUTU HK 官方兼容域进入香港，Moomoo Singapore Trustee 归回新加坡；两条香港资源每小时刷新 |
-| 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 6 条规则覆盖 Apple 登录与账单分片；随后 `us-residential.conf` 精确补齐 Capital One 两个专属 Medallia 租户与 myEquifax 入口，不扩大共享 Medallia 后缀 |
+| 7 | 美国住宅出口 | `us-residential.conf` 精确覆盖美国第一方金融、Apple Cash/Pay、PayPal、Capital One 两个专属 Medallia 租户与 myEquifax 入口；Apple Account 登录与账单已在第 3 层先行处理，不在本层重复 |
 | 8 | 跨地区金融、身份与风控 | Finance 41、Identity 21、Risk 8；语义顺序固定为 Finance → Identity → Risk，三层运行时均固定 `Res-Frontier`，不再依赖手动 `Verification`；地区银行与 Bybit/Crypto/Web3 的第一方规则仍在各自静态策略中，共享多租户 KYC 域明确作为美国金融优先的住宅兜底 |
 | 9 | 中心化交易所 | `bybit.conf` 15 条与 `crypto.conf` 46 条分文件维护但均进入 iPhone 固定 `Crypto` 出口；Gate 不建立专用覆盖，Bybit 不再跨策略重复 |
 | 10 | Web3 | `web3.conf`，195 条有效语义，`Web3` |
@@ -36,6 +36,7 @@
 | `taobao-functional.conf` | `DOMAIN-SET` | `DIRECT` |
 | `polymarket-global.conf` | `DOMAIN-SET` | `Res-Frontier` |
 | `polymarket.conf` | `DOMAIN-SET` | `Res-Frontier` |
+| `icloud-sync.conf` | `DOMAIN-SET` | `DIRECT` |
 | `apple-ai.conf` | `DOMAIN-SET` | `United States` |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` |
 | `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` |

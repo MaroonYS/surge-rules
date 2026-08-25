@@ -3,6 +3,19 @@
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
+## Apple 软件更新与加密 DNS
+
+Apple 当前 Software Updates 表共有 21 个精确主机。`appldnld.apple.com`、
+`gdmf.apple.com`、`gg.apple.com`、`gs.apple.com` 与 `mesu.apple.com` 直接内联在
+主规则中，确保本仓库外部资源尚未加载时 watchOS 核心检查仍可进行；
+`apple-software-update.conf` 只收录其余 16 个官方主机，覆盖配对 iPhone、附加组件、
+附属设备安装和 Mac 更新，不使用 `.apple.com` 之类宽泛后缀。
+
+`doh.dns.apple.com` 单独精确直连，让 Apple 加密 DNS 与更新目录/下载保持同一出口；
+它不属于更新域集合，也不改变 Private Relay 三个既有端点的美国策略。上述主机均受
+Apple 通配负向 MITM 保护，不进行 HTTPS inspection。来源：
+[Apple 企业网络主机与端口](https://support.apple.com/en-us/101555)。
+
 ## Apple iCloud 服务边界
 
 `icloud-sync.conf` 依据 Apple 企业网络清单中的 iCloud 段维护 CloudKit、Live Photos、

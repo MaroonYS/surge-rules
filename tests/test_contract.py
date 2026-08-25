@@ -167,15 +167,22 @@ class RuleContractTests(unittest.TestCase):
         self.assertLess(main.index(google_account), main.index(voice))
         self.assertLess(main.index(ntp), main.index(stun))
 
-    def test_watchos_update_and_validation_chain_is_exact_direct_and_early(self) -> None:
+    def test_apple_update_and_validation_chain_is_exact_direct_and_early(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         ntp = "DEST-PORT,123,DIRECT"
-        watchos_rules = [
+        watchos_bootstrap_rules = [
             "DOMAIN,appldnld.apple.com,DIRECT,extended-matching",
             "DOMAIN,gdmf.apple.com,DIRECT,extended-matching",
             "DOMAIN,gg.apple.com,DIRECT,extended-matching",
             "DOMAIN,gs.apple.com,DIRECT,extended-matching",
             "DOMAIN,mesu.apple.com,DIRECT,extended-matching",
+        ]
+        software_update_resource = (
+            "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/"
+            "surge-rules/main/apple-software-update.conf,DIRECT,extended-matching"
+        )
+        validation_rules = [
+            "DOMAIN,doh.dns.apple.com,DIRECT,extended-matching",
             "DOMAIN,bpapi.apple.com,DIRECT,extended-matching",
             "DOMAIN,certs.apple.com,DIRECT,extended-matching",
             "DOMAIN,crl.apple.com,DIRECT,extended-matching",
@@ -187,14 +194,46 @@ class RuleContractTests(unittest.TestCase):
             "DOMAIN,valid.apple.com,DIRECT,extended-matching",
             "DOMAIN,ocsp.digicert.cn,DIRECT,extended-matching",
         ]
+        expected_additional_hosts = {
+            "configuration.apple.com",
+            "fcs-keys-pub-prod.cdn-apple.com",
+            "gdmf-ados.apple.com",
+            "gsra.apple.com",
+            "ig.apple.com",
+            "oscdn.apple.com",
+            "osrecovery.apple.com",
+            "skl.apple.com",
+            "swcdn.apple.com",
+            "swdist.apple.com",
+            "swdownload.apple.com",
+            "swscan.apple.com",
+            "updates-http.cdn-apple.com",
+            "updates.cdn-apple.com",
+            "wkms-public.apple.com",
+            "xp.apple.com",
+        }
+        additional_hosts = {
+            line
+            for line in (ROOT / "apple-software-update.conf").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if line and not line.startswith("#")
+        }
         github_rules = [
             'DOMAIN,github.com,"Hong Kong",extended-matching',
             'DOMAIN-SUFFIX,githubusercontent.com,"Hong Kong",extended-matching',
         ]
         x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
-        protected_rules = watchos_rules + github_rules
+        protected_rules = (
+            watchos_bootstrap_rules
+            + [software_update_resource]
+            + validation_rules
+            + github_rules
+        )
         positions = [main.index(rule) for rule in protected_rules]
 
+        self.assertEqual(expected_additional_hosts, additional_hosts)
+        self.assertEqual(21, len(additional_hosts) + len(watchos_bootstrap_rules))
         self.assertEqual(sorted(positions), positions)
         self.assertTrue(all(main.count(rule) == 1 for rule in protected_rules))
         self.assertTrue(all(main.index(ntp) < position for position in positions))
@@ -202,7 +241,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("DOMAIN-SUFFIX,apple.com,DIRECT", main)
         self.assertNotIn("DOMAIN-KEYWORD,apple,DIRECT", main)
 
-    def test_weatherkit_country_fallback_is_coordinate_scoped(self) -> None:
+    def test_weatherkit_country_fallback_is_locale_and_coordinate_scoped(self) -> None:
         snippet = (
             ROOT / "snippets" / "weatherkit-country-fallback.conf"
         ).read_text(encoding="utf-8")
@@ -217,14 +256,20 @@ class RuleContractTests(unittest.TestCase):
             "https://weatherkit.apple.com/api/v2/weather/zh-Hans-US/"
             "22.544577/113.94114?timezone=Asia/Shanghai&dataSets=airQuality"
         )
+        current_gps = missing_country.replace("113.94114", "114.0579")
+        shanghai = missing_country.replace("22.544577/113.94114", "31.23/121.47")
         existing_country = missing_country + "&country=CN"
         other_location = missing_country.replace("22.544577/113.94114", "40.7/-74.0")
+        non_us_locale = missing_country.replace("zh-Hans-US", "zh-Hans-CN")
 
         self.assertEqual("header", mode)
         self.assertRegex(missing_country, pattern)
+        self.assertRegex(current_gps, pattern)
+        self.assertRegex(shanghai, pattern)
         self.assertIn("country=CN", re.sub(pattern, replacement, missing_country))
         self.assertNotRegex(existing_country, pattern)
         self.assertNotRegex(other_location, pattern)
+        self.assertNotRegex(non_us_locale, pattern)
 
     def test_icloud_layers_are_complete_and_ordered_before_reject(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

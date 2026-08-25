@@ -10,9 +10,10 @@ iCloud 内容、iWork、Apple iCloud DNS 及中国大陆条件域；通用 `.icl
 同步主机而保留在主规则中。三个 Private Relay 端点必须先匹配既有 SKK 精确列表，
 Apple Account 的 4 个认证主机及动态 App Store 账单分片则更早固定住宅出口。
 
-`cdn-apple.com` 是 Apple 多项服务共用的 CDN，不作为 iCloud 专属域扩大全量强制规则，
-继续由既有 Apple CDN 与 Apple Services 规则处理。Apple 官方明确要求其列出的服务
-免 HTTPS/SSL inspection；当前 Profile 的 Apple/iCloud 负向 MITM 边界继续保留。
+`cdn-apple.com` 是 Apple 多项服务共用的 CDN，因此放在 Apple Account 精确例外之后
+统一直连，而不是把它误当成 iCloud 独占域；这也延续仓库既有 Apple CDN 直连语义。
+Apple 官方明确要求其列出的服务免 HTTPS/SSL inspection；当前 Profile 的
+Apple/iCloud 负向 MITM 边界继续保留。
 来源：[Apple 企业网络主机与端口](https://support.apple.com/en-us/101555)。
 
 ## 监管目录

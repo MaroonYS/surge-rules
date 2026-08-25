@@ -11,6 +11,8 @@
 - Split Apple Account, Private Relay and core iCloud traffic so billing remains residential,
   relay endpoints retain their configured US path, and sync/upload/download hosts go direct
   before the reject stack (including Apple's required `metrics.icloud.com`).
+- Extended the protected MITM exclusion contract to every non-Apple-root iCloud service
+  family in Apple's current enterprise network list.
 - Unified Apple's five documented watchOS update catalog and payload hosts on an early
   exact `DIRECT` path, preventing the update transaction from crossing proxy exits.
 - Added an exact Singapore exception for the observed `nano.cr18.eu.org` Emby host

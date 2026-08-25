@@ -67,6 +67,9 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 
 - WeatherKit、LocationService、Maps、News、TV 与 WLOC 的上述 MITM 主机必须在
   修改后配置中先于 Apple 负项。
+- iCloud 的非 Apple 根域还必须保留 `icloud.com(.cn)`、`icloud-content.com`、
+  `apple-cloudkit.com`、`apple-livephotoskit.com`、`apzones.com`、`cdn-apple.com`
+  与 `apple-dns.net` 负项，避免后续模块漂移把官方同步/内容链纳入 SSL inspection。
 - News 的代理参数必须引用现有的 `United States`；不能保留不存在的 emoji 策略名。
 - LocationService、Maps 与 WLOC 会同时执行，但它们分别修改地区、地图供应商和
   坐标。当前常见的 US Location + CN/AutoNavi Maps + 自定义坐标是混合语义，主 Rule

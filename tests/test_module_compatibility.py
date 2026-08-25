@@ -24,11 +24,14 @@ class ModuleCompatibilityTests(unittest.TestCase):
 
     def test_manifest_and_documentation_are_current(self) -> None:
         self.assertEqual(21, len(self.positives))
-        self.assertEqual(22, len(self.negatives))
+        self.assertEqual(38, len(self.negatives))
         self.assertIn("-capitalone.md-apis.medallia.com", self.negatives)
         self.assertIn("-*.myequifax.com", self.negatives)
         self.assertIn("-*.polymarket.com", self.negatives)
         self.assertIn("-*.gate.com", self.negatives)
+        self.assertIn("-*.apple-livephotoskit.com", self.negatives)
+        self.assertIn("-*.icloud.com.cn", self.negatives)
+        self.assertIn("-*.apple-dns.net", self.negatives)
         documentation = ROOT / self.data["documentation"]
         self.assertEqual(
             self.positives,

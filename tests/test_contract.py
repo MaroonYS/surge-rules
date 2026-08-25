@@ -184,6 +184,7 @@ class RuleContractTests(unittest.TestCase):
             "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/"
             "icloud-sync.conf,DIRECT,extended-matching"
         )
+        cdn = "DOMAIN-SUFFIX,cdn-apple.com,DIRECT,extended-matching"
         icloud = "DOMAIN-SUFFIX,icloud.com,DIRECT,extended-matching"
         reject = "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT"
         domains = {
@@ -205,7 +206,8 @@ class RuleContractTests(unittest.TestCase):
 
         self.assertEqual(required, domains)
         self.assertLess(main.index(account), main.index(relay))
-        self.assertLess(main.index(relay), main.index(icloud))
+        self.assertLess(main.index(relay), main.index(cdn))
+        self.assertLess(main.index(cdn), main.index(icloud))
         self.assertLess(main.index(icloud), main.index(sync))
         self.assertLess(main.index(sync), main.index(reject))
         self.assertEqual(1, main.count(account))

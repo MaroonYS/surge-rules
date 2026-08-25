@@ -53,6 +53,7 @@
       "rules": [
         "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,\"United States\",extended-matching",
+        "DOMAIN-SUFFIX,cdn-apple.com,DIRECT,extended-matching",
         "DOMAIN-SUFFIX,icloud.com,DIRECT,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/icloud-sync.conf,DIRECT,extended-matching"
       ]

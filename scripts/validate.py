@@ -985,7 +985,7 @@ def validate_rule_contract(
         )
         return
 
-    expected_numbers = list(range(1, 18))
+    expected_numbers = list(range(1, len(sections) + 1))
     actual_numbers = [section.get("number") for section in sections]
     if actual_numbers != expected_numbers:
         _diag(
@@ -994,7 +994,10 @@ def validate_rule_contract(
             "RULE_CONTRACT_SECTIONS",
             contract_relative,
             0,
-            f"expected section numbers 1..17, found {actual_numbers}",
+            (
+                f"expected contiguous section numbers 1..{len(sections)}, "
+                f"found {actual_numbers}"
+            ),
         )
         return
 
@@ -1072,7 +1075,7 @@ def validate_rule_contract(
             main_relative,
             line_number,
             (
-                f"rule {mismatch + 1} differs from the 17-section contract; "
+                f"rule {mismatch + 1} differs from the rule contract; "
                 f"expected {expected!r}, found {actual!r}"
             ),
         )
@@ -1245,20 +1248,12 @@ def validate_main_rules(
 
     anchors = [
         ("NTP", lambda value: value == "DEST-PORT,123,DIRECT"),
-        ("STUN", lambda value: value == "PROTOCOL,STUN,REJECT"),
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
-        ("LAN", lambda value: value.startswith("RULE-SET,LAN,")),
-        ("Polymarket", lambda value: "polymarket.conf" in value),
-        ("Private Relay", lambda value: "icloud_private_relay.conf" in value),
-        ("Apple AI", lambda value: "apple-ai.conf" in value),
+        ("Apple update", lambda value: value.startswith("DOMAIN,gdmf.apple.com,")),
         ("DIRECT CN", lambda value: "direct-cn.conf" in value),
-        ("SYSTEM", lambda value: value == "RULE-SET,SYSTEM,DIRECT"),
-        ("Reject", lambda value: "/domainset/reject.conf" in value),
-        ("Dedicated services", lambda value: "Emby.list" in value),
-        ("Platform", lambda value: "/domainset/apple_cdn.conf" in value),
-        ("Download", lambda value: "/domainset/speedtest.conf" in value),
-        ("Domestic", lambda value: "/non_ip/domestic.conf" in value),
-        ("IP", lambda value: "/ip/reject.conf" in value),
+        ("Sukka DOMAIN-SET", lambda value: "/List/domainset/speedtest.conf" in value),
+        ("Sukka non_ip", lambda value: "/List/non_ip/cdn.conf" in value),
+        ("Sukka IP", lambda value: "/List/ip/stream.conf" in value),
         ("FINAL", lambda value: value.startswith("FINAL,")),
     ]
     positions: list[tuple[str, int]] = []
@@ -1286,6 +1281,41 @@ def validate_main_rules(
                 relative,
                 right_line,
                 f"{left_label} must appear before {right_label}",
+            )
+
+    # Sukka's DNS-pollution protection relies on every domain and non_ip rule
+    # appearing before the first IP rule. Keep this invariant independent of
+    # the human-readable section contract so future edits cannot silently
+    # reintroduce an early IP-CIDR/IP ruleset.
+    ip_phase_started = False
+    for line_number, rule in rules:
+        fields = [field.strip() for field in rule.split(",")]
+        rule_type = fields[0]
+        is_ip_rule = (
+            "/List/ip/" in rule
+            or rule.startswith("RULE-SET,LAN,")
+            or rule_type in {"IP-CIDR", "IP-CIDR6", "IP-ASN", "GEOIP"}
+        )
+        is_domain_or_non_ip = (
+            rule_type in {
+                "DOMAIN",
+                "DOMAIN-SUFFIX",
+                "DOMAIN-WILDCARD",
+                "DOMAIN-KEYWORD",
+                "DOMAIN-SET",
+            }
+            or "/List/non_ip/" in rule
+        )
+        if is_ip_rule:
+            ip_phase_started = True
+        elif ip_phase_started and is_domain_or_non_ip:
+            _diag(
+                diagnostics,
+                "error",
+                "SUKKA_PHASE_ORDER",
+                relative,
+                line_number,
+                "domain/domainset/non_ip rule appears after the IP phase started",
             )
 
     final_rules = [

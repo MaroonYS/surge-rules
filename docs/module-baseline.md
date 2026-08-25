@@ -55,9 +55,9 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 - Apple 精确正项之后继续保留 Apple 通配负项、金融/KYC/风控负项和
   `-<ip-address>`。`api5.futunn.com` 没有对应的活动处理脚本，不应为了广域 MITM
   清单而解除券商端点保护。
-- NTP/UDP 123 必须先固定 `DIRECT`；Google Voice 的控制面和媒体例外必须位于全局 `PROTOCOL,STUN,REJECT` 之前。
-  全局 STUN 拦截是隐私选择；改为 `DIRECT` 会恢复其他 WebRTC/游戏打洞，但也可能
-  暴露公网地址，两种目标不能同时保证。
+- NTP/UDP 123 必须先固定 `DIRECT`。基础规则不再使用全局
+  `PROTOCOL,STUN,REJECT`；Google Voice 控制面合入 `us-residential.conf`，媒体连接
+  按协议正常建立，避免为一个隐私取舍破坏 Voice、WebRTC、游戏和验证流程。
 - 主 Profile 不再复制 Sukka/Fries 模块注入的 `[Host]`、`always-real-ip` 或
   `skip-proxy`。Apple 更新域也不加入配置级 `always-real-ip`：Surge 的 Fake-IP
   映射能保留原始域名并稳定命中前置规则，强制真实 IP 只会增加对 SNI/Host 嗅探的依赖。
@@ -101,8 +101,8 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 
 - Global 的启用地区与策略名必须真实存在。当前稳定组合使用 `CHN,HKG`，HKG 对应
   `Hong Kong`；不要启用不存在的 `Taiwan` 策略。
-- `bilibili-direct.conf` 只固定视频 CDN，不排除 `bilibili.com`、`biliapi.net` 等
-  API 主机的 MITM/Script。DIRECT 是路由结果，不等于绕过 HTTP 引擎。
+- 基础规则不再加载 `bilibili-direct.conf`；Sukka 国内/全局规则负责普通路由，
+  BiliUniverse 模块继续负责 API、地区与脚本处理。路由结果不等于绕过 HTTP 引擎。
 - 官方 Global/Enhanced/ADBlock/Redirect 与其他已保留 Bilibili 模块有请求重叠。
   主 Rule 无法让一个模块的 pre-matching REJECT 为后置模块让路；验证标准是播放、
   搜索、地区选择和 CDN 结果，而不是要求每条重复脚本都执行。
@@ -117,7 +117,8 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
   `dot.pub`、`doh.pub`、`doh.360.cn` 注入不同 Host 值。主 `[Host]` 排在模块之后，
   无法删除前面的条目；添加第三份只会增加歧义。
 - 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库主 Rule。
-  被模块先行拒绝的连接不能再由 GitHub `DOMAIN-SET,DIRECT` 救回。
+  被模块先行拒绝的连接不能再由后置基础规则救回；本次移除基础 Reject 只消除重复层，
+  不改变模块本身的优先级。
 - 一个前置模块已经产生最终 REJECT 时，后置模块的 Rewrite/Script 不再执行。这不等于
   后置模块整体失效，但意味着“全部模块的每一条声明都执行”在逻辑上不可实现。
 

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Rebuilt the base Rule layer around Sukka's strict `domainset -> non_ip -> ip -> FINAL`
+  ordering and added an independent validator guard against later phase regressions.
+- Reduced active repository resources from 30 to 12 DOMAIN-SET files by merging same-policy
+  X/Google/Polymarket, Hong Kong account-context and Bybit layers without dropping domains.
+- Removed duplicate base Reject, global STUN, SYSTEM/APNs and reverse-whitelist stacks while
+  leaving all user-retained Surge modules untouched.
+- Inlined the 21 Apple Software Updates hosts, Apple Account payment boundary, six Private
+  Relay endpoints and iCloud sync boundary so core system traffic does not depend on a
+  secondary GitHub resource refresh.
+- Disabled the scheduled Adblock4limbo supplement publisher because the supplement is no
+  longer active; retained its source tooling and history without generating no-op commits.
+- Synchronized the rebuilt iPhone and Mac profiles; Mac keeps only its three VoHive-specific
+  exceptions, with the IP-CIDR moved into the final IP phase.
 - Completed Apple's current 21-host Software Updates boundary while retaining the five
   watchOS core hosts inline as a bootstrap path; aligned Apple DoH and every remaining
   exact update host on DIRECT without widening to an Apple suffix.

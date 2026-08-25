@@ -1,85 +1,44 @@
-# Migration notes
+# Migration Notes
 
-本仓库的规则数据来自配置所有者提供的 555 行 `[Rule]` 清单，并按语义角色拆分。
-当前配置不再为每个语义角色创建策略组；Identity/Risk 与跨地区 Finance 一样
-固定使用 `Res-Frontier`。`rules-manifest.json` 用
-`semantic_role` 保留验证边界，用 `policy` 记录实际运行出口。
+## 2026-08 Sukka-first rebuild
 
-## 已迁移覆盖
+旧规则层按业务历史逐次增补，出现了三个问题：同一策略拆成多个远程文件、公共 Reject
+与保留广告模块重复、以及 IP 类规则过早出现。此次迁移只替换基础 `[Rule]`，策略组、
+节点、订阅、General、MITM、Rewrite 与模块均保持不变。
 
-| 来源策略 / 语义角色 | 仓库位置 | 处理 |
-| --- | --- | --- |
-| `DIRECT`（Apple Software Updates） | `apple-software-update.conf` | Apple 官方 21 主机中的 5 个 watchOS 核心域保留内联，其余 16 个精确补齐并统一直连 |
-| `Res-Frontier`（X） | `x-residential.conf` | X 第一方账户、API、Money、跳转、媒体与 Live 统一住宅出口 |
-| `DIRECT` | `direct-cn.conf` | 中国大陆银行与银联迁移 |
-| `DIRECT`（Bilibili） | `bilibili-direct.conf` | 原宽泛关键词收窄为 3 个视频 CDN 后缀并恢复前置优先级 |
-| `HK-FINANCE` | `hk-finance.conf`、`hk-finance-context.conf` | 香港第一方域名迁移；当前账户的香港汇丰及香港券商共享基础设施从跨地区集合固定到香港上下文 |
-| `SG-FINANCE` | `sg-finance.conf` | 全部迁移 |
-| `JP-FINANCE` | `jp-finance.conf` | 全部迁移 |
-| `KR-FINANCE` | `kr-finance.conf` | 全部迁移 |
-| `UK-FINANCE` | `uk-finance.conf` | 全部迁移 |
-| `Res-Frontier` | `polymarket-global.conf`、`polymarket.conf`、`us-residential.conf` | Polymarket 国际与美国产品按配置所有者最新决定统一走固定家宽；美国第一方金融、Apple Cash/Pay 与 PayPal 同样走住宅 |
-| `Finance` | `finance-context.conf` | 跨地区金融机构自身域名迁移 |
-| `Identity` / `Risk` | `identity-context.conf`、`risk-context.conf` | KYC/身份验证与保守设备情报/指纹分层；共享多租户域固定使用 `Res-Frontier` 兜底 |
-| `Crypto` | `bybit.conf`、`crypto.conf` | Bybit 独立维护域名边界，但与其余已维护中心化交易所共同使用 iPhone 固定 Crypto 出口；Gate 不建立专用覆盖 |
-| `Web3` | `web3.conf` | 全部有效语义迁移 |
-| `AIGC` | `apple-ai.conf` | 全部迁移；运行时固定 `United States` |
+### 合并
 
-没有任何金融机构因为“推测未使用”而被删除或归档。
+- `x-residential.conf`、`google-account.conf`、`google-voice.conf`、
+  `polymarket-global.conf`、`polymarket.conf` → `us-residential.conf`。
+- `hk-finance-context.conf` → `hk-finance.conf`。
+- `bybit.conf` → `crypto.conf`。
 
-## 等价去重
+旧文件不再活动，但保留在仓库历史中，避免破坏已有链接；主规则与 manifest 只加载
+合并后的 12 个资源。
 
-来源中的：
+### 内联
 
-```text
-.moonbeam.moonscan.io
-.moonscan.io
-```
+- `apple-software-update.conf` 的内容与 5 个既有启动主机合并为 21 条精确 `DOMAIN`。
+- `apple-account-payment-rules.conf` 改为 5 个精确主机加一个动态账单分片。
+- `icloud_private_relay.conf` 不再作为未列入 Sukka README 基线的远程依赖，改为 6 个
+  精确入口并前置于 iCloud 直连层。
+- `icloud-sync.conf` 改为精确后缀内联，保证 CloudKit、Photos、iWork 与内容传输不受
+  外部资源刷新影响。
 
-前者已经被后者完整覆盖，因此仓库只保留 `.moonscan.io`。实际匹配范围不变。
+### 删除的基础规则层
 
-## 有意调整
+- Sukka Reject、Adblock4limbo 补集与 IP Reject；现有模块继续负责广告拦截。
+- Bilibili、淘宝、Brawl Stars 等为旧 Reject 误杀而建立的反向放行；Reject 移除后不再需要。
+- 全局 STUN 拒绝及其 Google Voice 例外；不再人为阻断正常 WebRTC/Voice。
+- APNs 代理覆盖与 `SYSTEM`；当前设备明确使用 `include-apns=false`。
+- 第三方 WeChat、Emby 总表及 GitHub API 特例；分别由 Sukka 国内/全局规则、精确 Emby
+  主机与普通 CDN/全局策略承接。
 
-- 按 17 段契约保留 `PROTOCOL,STUN,REJECT`，并在其前将 NTP/UDP 123 固定 `DIRECT`，避免系统时间同步误入普通代理。
-- Apple Software Updates 的 21 个官方主机统一前置直连；5 个 watchOS 核心域保持
-  内联启动保护，其余 16 个集中维护。Apple DoH 单独精确直连，配置级更新域
-  `always-real-ip` 被移除，避免目录、DNS 与下载链因出口或域名映射方式分裂。
-- X 六个第一方后缀在 Google/Reject/CDN/Global 之前固定住宅出口；不扩大 X MITM，也不把路由当作 X Money 居住或身份资格。
-- 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
-  `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享
-  Reject、Streaming、CDN 与 Global 规则命中。
-- Bilibili 前置文件不收录 `bilibili.com` 与 `biliapi.net` API 域，保证
-  BiliUniverse Global 的脚本、MITM 与 `http-client-policy` 地区选择不被覆盖；
-  模块保持 `ForceHost=1`。
-- Private Relay 与 Apple Intelligence 从宽泛 Apple 路径拆出，运行时固定普通
-  `United States` 节点；Private Relay 不使用住宅 SOCKS5。
-- Apple Cash/Pay 与 PayPal 归入 `us-residential.conf`。
-- Polymarket 从宽泛 `DOMAIN-KEYWORD` 收窄并按产品拆分：国际 `.com`、精确 Auth0
-  租户及上传主机保留在 `polymarket-global.conf`，美国 `.us` 保留在
-  `polymarket.conf`；两个集合按配置所有者决定统一固定 `Res-Frontier` 家宽。
-- `bankofchina.com` 因不同国家站点共用根域且按路径分区，从大陆直连移到 `Finance`；
-  `pingan.com` 收窄为 `bank.pingan.com`。
-- 美国住宅文件移除共享清算、身份、征信及反欺诈基础设施，补充 11 个第一方区域银行。
-- KYC/身份验证与设备指纹/反欺诈供应商不混入 Finance 语义文件，分别进入
-  `identity-context.conf` 与 `risk-context.conf`；Finance、Identity 与 Risk 在运行时
-  均固定 `Res-Frontier`，不再要求用户手动切换验证上下文。
-- Identity 删除宽泛 `.persona.com`，保留产品域 `.withpersona.com`；Risk 收窄为
-  8 个设备情报、设备信誉、行为生物识别与指纹域名。
-- 中国、香港、新加坡、日本、韩国、英国银行第一方集合继续优先命中各自静态地区策略；
-  Bybit 与其余 Crypto 共同使用固定非美 `Crypto` 出口，Web3 使用独立非美策略。共享 KYC/风控根域无法由
-  iOS 识别调用 App，因此固定住宅仅是美国金融优先的确定性兜底。只有能由真实日志证明
-  租户归属的精确 hostname 才能在共享层之前增加对应地区或加密业务覆盖。
-- HSBC HK、Futu/Moomoo HK 与 Longbridge HK 的共享基础设施从
-  `finance-context.conf` 移入 `hk-finance-context.conf`，避免当前账户误走美国住宅。
-- Bybit 从通用文件拆成独立维护集合，但运行时复用 iPhone 已有的固定 `Crypto`
-  出口；该出口仍须与账户本人真实且受支持地区一致。
-- 美国住宅文件明确补回 Apex Clearing、Early Warning、ID.me 与 Login.gov。
-- 删除宽泛 `.icbc.com`，保留大陆专用 `.icbc.com.cn` 与香港 `.icbcasia.com`。
-- Apple CDN 从已废弃的 `non_ip` 占位切换至有效 DOMAIN-SET。
-- 删除只有 SKK 哨兵的 `ip/stream_us.conf`，并删除与聚合 Streaming 同策略的
-  `non_ip/stream_us.conf`。
-- reject-drop 不使用 `pre-matching`，避免越过前置业务规则；Adblock4limbo
-  只加载合规的清洗补集。
-- `api.github.com` 在通用 AI 规则前固定到 `PROXY`；删除无法精确验证的 cr18 关键词。
+### Sukka 顺序
 
-Identity 与 Risk 文件的活动条目由校验器按文件、语义角色与域名三重锁定。
+新结构严格为：自定义精确域名与本仓库 `DOMAIN-SET` → Sukka `DOMAIN-SET` → Sukka
+`non_ip` → Sukka `ip` → `FINAL`。Mac 的 VoHive `PROCESS-NAME` 与域名例外留在前段，
+其 `IP-CIDR` 被移动到 IP 阶段，避免破坏 DNS 污染防护顺序。
+
+Apple CN 在广义 Apple Services 前是有意的窄规则优先；这是首匹配语义所必需，并不
+改变 `domainset → non_ip → ip` 总体约束。

@@ -6,99 +6,16 @@
   "contract": "rules-contract.json",
   "active": [
     {
-      "file": "apple-software-update.conf",
-      "policy": "DIRECT",
-      "semantic_role": "Apple-Software-Update",
-      "description": "Apple-documented Software Updates hosts beyond the five inline watchOS bootstrap endpoints"
-    },
-    {
-      "file": "x-residential.conf",
-      "policy": "Res-Frontier",
-      "semantic_role": "X-Residential",
-      "description": "X account, API, Money, redirects, static media and Live first-party domains"
-    },
-    {
-      "file": "google-account.conf",
-      "policy": "Res-Frontier",
-      "semantic_role": "Google-Account",
-      "description": "Google Account sign-in, account management and OAuth control-plane hosts"
-    },
-    {
-      "file": "google-voice.conf",
-      "policy": "Res-Frontier",
-      "semantic_role": "GoogleVoice-Control",
-      "description": "Google Voice page, signaling and call-control hosts"
-    },
-    {
-      "file": "google-voice-media.conf",
-      "policy": "DIRECT",
-      "semantic_role": "GoogleVoice-Media",
-      "description": "Google Voice STUN hosts routed with the Workspace-published UDP media path"
-    },
-    {
-      "file": "google-voice-media-rules.conf",
-      "type": "RULE-SET",
-      "policy": "DIRECT",
-      "semantic_role": "GoogleVoice-Media",
-      "description": "Workspace-published Google Voice UDP media IP and port constraints"
-    },
-    {
-      "file": "bilibili-direct.conf",
-      "policy": "DIRECT",
-      "description": "Bilibili video CDN domains forced direct before shared reject and CDN rules"
-    },
-    {
-      "file": "taobao-functional.conf",
-      "policy": "DIRECT",
-      "description": "Taobao/Tmall interactive mini-app runtime restored before the shared reject stack"
-    },
-    {
-      "file": "polymarket-global.conf",
-      "policy": "Res-Frontier",
-      "semantic_role": "Polymarket-Global",
-      "description": "Polymarket international product, exact authentication tenant and observed S3 upload host on the owner's fixed residential context"
-    },
-    {
-      "file": "polymarket.conf",
-      "policy": "Res-Frontier",
-      "semantic_role": "Polymarket-US",
-      "description": "Polymarket US product namespace"
-    },
-    {
-      "file": "apple-account-payment-rules.conf",
-      "type": "RULE-SET",
-      "policy": "Res-Frontier",
-      "semantic_role": "Apple-Account-Payment",
-      "description": "Apple Account sign-in and App Store billing control-plane hosts"
-    },
-    {
-      "file": "icloud-sync.conf",
-      "policy": "DIRECT",
-      "semantic_role": "iCloud-Sync",
-      "description": "Apple-documented iCloud, CloudKit, Photos, iWork, content-transfer and diagnostics domains"
-    },
-    {
-      "file": "apple-ai.conf",
-      "policy": "United States",
-      "semantic_role": "AIGC",
-      "description": "Apple Intelligence, Siri and Private Cloud Compute"
-    },
-    {
       "file": "direct-cn.conf",
       "policy": "DIRECT",
+      "semantic_role": "CN-FINANCE",
       "description": "Mainland China banks and UnionPay"
     },
     {
       "file": "hk-finance.conf",
       "policy": "Hong Kong",
       "semantic_role": "HK-FINANCE",
-      "description": "Hong Kong financial services"
-    },
-    {
-      "file": "hk-finance-context.conf",
-      "policy": "Hong Kong",
-      "semantic_role": "HK-FINANCE",
-      "description": "Shared infrastructure pinned to the owner's Hong Kong HSBC and brokerage context"
+      "description": "Hong Kong banks, brokers and the owner's shared HK brokerage infrastructure"
     },
     {
       "file": "sg-finance.conf",
@@ -127,58 +44,38 @@
     {
       "file": "us-residential.conf",
       "policy": "Res-Frontier",
-      "description": "United States financial services plus exact, observed service-specific tenant hosts"
+      "semantic_role": "US-RESIDENTIAL",
+      "description": "US finance, X, Google account and Voice, and Polymarket on one stable residential egress"
     },
     {
       "file": "finance-context.conf",
       "policy": "Res-Frontier",
       "semantic_role": "Finance",
-      "description": "Financial services whose region cannot be inferred from the domain"
+      "description": "Financial first-party domains whose region cannot be inferred from the hostname"
     },
     {
       "file": "identity-context.conf",
       "policy": "Res-Frontier",
       "semantic_role": "Identity",
-      "description": "Shared multi-tenant KYC and identity services using the deterministic United States residential fallback"
+      "description": "Shared KYC and identity verification infrastructure"
     },
     {
       "file": "risk-context.conf",
       "policy": "Res-Frontier",
       "semantic_role": "Risk",
-      "description": "Shared multi-tenant device intelligence and fingerprinting services using the deterministic United States residential fallback"
-    },
-    {
-      "file": "bybit.conf",
-      "policy": "Crypto",
-      "description": "Bybit first-party application and documented API domains"
+      "description": "Conservative device intelligence and fraud-detection infrastructure"
     },
     {
       "file": "crypto.conf",
       "policy": "Crypto",
-      "description": "Remaining centralized cryptocurrency exchanges"
+      "semantic_role": "Crypto",
+      "description": "Bybit and remaining centralized cryptocurrency exchanges"
     },
     {
       "file": "web3.conf",
       "policy": "Web3",
+      "semantic_role": "Web3",
       "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
-    },
-    {
-      "file": "apple-push.conf",
-      "policy": "United States",
-      "semantic_role": "Apple-Push",
-      "description": "Apple Push Notification service override before the internal SYSTEM ruleset"
-    },
-    {
-      "file": "apple-push-rules.conf",
-      "type": "RULE-SET",
-      "policy": "United States",
-      "semantic_role": "Apple-Push",
-      "description": "Apple-published APNs TCP 5223 ranges plus a port-constrained 17/8 fallback"
-    },
-    {
-      "file": "adblock4limbo-supplement.conf",
-      "policy": "REJECT",
-      "description": "Precise Adblock4limbo domains not already covered by the SKK reject DOMAIN-SET or RULE-SET"
     }
   ]
 }

@@ -1,328 +1,137 @@
 # Surge Rules
 
-一套面向 Surge 的模块化规则仓库。主配置只保留有顺序意义的规则骨架，
-大量域名按“最终策略”拆成远程 `DOMAIN-SET`，IP/端口组合拆成远程
-`RULE-SET`，从而减少重复、顺序错误和后续维护成本。
+这是一套以 [SukkaW/Surge](https://github.com/SukkaW/Surge) 为基础骨架、
+面向当前 iPhone 与 Mac 配置的精简规则层。主配置只保留两类内容：
 
-## 设计目标
+1. Sukka 官方公开 `List` 资源及其严格顺序；
+2. 无法由公共规则表达的固定地区银行、住宅风控、Crypto、Web3 与少量系统例外。
 
-- 保留地区第一方金融域名的既有分流语义。
-- 将 Apple 官方 21 个 Software Updates 主机、Apple 加密 DNS、可选 Beta 注册及
-  证书验证链精确前置直连，并保留 5 个 watchOS 核心主机作为内联启动保护。
-- 将保留模块依赖的 GitHub release/raw 下载链固定到逐次实测稳定的香港出口，
-  避免普通美国与住宅上游同时失效时阻断脚本更新。
-- 用配置级精确 Rewrite 修复中国坐标配合 `*-US` locale 时 iPhone/watchOS
-  WeatherKit 请求遗漏 `country` 的上游兼容问题，不修改 WeatherKit 模块或其美标算法。
-- 将 Apple Account、Private Relay 与 iCloud 内容同步分层：账户/账单保持住宅出口，
-  Private Relay 保持既定美国出口，CloudKit、照片、iWork 与上传下载域直连并避开广告误杀。
-- 用精确后缀恢复 Bilibili 视频 CDN 的前置直连，避免被共享 Reject/CDN 规则抢先命中。
-- 仅恢复淘宝/天猫品牌互动页依赖的 mini-app 运行时，不对整个淘宝广告域放行。
-- 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
-- 在全局 STUN 拦截前精确放行 Google Voice 的控制与媒体通道。
-- 将 Google Account 登录、账户管理与 OAuth 控制面收口到稳定住宅出口。
-- 将 Bybit 的已确认 App/API 域名从通用 Crypto 余量中拆出维护，同时复用
-  iPhone 已存在的固定 `Crypto` 出口。
-- 为 APNs 提供 SYSTEM 之前的精确、可选稳定出口。
-- 将 Google Voice 与 APNs 的逻辑 `AND` 规则移入独立、无策略列的远程 `RULE-SET`。
-- 将跨地区金融、KYC/身份验证、设备指纹/反欺诈拆成独立策略层。
-- 将当前账户使用的 HSBC HK、Futu/Moomoo HK 与 Longbridge HK 共享基础设施固定到香港金融上下文。
-- 通过零依赖校验器和 GitHub Actions 阻止格式错误、重复、跨策略覆盖和主规则顺序回归。
-- 用机器可读模块兼容清单固定全部保留模块所需的 21 个 Apple MITM 前置主机，
-  不从第三方脚本自动扩域。
-- 分别记录 [Mac 与 iPhone 的模块有效顺序](docs/module-order.md)，仅按作者硬约束
-  调整优先级，不对无依据的模块做推测性重排。
-- 禁止未经批准的宽泛共享后缀和 `DOMAIN-KEYWORD`，让自定义规则保持可审计。
+模块、节点、策略组、MITM、Rewrite 和订阅不属于本仓库的规则重建范围；现有模块继续
+保留并由 Surge 在各设备上独立叠加。
 
-Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合大量域名：
+## 核心原则
 
-- `example.com` 只匹配精确域名；
-- `.example.com` 匹配根域名及其子域名。
+Sukka 官方要求所有域名规则与 `DOMAIN-SET` 先于全部 `non_ip`，全部 `non_ip`
+再先于任何 IP 类规则，最后才是 `FINAL`。本仓库把这个约束固化为五段契约：
 
-`DOMAIN-SET` 文件中只写域名，不写 `DOMAIN-SUFFIX`、策略名或逗号。
-`RULE-SET` 文件每行写一条完整规则声明，但不写策略列；策略由主 Rule 的外层
-`RULE-SET` 统一指定。
+1. 精确系统、Apple 与账户链路；
+2. 固定地区与高风控业务；
+3. Sukka `DOMAIN-SET`；
+4. Sukka `non_ip`；
+5. Sukka `ip` 与 `FINAL`。
 
-## 文件与策略
+所有自定义 `DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-WILDCARD` 和远程
+`DOMAIN-SET` 均位于 IP 阶段之前。校验器会拒绝任何把域名或 `non_ip` 规则放到
+IP 阶段之后的修改。
 
-| 文件 | 目标策略 | 用途 |
+Apple CN 是有意放在宽泛 `apple_services` 之前的窄规则例外；否则
+`apple_services` 中的 Apple 广义后缀会先命中，Apple CN 的 `DIRECT` 将失效。
+Microsoft CDN 同理位于 Microsoft 广义规则之前。
+
+## 为什么不在基础规则重复广告拦截
+
+Sukka README 明确只建议在 Surge for Mac 使用其大型 Reject 集，移动端建议使用专门
+工具。当前配置已经保留多套广告与 MITM 模块，因此基础规则不再加载 Sukka Reject、
+Adblock4limbo 补集、全局 STUN 拒绝或 URL-REGEX 拦截。这样可以避免同一请求同时经过
+多层拦截、降低误杀与资源开销；这不是删减现有模块。
+
+## Apple 与系统链路
+
+- Apple 官方 Software Updates 的 21 个精确主机直接内联为 `DIRECT`，系统更新不再
+  依赖 GitHub 外部资源先刷新成功。
+- Apple Account 与 App Store 账单只固定 5 个精确主机及动态 `*-buy` 分片到
+  `Res-Frontier`，不扩大到整个 Apple/iTunes。
+- Private Relay 的 6 个精确入口固定普通 `United States`，并置于 iCloud 直连层前。
+- iCloud、CloudKit、Photos、iWork 与内容传输域精确直连；Apple CN/CDN 继续直连。
+- GitHub 与 `githubusercontent.com` 固定香港出口，保证保留模块的发布资源可更新。
+- `include-apns=false` 的设备模式保持不变，基础规则不再加载不会生效的 APNs 专用覆盖。
+
+## 本仓库活动资源
+
+主规则通过 12 个远程本仓库 `DOMAIN-SET` 加载 630 条当前活动域名：
+
+| 文件 | 策略 | 作用 |
 | --- | --- | --- |
-| `apple-software-update.conf` | `DIRECT` | Apple 官方 Software Updates 表中除 5 个内联 watchOS 核心主机外的 16 个精确域名 |
-| `x-residential.conf` | `Res-Frontier` | X 账户、API、Money、跳转、媒体与 Live 第一方域 |
-| `google-account.conf` | `Res-Frontier` | Google Account 登录、账户管理与 OAuth 控制面 |
-| `google-voice.conf` | `Res-Frontier` | Google Voice 页面、信令与呼叫控制 |
-| `google-voice-media.conf` | `DIRECT` | Google Voice STUN 主机 |
-| `google-voice-media-rules.conf` | `DIRECT` | Google Voice UDP 媒体 IP/端口逻辑规则 |
-| `bilibili-direct.conf` | `DIRECT` | Bilibili 视频 CDN 精确前置直连 |
-| `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
-| `polymarket-global.conf` | `Res-Frontier` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
-| `polymarket.conf` | `Res-Frontier` | Polymarket 美国独立产品 |
-| `icloud-sync.conf` | `DIRECT` | Apple 官方 iCloud、CloudKit、照片、iWork、内容传输与诊断域 |
-| `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
-| `hk-finance.conf` | `Hong Kong` | 香港金融 |
-| `hk-finance-context.conf` | `Hong Kong` | 当前账户的香港汇丰及香港券商共享基础设施 |
+| `hk-finance.conf` | `Hong Kong` | 香港银行、券商及当前香港账户共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `uk-finance.conf` | `United Kingdom` | 英国金融 |
-| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple Account 登录控制面、App Store 账单根域与动态 `*-buy` 分片 |
-| `us-residential.conf` | `Res-Frontier` | 美国金融、Apple Cash/Pay、PayPal 与已实测的精确专属租户主机 |
-| `finance-context.conf` | `Res-Frontier` | 无法仅按域名判断地区的金融服务 |
-| `identity-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户 KYC 与身份验证服务 |
-| `risk-context.conf` | `Res-Frontier` | 无法识别调用方的共享多租户设备情报与指纹服务 |
-| `bybit.conf` | `Crypto` | Bybit 官方 App/API 域名，独立维护并复用固定 Crypto 出口 |
-| `crypto.conf` | `Crypto` | 中心化交易所 |
-| `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
-| `apple-push.conf` | `United States` | APNs 长连接，优先于内建 `SYSTEM` |
-| `apple-push-rules.conf` | `United States` | Apple 公布网段上的 APNs TCP 5223 逻辑规则 |
-| `adblock4limbo-supplement.conf` | `REJECT` | Adblock4limbo 经清洗、去重并减去 SKK 覆盖后的补集 |
+| `us-residential.conf` | `Res-Frontier` | 美国金融、X、Google Account/Voice 与 Polymarket |
+| `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
+| `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
+| `risk-context.conf` | `Res-Frontier` | 设备情报、指纹与反欺诈基础设施 |
+| `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所 |
+| `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 
-`archive/` 中的文件永远不被主规则加载。当前没有任何被确认停用的域名。
+同一策略下原有的小文件已经合并：X、Google Account/Voice、Polymarket 合入
+`us-residential.conf`；香港账户上下文合入 `hk-finance.conf`；Bybit 合入
+`crypto.conf`。旧文件仍保留在仓库供历史追踪，但不再被主规则引用。
 
-## 接入
+共享 KYC 和风控供应商无法仅根据域名判断调用它的是哪家银行；Surge iOS 也无法按
+请求来源 App 为同一共享域名动态选择地区。因此这两层只保留经过审计的窄后缀，并按
+当前账户使用场景固定住宅出口，不加入 `.auth0.com`、`.cloudflare.com`、
+`.medallia.com` 等宽泛共享后缀。
 
-1. 确认现有配置已经定义主 Rule 使用的固定策略：`Res-Frontier`、`PROXY`、
-   `Hong Kong`、`Singapore`、`Japan`、`Korea`、`United Kingdom`、
-   `United States`、`Crypto` 与 `Web3`。
-2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
-3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 30 个远程本仓库规则文件（27 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
-   - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 30 个本仓库规则文件均成功加载。
+## Sukka 公共分流
 
-香港金融与账户上下文资源单独使用一小时更新间隔，减少 Futu 等紧急修订发布后
-仍命中旧缓存的时间；其余资源保持 Surge 默认更新节奏，避免无意义轮询。
+当前使用的官方资源均来自统一基址 `https://ruleset.skk.moe/List/`：
 
-展开版由 `scripts/build_expanded.py` 自动生成，与远程版的活动规则语义一致。
-它用于检查和整段复制，不应手工编辑。修改对应外部规则文件后运行：
+- `speedtest`、`cdn` → `PROXY`；
+- `stream`、`ai`、`apple_intelligence` → `United States`；
+- `apple_cdn`、`apple_cn`、`microsoft_cdn`、`lan`、`domestic`、`direct` → `DIRECT`；
+- `apple_services`、`microsoft` → `United States`；
+- `download` → `Hong Kong`；
+- Telegram 官方 CIDR → `Singapore`；
+- `global` 与 `FINAL` → `PROXY`；
+- 中国 IP → `DIRECT`。
 
-```bash
-python3 scripts/build_expanded.py --write
-```
+Telegram 仅加载作者推荐的官方 CIDR，不加载可选 ASN 或重复的域名列表。IPv6 当前未
+启用，因此不加载 China IPv6 资源。`nano.cr18.eu.org` 是唯一保留的 Emby 精确例外，
+固定新加坡，不再加载整个第三方 Emby 总表。
 
-原始 Rule 到各文件的覆盖和有意调整记录在
-[docs/migration-notes.md](docs/migration-notes.md)。
-与 BiliUniverse Global 的域名边界、模块参数及持续兼容检查见
-[docs/biliuniverse-global.md](docs/biliuniverse-global.md)。
-逐项完成状态见 [docs/requirements-matrix.md](docs/requirements-matrix.md)。
-原始 Rule、Bilibili 精确恢复、金融/身份/风控扩充及广告补集的版本数量对账见
-[docs/source-parity.md](docs/source-parity.md)。
-本轮金融域名的来源与边界见
-[docs/domain-sources.md](docs/domain-sources.md)。
+## 接入与校验
 
-主规则使用以下公开 Raw 基址：
+`surge-main.conf` 是远程资源版；`surge-expanded.conf` 仅用于审计和整段复制，
+由生成器维护。接入前应确认策略组存在：`Res-Frontier`、`PROXY`、`Hong Kong`、
+`Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
+`Web3`。
 
-```text
-https://raw.githubusercontent.com/MaroonYS/surge-rules/main/
-```
-
-Private Relay 与 Apple Intelligence 固定使用普通 `United States` 节点；住宅
-SOCKS5 不参与 Private Relay 的 UDP/QUIC 路径。
-Apple Cash/Pay 与 PayPal 按配置所有者的明确账户地区选择收录在
-`us-residential.conf`；Apple Account 的 4 个精确登录控制主机、账单根域与动态
-`*-buy.itunes.apple.com` 分片单独收录在
-`apple-account-payment-rules.conf`。两层均命中
-`Res-Frontier`，但不扩大到整个 Apple/iTunes 或共享 Braintree 基础设施。
-这些服务本身并非天然只属于美国。
-
-## 维护
-
-新增服务时，先确认其最终策略，再把域名加入对应文件。不要按银行创建新文件。
-只有你明确确认停用的域名才应移入 `archive/`，需要时可再移回正式文件。
-
-优先从 Surge 请求日志取得真实主机名，再添加 `DOMAIN` 或足够窄的后缀。
-不要为了“兜底”添加 `.apple.com`、`.auth0.com`、`.cloudflare.com` 或公共后缀；
-这种规则看似覆盖更多，实际会吞掉无关服务。
-
-本地检查：
+在 Surge 的外部资源页面刷新，并确认 12 个本仓库规则文件均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict
 python3 scripts/build_expanded.py --check
 python3 -m unittest discover -s tests -v
-python3 scripts/check_biliuniverse.py --timeout 30
-python3 scripts/check_module_compatibility.py
 python3 scripts/check_upstreams.py --timeout 15 --retries 2
+python3 scripts/check_module_compatibility.py
 ```
 
-核对完整 Surge 配置中的策略是否存在，并确认地区、住宅与加密资产策略使用固定代理
-或手动 `select`。APNs 是 TCP 5223 长连接，普通 HTTP
-健康检查不能证明该端口可用，所以仓库不再使用自动 `fallback`：
+完整配置还可以用 Surge 自带检查器验证：
 
 ```bash
-python3 scripts/check_profile_policies.py \
-  --profile /path/to/profile.conf \
-  --require-stable \
-  Res-Frontier PROXY "Hong Kong" Singapore Japan Korea \
-  "United Kingdom" "United States" Crypto Web3
+/Applications/Surge.app/Contents/Applications/surge-cli --check /path/to/Sukka.conf
 ```
 
-该检查器也可将 Surge 导出的“修改后配置”同时作为 `--profile` 和
-`--rules`；它会识别模块的 `#!FROM-MODULE`、逻辑规则与 `pre-matching`，
-避免把嵌套条件或选项误报为策略名。
+## 维护边界
 
-生成机器可读报告：
+- 优先从 Surge 请求日志取得真实主机名，再加入足够窄的精确域或后缀。
+- 地区银行必须进入对应地区文件，不应因 App Store 下载地区而统一改成美国出口。
+- Crypto 与 Web3 使用不同策略，避免交易所地区限制与链上服务可用性互相牵连。
+- 不添加 Gate 专用覆盖；Gate 未命中自定义 Crypto 时按 Sukka/最终规则正常分流。
+- 不使用 `DOMAIN-KEYWORD` 或公共云、KYC、CDN 的宽泛根域做“兜底”。
+- 模块顺序与 MITM 保护边界分别见 [module-order](docs/module-order.md) 和
+  [module-baseline](docs/module-baseline.md)，规则重建不会删除或改写模块。
 
-```bash
-python3 scripts/validate.py \
-  --strict \
-  --json-out validation-report.json
-```
-
-重新生成或核对 Adblock4limbo 补集：
-
-```bash
-python3 scripts/sync_adblock4limbo.py --write
-python3 scripts/sync_adblock4limbo.py --check
-```
-
-同步器只在补集的有效规则发生变化时重写文件。上游与两个 SKK 基线的 SHA-256
-属于易变来源元数据，不再写入受版本控制的规则头；自动化会把它们写入 Actions
-Summary，避免“只有来源哈希变化”触发无意义提交。
-
-`check_upstreams.py` 会读取完整正文并检查 HTTPS、内容类型、UTF-8、
-Deprecated 标记、空文件、SKK 哨兵占位及外部 RULE-SET 的策略列，不再只探测 URL。
-Adblock4limbo 原文件把 `reject` 写进了每一条外部规则；生成器会移除策略列、
-排除宽泛关键词、去重并减去 SKK 已覆盖项。许可归属见
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-
-`.github/workflows/sync-adblock4limbo.yml` 每天香港时间 02:37 轮询一次
-Adblock4limbo 及两个 SKK Reject 基线，也可以从 Actions 手动运行。它会依次重新生成
-`adblock4limbo-supplement.conf` 与 `surge-expanded.conf`、运行全部单元测试和严格
-校验。只有这两个生成文件确实变化且全部检查通过时，才会由 GitHub Actions 机器人
-直接创建提交并以普通非强制推送快进 `main`，无需人工确认或合并。
-
-没有有效变化时不会创建提交；上游下载、生成、测试或校验失败时不会发布任何变更。
-若同步期间 `main` 出现其他提交，工作流会拒绝推送并由下一次计划任务重新执行，避免
-覆盖并发修改。瞬时下载错误会在当前运行中短暂重试，整个工作流失败时还会自动从最新
-`main` 重新排队最多两次，不需要人工重新运行。GitHub 定时任务是轮询而不是上游
-Webhook，因此临时人工更新最多约延迟 24 小时，实际执行时间还可能受 GitHub 调度
-影响。仓库需要允许工作流写入内容和重新调度 Actions。
-
-### SKK 兼容性边界
-
-SKK 的资源类型、各非 IP 资源内部顺序和 `domainset → non_ip → ip` 总体结构均保留。
-本配置有两项经过测试的有意例外，不能描述成对其示例的逐字复制：
-
-- `reject-drop.conf` 不加 `pre-matching`。Surge 会把带该参数的拒绝规则提升到所有
-  普通规则之前，导致 Bilibili 视频 CDN 与淘宝互动运行时无法由更精确的前置规则放行。
-- Google Voice 与 APNs 的端口约束规则必须先于全局 STUN / `SYSTEM` 生效；其所有
-  IP 子规则均带 `no-resolve`，不会为域名触发本地 DNS 查询。Blackmatrix7 的 WeChat
-  文件按其 README 作为一个混合 `RULE-SET` 原样加载，其中 IP 子规则同样自带
-  `no-resolve`。
-
-这是对多个上游约束和本配置实测例外的显式取舍，不应删除 `no-resolve`，也不应在
-未重新验证 Bilibili、淘宝、Google Voice 与 APNs 前恢复 `pre-matching`。
-
-## Identity 与 Risk 的边界
-
-跨地区第一方金融、KYC/身份验证、设备情报与指纹服务仍分别保留 Finance、Identity、
-Risk 三个语义层。三层运行时均固定到 `Res-Frontier`，不再需要手动切换验证上下文，
-也不会因自动测速或可用性检查改变账户出口。
-
-中国、香港、新加坡、日本、韩国与英国银行的第一方集合仍先命中并固定到各自的
-`DIRECT` 或地区策略；Bybit 与其余 Crypto 复用固定非美 `Crypto` 出口，Web3 继续
-使用独立非美策略。
-Identity/Risk 中的根域属于共享多租户基础设施，仅凭 SNI/Host 无法判断调用它的是哪家
-银行、交易所或钱包，因此住宅出口是明确的“美国金融优先”确定性兜底，并不宣称共享
-KYC 会自动继承前一个业务请求的策略。
-
-长期应依据真实请求日志，把能够证明租户归属的精确 hostname 放在共享 Identity/Risk
-后缀之前，并直接指向对应银行地区、Bybit、Crypto 或 Web3；未经证明的共享根域不得
-复制到业务集合中。
-`rules-manifest.json` 的 `semantic_role` 继续让校验器按原边界检查。宽泛 Persona 根域和
-通用反欺诈 SaaS 不在活动文件中；
-验证码等未列入活动文件的共享服务仍按实际日志精确补充。
-
-本仓库只负责分流结构与规则数据，不包含节点、代理凭据或订阅。
-它不能保证银行或支付服务不触发风控；稳定、固定的账户地区和正常使用行为
-比持续扩大共享验证规则更重要。
-
-## X 与加密业务边界
-
-X 的 `x.com`、`twitter.com`、`t.co`、`twimg.com`、`pscp.tv` 与
-`periscope.tv` 第一方后缀统一固定到 `Res-Frontier`，并先于 Reject、CDN、
-Global 与 FINAL 匹配。这会让账户、Money、API、静态媒体和 Live 共用同一
-住宅出口，但也会让媒体放弃 QUIC，在 TCP/HTTP2 上运行。不扩大 X 的 MITM；
-X Money 子域不受只匹配精确 `x.com` Timeline 端点的网页去广告脚本处理。
-
-X Money 当前只向部分美国用户提供，要求年满 18 岁、真实美国居民、
-已验证的美国手机号及身份验证；住宅 IP 只能减少出口漂移，不能替代
-这些资格。以 [X Money FAQ](https://money.x.com/en/i/faq) 为准。
-
-`Crypto` 和 `Web3` 组只允许非美候选并保留 `REJECT` 失败关闭。
-未实际使用的交易所不建立专用覆盖；其请求继续由通用规则处理。所有交易所仍须
-使用与真实账户/KYC 地区一致且受支持的出口。
-
-Polymarket 国际产品 `.polymarket.com` 及其精确登录/上传主机与美国独立产品
-`.polymarket.us` 仍分文件维护，但按配置所有者最新决定统一进入固定
-`Res-Frontier` 家宽。统一出口只减少会话漂移，不改变两个产品的地区资格，也不得
-用于规避服务限制。
-
-## 实时通信与 Apple 连续互通
-
-Google Account 的 6 个精确登录、管理与 OAuth 主机在 Google Voice 之前固定到
-`Res-Frontier`。Google Voice 的页面、信令和呼叫控制同样固定到
-`Res-Frontier`；5 个精确 STUN 主机以及
-Google Workspace Voice 官方公布的 UDP 端口和专用 IP 段固定到 `DIRECT`，其他
-STUN 仍保持拒绝。该配置基于当前用户网络已完成的直连拨号 A/B；它会形成
-美国控制面与本地媒体面的出口分离。若直连媒体异常，只切换
-对应三条媒体规则的策略到已实测支持 UDP Relay 的固定美国节点，无需改变页面与
-账户控制出口。官方媒体 IP 明确限定为 Workspace Voice；个人 Voice 必须用
-实际拨号日志确认命中，不能把策略类型检查当作 UDP 可用性证明。
-
-ChatGPT 的域名控制面继续由 SKK `non_ip/ai.conf` 固定到 `United States`；IP
-区另加载同源 `ip/ai.conf`，只补充 OpenAI 官方发布的 Voice 精确 `/32` 媒体
-地址。该规则与 Google Voice 的精确媒体例外一样前置于全局 STUN 拒绝，避免
-Voice 被迫只走 TCP 回落；每条 IP 都自带 `no-resolve`，不增加 DNS 查询，也不
-扩大普通网页或 API 的匹配范围。
-
-两个 `apple-push` 规则文件只在 Surge iOS 实际接管 APNs 时生效；
-`include-apns=true` 必须与 `include-all-networks=true` 同时使用。主规则覆盖
-`*.push.apple.com`、实际 CNAME、Apple 公布的窄网段，并以 Apple 建议的
-`17.0.0.0/8` 作为仅限 TCP 5223 的 IPv4 兜底，不会代理 17/8 普通 HTTPS。
-
-`include-all-networks=true` 本身还能防止 App 绑定物理接口绕过 VIF，因此
-`true/false` 是有效的“业务完整接管、APNs 系统直连”模式，不是无效中间态。
-Surge 同时警告它可能影响 AirDrop、Xcode 和 USB Dashboard。仓库提供三种片段：
-
-- [ios-continuity.conf](snippets/ios-continuity.conf)：AirDrop/Handoff 优先，APNs 直连。
-- [ios-complete-routing.conf](snippets/ios-complete-routing.conf)：金融/Web3 分流完整性优先，APNs 仍由系统直连；当前推荐。
-- [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
-  的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
-- [weatherkit-country-fallback.conf](snippets/weatherkit-country-fallback.conf)：仅对
-  `*-US` locale、中国坐标、`Asia/Shanghai` 且缺少 `country` 的请求补 `CN`，并为
-  当前深圳范围保留无时区窄兜底；模块中选择的空气质量算法保持独立，例如美标仍使用
-  `WAQI_InstantCast_US`。
-
-当前以完整业务分流为目标时使用 complete-routing；若 AirDrop/Xcode 出现问题退回
-Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。单独 Telegram
-无横幅/声音不应继续扩大 Apple 代理范围。
-
-`RULE-SET,SYSTEM,DIRECT` 保留在 Private Relay、Apple Intelligence/Siri 与 APNs
-三个精确例外之后、宽泛 Apple Services 之前。Surge 的内建 `SYSTEM` 覆盖大多数
-iOS/macOS 自身请求，但不包含 App Store、iTunes 等内容服务；这个位置既让三个例外
-按指定策略接管，也避免后面的 `.apple.com` / `.icloud.com` 聚合规则代理过多系统流量。
-
-Bybit 规则独立维护完整首方 App/API 域名边界，但按 iPhone 现有配置进入同一个
-固定 `Crypto` 组。该组只能保留与账户本人真实且受支持地区一致的候选，不能加入
-美国等受限地区线路。
-
-模块会覆盖主 Profile，且启用状态不会跨设备同步。保留全部模块时的实际命中条件、
-已知不可覆盖冲突与逐设备检查见 [docs/module-baseline.md](docs/module-baseline.md)。
+迁移详情见 [migration-notes](docs/migration-notes.md)，需求映射见
+[requirements-matrix](docs/requirements-matrix.md)，数量对账见
+[source-parity](docs/source-parity.md)。
 
 ## 官方参考
 
+- [SukkaW/Surge README](https://github.com/SukkaW/Surge/blob/master/README.md)
+- [Sukka Ruleset 服务](https://ruleset.skk.moe/)
 - [Surge Ruleset](https://manual.nssurge.com/rule/ruleset.html)
-- [Surge Logical Rule](https://manual.nssurge.com/rule/logical-rule.html)
 - [Surge Domain-based Rule](https://manual.nssurge.com/rule/domain-based.html)
-- [Surge Policy Group](https://manual.nssurge.com/policy/group.html)
-- [Surge Modules](https://manual.nssurge.com/others/module.html)
-- [Surge iOS Miscellaneous Options](https://manual.nssurge.com/others/misc-options.html)
-- [Apple APNs network requirements](https://support.apple.com/102266)
-- [Apple products on enterprise networks](https://support.apple.com/en-us/101555)
-- [Google Voice connectivity requirements](https://knowledge.workspace.google.com/admin/voice/voice-connectivity-requirements)
-- [Bybit Service Restricted Countries](https://www.bybit.com/en/help-center/article/Service-Restricted-Countries)
-- [SukkaW/Surge 使用说明](https://github.com/SukkaW/Surge)
-- [blackmatrix7 WeChat 规则说明](https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/Surge/WeChat)
-- [ddgksf2013/Filter](https://github.com/ddgksf2013/Filter)
+- [Apple Software Updates network requirements](https://support.apple.com/en-us/101555)

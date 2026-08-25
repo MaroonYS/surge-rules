@@ -57,9 +57,3 @@ jobs:
           --config-ref main
           --timeout 15
           --retries 2
-
-      - name: Check the Adblock4limbo supplement
-        run: >
-          python scripts/sync_adblock4limbo.py
-          --check
-          --timeout 30

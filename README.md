@@ -7,7 +7,13 @@
 ## 设计目标
 
 - 保留地区第一方金融域名的既有分流语义。
-- 将 Apple 官方列出的 5 个 watchOS 更新目录与下载域统一前置直连，避免更新链跨出口。
+- 将 Apple 官方列出的 watchOS 更新、可选 Beta 注册及证书验证链精确前置直连，
+  并用扩展匹配兼容原始域名的动态 CNAME/SNI。
+- 将保留模块依赖的 GitHub release/raw 下载链固定到已验证可用的住宅出口。
+- 用配置级精确 Rewrite 修复当前 WLOC 下 iPhone/watchOS WeatherKit 请求遗漏
+  `country` 的上游兼容问题，不修改 WeatherKit 模块。
+- 将 Apple Account、Private Relay 与 iCloud 内容同步分层：账户/账单保持住宅出口，
+  Private Relay 保持既定美国出口，CloudKit、照片、iWork 与上传下载域直连并避开广告误杀。
 - 用精确后缀恢复 Bilibili 视频 CDN 的前置直连，避免被共享 Reject/CDN 规则抢先命中。
 - 仅恢复淘宝/天猫品牌互动页依赖的 mini-app 运行时，不对整个淘宝广告域放行。
 - 将 Crypto 与 Web3 拆开，避免一个策略切换影响另一类服务。
@@ -281,6 +287,8 @@ Surge 同时警告它可能影响 AirDrop、Xcode 和 USB Dashboard。仓库提�
 - [ios-complete-routing.conf](snippets/ios-complete-routing.conf)：金融/Web3 分流完整性优先，APNs 仍由系统直连；当前推荐。
 - [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
   的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
+- [weatherkit-country-fallback.conf](snippets/weatherkit-country-fallback.conf)：仅对当前
+  固定 WLOC 在缺少 `country` 时补 `CN`，用于兼容 WeatherKit 上游问题 #100。
 
 当前以完整业务分流为目标时使用 complete-routing；若 AirDrop/Xcode 出现问题退回
 Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。单独 Telegram

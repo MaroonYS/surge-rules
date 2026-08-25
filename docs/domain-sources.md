@@ -3,6 +3,18 @@
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
+## Apple iCloud 服务边界
+
+`icloud-sync.conf` 依据 Apple 企业网络清单中的 iCloud 段维护 CloudKit、Live Photos、
+iCloud 内容、iWork、Apple iCloud DNS 及中国大陆条件域；通用 `.icloud.com` 因覆盖动态
+同步主机而保留在主规则中。三个 Private Relay 端点必须先匹配既有 SKK 精确列表，
+Apple Account 的 4 个认证主机及动态 App Store 账单分片则更早固定住宅出口。
+
+`cdn-apple.com` 是 Apple 多项服务共用的 CDN，不作为 iCloud 专属域扩大全量强制规则，
+继续由既有 Apple CDN 与 Apple Services 规则处理。Apple 官方明确要求其列出的服务
+免 HTTPS/SSL inspection；当前 Profile 的 Apple/iCloud 负向 MITM 边界继续保留。
+来源：[Apple 企业网络主机与端口](https://support.apple.com/en-us/101555)。
+
 ## 监管目录
 
 - 香港：[HKMA 认可机构登记册](https://vpr.hkma.gov.hk/eng/regulatory-resources/registers/register-of-ais-and-lros/)

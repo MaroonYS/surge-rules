@@ -101,12 +101,13 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 ## 已知无法由主 Profile 修复的冲突
 
 - WeatherKit 模块把 Apple AS714/AS6185 的 QUIC 提升为前置 `REJECT-DROP`，会让
-  Private Relay 的部分 QUIC 路径回落 TCP/H2。主 Rule 位于模块规则之后，无法抢先
-  放行；在“不改模块且全部保留”的约束下不能同时保证两者完整 QUIC。
+  Private Relay 与部分 iCloud TCP/UDP 443 服务回落 TCP/H2。主 Rule 位于模块规则
+  之后，无法抢先放行；在“不改模块且全部保留”的约束下不能同时保证完整 QUIC，
+  但 Apple 官方为这些 iCloud 服务保留 TCP 443 路径。
 - 多套 HTTPDNS 模块存在相同的 pre-matching 拒绝，Sukka 与 Fries 还会对
   `dot.pub`、`doh.pub`、`doh.360.cn` 注入不同 Host 值。主 `[Host]` 排在模块之后，
   无法删除前面的条目；添加第三份只会增加歧义。
-- 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库 61 条主 Rule。
+- 广告、HTTPDNS、Bilibili、YouTube 与 Spotify 的模块规则均早于仓库主 Rule。
   被模块先行拒绝的连接不能再由 GitHub `DOMAIN-SET,DIRECT` 救回。
 - 一个前置模块已经产生最终 REJECT 时，后置模块的 Rewrite/Script 不再执行。这不等于
   后置模块整体失效，但意味着“全部模块的每一条声明都执行”在逻辑上不可实现。

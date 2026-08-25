@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Completed the watchOS path with Apple's certificate-validation hosts, optional beta
+  enrollment, extended hostname matching, and an early direct policy.
+- Routed GitHub module release/content downloads through the verified residential path,
+  preventing fresh devices from missing scripts when the ordinary US route times out.
+- Added a coordinate-scoped WeatherKit URL fallback for upstream issue #100 so the retained
+  module can classify the fixed China WLOC when iPhone/watchOS omits `country`.
+- Split Apple Account, Private Relay and core iCloud traffic so billing remains residential,
+  relay endpoints retain their configured US path, and sync/upload/download hosts go direct
+  before the reject stack (including Apple's required `metrics.icloud.com`).
 - Unified Apple's five documented watchOS update catalog and payload hosts on an early
   exact `DIRECT` path, preventing the update transaction from crossing proxy exits.
 - Added an exact Singapore exception for the observed `nano.cr18.eu.org` Emby host

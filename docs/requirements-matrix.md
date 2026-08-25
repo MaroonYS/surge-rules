@@ -5,13 +5,13 @@
 
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
-| 1 | NTP、watchOS 更新、模块资源、X、Google Account、Google Voice、ChatGPT Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`；Apple 官方 watchOS 目录/下载 5 域、可选 Beta 注册 1 域与证书验证 9 域随后使用精确 `DIRECT + extended-matching`；GitHub release/raw 模块资源链固定 `Res-Frontier`；X 的 6 个第一方后缀随后固定 `Res-Frontier`；Google Account 的 6 个精确登录/管理/OAuth 主机在 Google Voice 之前固定 `Res-Frontier`；Google Voice 的页面/控制域固定 `Res-Frontier`，5 个 STUN 主机和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`；随后用 OpenAI 官方精确 `/32` 将 ChatGPT Voice 固定 `United States`；上述媒体例外全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
+| 1 | NTP、watchOS 更新、模块资源、X、Google Account、Google Voice、ChatGPT Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`；Apple 官方 watchOS 目录/下载 5 域、可选 Beta 注册 1 域与证书验证 9 域随后使用精确 `DIRECT + extended-matching`；GitHub release/raw 模块资源链固定到逐次实测稳定的 `Hong Kong`；X 的 6 个第一方后缀随后固定 `Res-Frontier`；Google Account 的 6 个精确登录/管理/OAuth 主机在 Google Voice 之前固定 `Res-Frontier`；Google Voice 的页面/控制域固定 `Res-Frontier`，5 个 STUN 主机和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`；随后用 OpenAI 官方精确 `/32` 将 ChatGPT Voice 固定 `United States`；上述媒体例外全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
 | 2 | 特殊服务最优先 | iPhone 现用的 Brawl Stars 两条精确例外及 Bilibili 的 3 个视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；Polymarket 国际 3 条与美国 1 条分文件维护但统一固定 `Res-Frontier` 家宽，全部位于共享 Reject/CDN 规则之前 |
 | 3 | Apple Account / iCloud / Private Relay | Apple Account 与 App Store 账单精确主机先固定 `Res-Frontier`；Private Relay 随后固定普通 `United States`；Apple 官方 iCloud/CloudKit/照片/iWork/内容传输域再固定 `DIRECT`，三者按窄例外到宽后缀排序且位于广告栈之前 |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |
 | 5 | 中国大陆银行 | `direct-cn.conf`，24 条，`DIRECT`；跨地区的 `bankofchina.com` 与宽泛 `.icbc.com` 不在此强制直连 |
 | 6 | 分地区金融 | HK 第一方 41、当前账户香港共享上下文 32、SG 22、JP 15、KR 10、UK 20，策略逐一固定；FUTU HK 官方兼容域进入香港，Moomoo Singapore Trustee 归回新加坡；两条香港资源每小时刷新 |
-| 7 | 美国住宅出口 | `apple-account-payment-rules.conf` 以 6 条规则覆盖 Apple 登录与账单分片；随后 `us-residential.conf` 精确补齐 Capital One 两个专属 Medallia 租户与 myEquifax 入口，不扩大共享 Medallia 后缀 |
+| 7 | 美国住宅出口 | `us-residential.conf` 精确覆盖美国第一方金融、Apple Cash/Pay、PayPal、Capital One 两个专属 Medallia 租户与 myEquifax 入口；Apple Account 登录与账单已在第 3 层先行处理，不在本层重复 |
 | 8 | 跨地区金融、身份与风控 | Finance 41、Identity 21、Risk 8；语义顺序固定为 Finance → Identity → Risk，三层运行时均固定 `Res-Frontier`，不再依赖手动 `Verification`；地区银行与 Bybit/Crypto/Web3 的第一方规则仍在各自静态策略中，共享多租户 KYC 域明确作为美国金融优先的住宅兜底 |
 | 9 | 中心化交易所 | `bybit.conf` 15 条与 `crypto.conf` 46 条分文件维护但均进入 iPhone 固定 `Crypto` 出口；Gate 不建立专用覆盖，Bybit 不再跨策略重复 |
 | 10 | Web3 | `web3.conf`，195 条有效语义，`Web3` |
@@ -36,6 +36,7 @@
 | `taobao-functional.conf` | `DOMAIN-SET` | `DIRECT` |
 | `polymarket-global.conf` | `DOMAIN-SET` | `Res-Frontier` |
 | `polymarket.conf` | `DOMAIN-SET` | `Res-Frontier` |
+| `icloud-sync.conf` | `DOMAIN-SET` | `DIRECT` |
 | `apple-ai.conf` | `DOMAIN-SET` | `United States` |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` |
 | `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` |

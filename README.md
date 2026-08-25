@@ -9,7 +9,8 @@
 - 保留地区第一方金融域名的既有分流语义。
 - 将 Apple 官方列出的 watchOS 更新、可选 Beta 注册及证书验证链精确前置直连，
   并用扩展匹配兼容原始域名的动态 CNAME/SNI。
-- 将保留模块依赖的 GitHub release/raw 下载链固定到已验证可用的住宅出口。
+- 将保留模块依赖的 GitHub release/raw 下载链固定到逐次实测稳定的香港出口，
+  避免普通美国与住宅上游同时失效时阻断脚本更新。
 - 用配置级精确 Rewrite 修复当前 WLOC 下 iPhone/watchOS WeatherKit 请求遗漏
   `country` 的上游兼容问题，不修改 WeatherKit 模块。
 - 将 Apple Account、Private Relay 与 iCloud 内容同步分层：账户/账单保持住宅出口，
@@ -54,6 +55,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 | `taobao-functional.conf` | `DIRECT` | 淘宝/天猫品牌互动小程序运行时，优先于共享 Reject |
 | `polymarket-global.conf` | `Res-Frontier` | Polymarket 国际产品、精确 Auth0 租户及实测 S3 上传主机 |
 | `polymarket.conf` | `Res-Frontier` | Polymarket 美国独立产品 |
+| `icloud-sync.conf` | `DIRECT` | Apple 官方 iCloud、CloudKit、照片、iWork、内容传输与诊断域 |
 | `apple-ai.conf` | `United States` | Apple Intelligence、Siri、PCC |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `hk-finance.conf` | `Hong Kong` | 香港金融 |
@@ -83,9 +85,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 28 个远程本仓库规则文件（25 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 29 个远程本仓库规则文件（26 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 28 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 29 个本仓库规则文件均成功加载。
 
 香港金融与账户上下文资源单独使用一小时更新间隔，减少 Futu 等紧急修订发布后
 仍命中旧缓存的时间；其余资源保持 Surge 默认更新节奏，避免无意义轮询。

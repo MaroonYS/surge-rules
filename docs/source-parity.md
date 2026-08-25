@@ -76,19 +76,19 @@
 | Futu / Moomoo 地区校正 | +7 | 香港上下文净增 6 条，新加坡 Trustee 增 1 条；剔除异地区域和无官方/日志依据的停放域 |
 | Bybit / 其余 CEX | +46 | Bybit 扩为 15 条并独立维护；其余 CEX 扩为 46 条，删除重复 Bybit 与已取消的 Gate 覆盖 |
 | Web3 精准扩展 | +26 | 新增钱包、RPC、DeFi 与链上基础设施第一方后缀 |
-| 当前 DOMAIN-SET 条目 | 872 | 25 个本仓库 `DOMAIN-SET` |
+| 当前 DOMAIN-SET 条目 | 881 | 26 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 21 | 3 个无策略列 `RULE-SET` |
-| 当前活动条目 | 893 | 28 个本仓库活动文件 |
+| 当前活动条目 | 902 | 29 个本仓库活动文件 |
 
 [surge-expanded.conf](../surge-expanded.conf) 将当前自维护活动规则全部内联。
-当前远程版共加载 28 个本仓库文件：25 个域名 `DOMAIN-SET`，以及承载
+当前远程版共加载 29 个本仓库文件：26 个域名 `DOMAIN-SET`，以及承载
 Apple Account 6 条、Google Voice 5 条和 APNs 10 条逻辑规则的 3 个
 无策略列 `RULE-SET`。
 Private Relay、SKK、WeChat 与 Emby 等资源仍按 17 段契约引用上游。
 
 ## 两个版本为何行数不同
 
-- `surge-main.conf`：通过 28 个远程文件加载当前活动规则。
+- `surge-main.conf`：通过 29 个远程文件加载当前活动规则。
 - `surge-expanded.conf`：由生成器将同样的活动规则全部展开。
 
 两者的自维护活动规则语义一致，不能同时加载。

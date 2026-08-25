@@ -7,9 +7,9 @@
   exact update host on DIRECT without widening to an Apple suffix.
 - Removed the profile-level update-host `always-real-ip` dependency and preserved Surge's
   domain mapping for deterministic early rule matching.
-- Expanded the WeatherKit country fallback from one stale coordinate prefix to the precise
-  combination of a `*-US` locale, China coordinate bounds and a missing country parameter;
-  the module's independently selected AQ algorithm remains unchanged.
+- Expanded the WeatherKit country fallback from one stale coordinate prefix to a guarded
+  `*-US` locale + China coordinate + Asia/Shanghai combination, with a narrow timezone-free
+  Shenzhen fallback; the module's independently selected AQ algorithm remains unchanged.
 - Moved the narrowly scoped GitHub release/raw module-download path from the currently
   timing-out US residential chain to the repeatedly verified Hong Kong policy; direct and
   Hong Kong succeeded while both ordinary-US and residential-US trials timed out.

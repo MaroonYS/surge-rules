@@ -291,8 +291,9 @@ Surge 同时警告它可能影响 AirDrop、Xcode 和 USB Dashboard。仓库提�
 - [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
   的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
 - [weatherkit-country-fallback.conf](snippets/weatherkit-country-fallback.conf)：仅对
-  `*-US` locale、中国坐标且缺少 `country` 的请求补 `CN`；模块中选择的空气质量
-  算法保持独立，例如美标仍使用 `WAQI_InstantCast_US`。
+  `*-US` locale、中国坐标、`Asia/Shanghai` 且缺少 `country` 的请求补 `CN`，并为
+  当前深圳范围保留无时区窄兜底；模块中选择的空气质量算法保持独立，例如美标仍使用
+  `WAQI_InstantCast_US`。
 
 当前以完整业务分流为目标时使用 complete-routing；若 AirDrop/Xcode 出现问题退回
 Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。单独 Telegram

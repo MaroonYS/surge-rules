@@ -100,7 +100,7 @@ Apple Account 绑定 PayPal 的登录与账单控制面会使用
 的 Surge 会话在 2026-08-09 与 2026-08-11 观察到
 `p100-buy.itunes.apple.com` 经 `DIRECT` 返回空 DNS 结果，同时 PayPal 主链经
 `Res-Frontier`，形成同一授权流程的出口分裂。由于 `p100-buy` 是完整 DNS 标签，
-普通后缀 `.buy.itunes.apple.com` 无法命中；因此使用独立 RULE-SET 中的 5 条精确
+普通后缀 `.buy.itunes.apple.com` 无法命中；因此在主规则中内联 5 条精确
 `DOMAIN` 与 `DOMAIN-WILDCARD,*-buy.itunes.apple.com`，使登录与动态分片与 PayPal
 保持同一住宅出口；
 不加入 `.apple.com`、`.itunes.apple.com`、其他 Apple ID 通用域或共享 Braintree
@@ -108,8 +108,8 @@ Apple Account 绑定 PayPal 的登录与账单控制面会使用
 验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
 
 当前配置所有者明确使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
-App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名被移动到
-`hk-finance-context.conf` 并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
+App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名已合并到
+`hk-finance.conf`，并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。
 
 FUTU HK 官方下载页当前加载的前端包将 `futuhk8.com`、`futuhongkong.com` 与
@@ -126,7 +126,7 @@ Cloud 网段及裸 IP 均不作为兜底加入，避免把其他 App 的共享�
   [`t.co` 链接缩短](https://help.x.com/en/using-x/url-shortener)、
   [`twimg.com` 媒体](https://help.x.com/en/using-x/x-videos) 以及
   [X Live / Periscope](https://help.x.com/en/using-x/periscope-faq) 的现行关系。
-  因此 `x-residential.conf` 只收录 `.x.com`、`.twitter.com`、`.t.co`、
+  因此 `us-residential.conf` 中的 X 小节只收录 `.x.com`、`.twitter.com`、`.t.co`、
   `.twimg.com`、`.pscp.tv`、`.periscope.tv`，不猜测 `xpayments.com`
   或共享第三方 KYC/银行联接域。
 - [X Money FAQ](https://money.x.com/en/i/faq) 明确要求真实美国居民、
@@ -135,6 +135,6 @@ Cloud 网段及裸 IP 均不作为兜底加入，避免把其他 App 的共享�
 
 - [Polymarket 官方地域说明](https://help.polymarket.com/en/articles/13364163-geographic-restrictions)
   明确国际 `.com` 会按请求 IP 执行地域限制；美国用户使用的是独立 `.us` 产品。
-- `.polymarket.com`、精确 Auth0 租户、上传主机与 `.polymarket.us` 仍按产品拆分，
-  但依据配置所有者最新决定统一固定 `Res-Frontier` 家宽。路由只保持出口稳定，
+- `.polymarket.com`、精确 Auth0 租户、上传主机与 `.polymarket.us` 仍按产品边界维护，
+  但已合并进 `us-residential.conf` 并统一固定 `Res-Frontier` 家宽。路由只保持出口稳定，
   不改变真实地区及账户资格，也不用于绕过限制。

@@ -6,6 +6,12 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "apple-software-update.conf",
+      "policy": "DIRECT",
+      "semantic_role": "Apple-Software-Update",
+      "description": "Apple-documented Software Updates hosts beyond the five inline watchOS bootstrap endpoints"
+    },
+    {
       "file": "x-residential.conf",
       "policy": "Res-Frontier",
       "semantic_role": "X-Residential",

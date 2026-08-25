@@ -2,10 +2,18 @@
 
 ## Unreleased
 
+- Completed Apple's current 21-host Software Updates boundary while retaining the five
+  watchOS core hosts inline as a bootstrap path; aligned Apple DoH and every remaining
+  exact update host on DIRECT without widening to an Apple suffix.
+- Removed the profile-level update-host `always-real-ip` dependency and preserved Surge's
+  domain mapping for deterministic early rule matching.
+- Expanded the WeatherKit country fallback from one stale coordinate prefix to the precise
+  combination of a `*-US` locale, China coordinate bounds and a missing country parameter;
+  the module's independently selected AQ algorithm remains unchanged.
 - Moved the narrowly scoped GitHub release/raw module-download path from the currently
   timing-out US residential chain to the repeatedly verified Hong Kong policy; direct and
   Hong Kong succeeded while both ordinary-US and residential-US trials timed out.
-- Synchronized the current 29-file rule inventory across README and requirements/source
+- Synchronized the current 30-file rule inventory across README and requirements/source
   documentation, and added a manifest-driven regression test so future rule additions cannot
   silently leave the documented counts or active-file tables stale.
 

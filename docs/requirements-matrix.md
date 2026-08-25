@@ -5,7 +5,7 @@
 
 | 序号 | 要求 | 实现与校验 |
 | ---: | --- | --- |
-| 1 | NTP、watchOS 更新、模块资源、X、Google Account、Google Voice、ChatGPT Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`；Apple 官方 watchOS 目录/下载 5 域、可选 Beta 注册 1 域与证书验证 9 域随后使用精确 `DIRECT + extended-matching`；GitHub release/raw 模块资源链固定到逐次实测稳定的 `Hong Kong`；X 的 6 个第一方后缀随后固定 `Res-Frontier`；Google Account 的 6 个精确登录/管理/OAuth 主机在 Google Voice 之前固定 `Res-Frontier`；Google Voice 的页面/控制域固定 `Res-Frontier`，5 个 STUN 主机和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`；随后用 OpenAI 官方精确 `/32` 将 ChatGPT Voice 固定 `United States`；上述媒体例外全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
+| 1 | NTP、Apple 更新、模块资源、X、Google Account、Google Voice、ChatGPT Voice、STUN、MTProto、Telegram、LAN | NTP/UDP 123 先固定 `DIRECT`；Apple 官方 21 个 Software Updates 精确主机统一 `DIRECT + extended-matching`，其中 5 个 watchOS 核心主机内联作为启动保护、其余 16 个由 `apple-software-update.conf` 补齐；Apple DoH、可选 Beta 注册 1 域与证书验证 9 域随后精确直连；GitHub release/raw 模块资源链固定到逐次实测稳定的 `Hong Kong`；X 的 6 个第一方后缀随后固定 `Res-Frontier`；Google Account 的 6 个精确登录/管理/OAuth 主机在 Google Voice 之前固定 `Res-Frontier`；Google Voice 的页面/控制域固定 `Res-Frontier`，5 个 STUN 主机和 5 条 Workspace 官方 UDP 媒体规则固定 `DIRECT`；随后用 OpenAI 官方精确 `/32` 将 ChatGPT Voice 固定 `United States`；上述媒体例外全部先于全局 STUN 拦截；MTProto 与 Telegram 非 IP 规则固定 `Singapore` 并先于广告栈，随后保留 SKK 非 IP LAN 和内建 `LAN,DIRECT,no-resolve` |
 | 2 | 特殊服务最优先 | iPhone 现用的 Brawl Stars 两条精确例外及 Bilibili 的 3 个视频 CDN 后缀固定到 `DIRECT`；仅恢复淘宝/天猫品牌 mini-app 的 1 个运行时后缀；Polymarket 国际 3 条与美国 1 条分文件维护但统一固定 `Res-Frontier` 家宽，全部位于共享 Reject/CDN 规则之前 |
 | 3 | Apple Account / iCloud / Private Relay | Apple Account 与 App Store 账单精确主机先固定 `Res-Frontier`；Private Relay 随后固定普通 `United States`；Apple 官方 iCloud/CloudKit/照片/iWork/内容传输域再固定 `DIRECT`，三者按窄例外到宽后缀排序且位于广告栈之前 |
 | 4 | Apple Intelligence / Siri / PCC | `apple-ai.conf` 固定到 `United States` |
@@ -27,6 +27,7 @@
 
 | 文件 | 类型 | 策略 |
 | --- | --- | --- |
+| `apple-software-update.conf` | `DOMAIN-SET` | `DIRECT`（语义角色 `Apple-Software-Update`） |
 | `x-residential.conf` | `DOMAIN-SET` | `Res-Frontier` |
 | `google-account.conf` | `DOMAIN-SET` | `Res-Frontier` |
 | `google-voice.conf` | `DOMAIN-SET` | `Res-Frontier` |

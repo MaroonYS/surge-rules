@@ -7,12 +7,12 @@
 ## 设计目标
 
 - 保留地区第一方金融域名的既有分流语义。
-- 将 Apple 官方列出的 watchOS 更新、可选 Beta 注册及证书验证链精确前置直连，
-  并用扩展匹配兼容原始域名的动态 CNAME/SNI。
+- 将 Apple 官方 21 个 Software Updates 主机、Apple 加密 DNS、可选 Beta 注册及
+  证书验证链精确前置直连，并保留 5 个 watchOS 核心主机作为内联启动保护。
 - 将保留模块依赖的 GitHub release/raw 下载链固定到逐次实测稳定的香港出口，
   避免普通美国与住宅上游同时失效时阻断脚本更新。
-- 用配置级精确 Rewrite 修复当前 WLOC 下 iPhone/watchOS WeatherKit 请求遗漏
-  `country` 的上游兼容问题，不修改 WeatherKit 模块。
+- 用配置级精确 Rewrite 修复中国坐标配合 `*-US` locale 时 iPhone/watchOS
+  WeatherKit 请求遗漏 `country` 的上游兼容问题，不修改 WeatherKit 模块或其美标算法。
 - 将 Apple Account、Private Relay 与 iCloud 内容同步分层：账户/账单保持住宅出口，
   Private Relay 保持既定美国出口，CloudKit、照片、iWork 与上传下载域直连并避开广告误杀。
 - 用精确后缀恢复 Bilibili 视频 CDN 的前置直连，避免被共享 Reject/CDN 规则抢先命中。
@@ -46,6 +46,7 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
 
 | 文件 | 目标策略 | 用途 |
 | --- | --- | --- |
+| `apple-software-update.conf` | `DIRECT` | Apple 官方 Software Updates 表中除 5 个内联 watchOS 核心主机外的 16 个精确域名 |
 | `x-residential.conf` | `Res-Frontier` | X 账户、API、Money、跳转、媒体与 Live 第一方域 |
 | `google-account.conf` | `Res-Frontier` | Google Account 登录、账户管理与 OAuth 控制面 |
 | `google-voice.conf` | `Res-Frontier` | Google Voice 页面、信令与呼叫控制 |
@@ -85,9 +86,9 @@ Surge 按从上到下的顺序匹配，首条命中生效。`DOMAIN-SET` 适合�
    `United States`、`Crypto` 与 `Web3`。
 2. 地区组和住宅出口只使用固定代理或手动 `select`，不得自动切换账户出口。
 3. 在以下两种 Rule 中选择一种，不要同时加载：
-   - 推荐：[surge-main.conf](surge-main.conf)，通过 29 个远程本仓库规则文件（26 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
+   - 推荐：[surge-main.conf](surge-main.conf)，通过 30 个远程本仓库规则文件（27 个 `DOMAIN-SET`、3 个 `RULE-SET`）加载当前活动规则；
    - 展开：[surge-expanded.conf](surge-expanded.conf)，把同样的活动规则全部写回 `[Rule]`，可整段复制。
-4. 在 Surge 的外部资源页面刷新，确认 29 个本仓库规则文件均成功加载。
+4. 在 Surge 的外部资源页面刷新，确认 30 个本仓库规则文件均成功加载。
 
 香港金融与账户上下文资源单独使用一小时更新间隔，减少 Futu 等紧急修订发布后
 仍命中旧缓存的时间；其余资源保持 Surge 默认更新节奏，避免无意义轮询。
@@ -289,8 +290,9 @@ Surge 同时警告它可能影响 AirDrop、Xcode 和 USB Dashboard。仓库提�
 - [ios-complete-routing.conf](snippets/ios-complete-routing.conf)：金融/Web3 分流完整性优先，APNs 仍由系统直连；当前推荐。
 - [ios-apns-capture.conf](snippets/ios-apns-capture.conf)：接管 APNs，用于多款国际 App
   的推送均无法直连时；该模式在受影响的 iOS 版本上仍可能妨碍 AirDrop。
-- [weatherkit-country-fallback.conf](snippets/weatherkit-country-fallback.conf)：仅对当前
-  固定 WLOC 在缺少 `country` 时补 `CN`，用于兼容 WeatherKit 上游问题 #100。
+- [weatherkit-country-fallback.conf](snippets/weatherkit-country-fallback.conf)：仅对
+  `*-US` locale、中国坐标且缺少 `country` 的请求补 `CN`；模块中选择的空气质量
+  算法保持独立，例如美标仍使用 `WAQI_InstantCast_US`。
 
 当前以完整业务分流为目标时使用 complete-routing；若 AirDrop/Xcode 出现问题退回
 Continuity。只有多款国际 App 都不能推送时才切换 APNs capture。单独 Telegram
@@ -317,6 +319,7 @@ Bybit 规则独立维护完整首方 App/API 域名边界，但按 iPhone 现有
 - [Surge Modules](https://manual.nssurge.com/others/module.html)
 - [Surge iOS Miscellaneous Options](https://manual.nssurge.com/others/misc-options.html)
 - [Apple APNs network requirements](https://support.apple.com/102266)
+- [Apple products on enterprise networks](https://support.apple.com/en-us/101555)
 - [Google Voice connectivity requirements](https://knowledge.workspace.google.com/admin/voice/voice-connectivity-requirements)
 - [Bybit Service Restricted Countries](https://www.bybit.com/en/help-center/article/Service-Restricted-Countries)
 - [SukkaW/Surge 使用说明](https://github.com/SukkaW/Surge)

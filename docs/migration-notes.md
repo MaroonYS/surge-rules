@@ -9,6 +9,7 @@
 
 | 来源策略 / 语义角色 | 仓库位置 | 处理 |
 | --- | --- | --- |
+| `DIRECT`（Apple Software Updates） | `apple-software-update.conf` | Apple 官方 21 主机中的 5 个 watchOS 核心域保留内联，其余 16 个精确补齐并统一直连 |
 | `Res-Frontier`（X） | `x-residential.conf` | X 第一方账户、API、Money、跳转、媒体与 Live 统一住宅出口 |
 | `DIRECT` | `direct-cn.conf` | 中国大陆银行与银联迁移 |
 | `DIRECT`（Bilibili） | `bilibili-direct.conf` | 原宽泛关键词收窄为 3 个视频 CDN 后缀并恢复前置优先级 |
@@ -40,6 +41,9 @@
 ## 有意调整
 
 - 按 17 段契约保留 `PROTOCOL,STUN,REJECT`，并在其前将 NTP/UDP 123 固定 `DIRECT`，避免系统时间同步误入普通代理。
+- Apple Software Updates 的 21 个官方主机统一前置直连；5 个 watchOS 核心域保持
+  内联启动保护，其余 16 个集中维护。Apple DoH 单独精确直连，配置级更新域
+  `always-real-ip` 被移除，避免目录、DNS 与下载链因出口或域名映射方式分裂。
 - X 六个第一方后缀在 Google/Reject/CDN/Global 之前固定住宅出口；不扩大 X MITM，也不把路由当作 X Money 居住或身份资格。
 - 原 `DOMAIN-KEYWORD,bilivideo,DIRECT,extended-matching` 收窄为 `.bilivideo.com`、
   `.bilivideo.cn`、`.bilivideo.net`，并在第 2 段首位加载，保证先于共享

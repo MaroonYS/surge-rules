@@ -10,6 +10,8 @@
         "DOMAIN,gg.apple.com,DIRECT,extended-matching",
         "DOMAIN,gs.apple.com,DIRECT,extended-matching",
         "DOMAIN,mesu.apple.com,DIRECT,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-software-update.conf,DIRECT,extended-matching",
+        "DOMAIN,doh.dns.apple.com,DIRECT,extended-matching",
         "DOMAIN,bpapi.apple.com,DIRECT,extended-matching",
         "DOMAIN,certs.apple.com,DIRECT,extended-matching",
         "DOMAIN,crl.apple.com,DIRECT,extended-matching",

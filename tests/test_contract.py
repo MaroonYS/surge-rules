@@ -110,6 +110,26 @@ class RuleContractTests(unittest.TestCase):
         self.assertLess(main.index(google_account), main.index(voice))
         self.assertLess(main.index(ntp), main.index(stun))
 
+    def test_watchos_update_chain_is_exact_direct_and_early(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        ntp = "DEST-PORT,123,DIRECT"
+        watchos_rules = [
+            "DOMAIN,appldnld.apple.com,DIRECT",
+            "DOMAIN,gdmf.apple.com,DIRECT",
+            "DOMAIN,gg.apple.com,DIRECT",
+            "DOMAIN,gs.apple.com,DIRECT",
+            "DOMAIN,mesu.apple.com,DIRECT",
+        ]
+        x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
+        positions = [main.index(rule) for rule in watchos_rules]
+
+        self.assertEqual(sorted(positions), positions)
+        self.assertTrue(all(main.count(rule) == 1 for rule in watchos_rules))
+        self.assertTrue(all(main.index(ntp) < position for position in positions))
+        self.assertTrue(all(position < main.index(x_residential) for position in positions))
+        self.assertNotIn("DOMAIN-SUFFIX,apple.com,DIRECT", main)
+        self.assertNotIn("DOMAIN-KEYWORD,apple,DIRECT", main)
+
     def test_x_first_party_surface_uses_early_residential_route(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         entries = {

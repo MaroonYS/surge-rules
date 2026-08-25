@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Unified Apple's five documented watchOS update catalog and payload hosts on an early
+  exact `DIRECT` path, preventing the update transaction from crossing proxy exits.
 - Added an exact Singapore exception for the observed `nano.cr18.eu.org` Emby host
   ahead of the broader SKK global rule, without routing the shared `eu.org` suffix.
 - Pinned both Polymarket product rule sets to the owner's fixed residential policy while

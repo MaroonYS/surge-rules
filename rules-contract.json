@@ -5,6 +5,11 @@
       "title": "协议和局域网",
       "rules": [
         "DEST-PORT,123,DIRECT",
+        "DOMAIN,appldnld.apple.com,DIRECT",
+        "DOMAIN,gdmf.apple.com,DIRECT",
+        "DOMAIN,gg.apple.com,DIRECT",
+        "DOMAIN,gs.apple.com,DIRECT",
+        "DOMAIN,mesu.apple.com,DIRECT",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/x-residential.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-account.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,Res-Frontier,extended-matching",

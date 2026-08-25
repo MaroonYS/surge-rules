@@ -78,10 +78,8 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
   无法替模块统一，必须在每台设备的模块参数中自行保持一致。
 - WeatherKit 使用第三方天气源时必须在模块参数中具备有效凭据；主 Profile 或远程
   Rule 无法补齐模块参数。
-- WeatherKit 请求的 `country` 决定 `Weather.Replace` 是否处理该地区；
-  `AirQuality.Calculate.Algorithm` 决定处理后采用哪套指数算法。配置级 fallback 只在
-  `*-US` locale、中国坐标、`Asia/Shanghai` 且缺少 `country` 时补 `CN`，仅为当前
-  深圳范围保留无时区窄兜底，不会把用户选择的美标算法改回国标或误改邻近地区。
+- WeatherKit 请求的 `country` 与 `AirQuality.Calculate.Algorithm` 现在完全由模块
+  自身处理；主配置不再注入 `country=CN` Rewrite，也不修正模块选择的指数算法。
 - Maps v4.6.1 的 `Missing style` 只表示当前 Geo Resource Manifest 不含某些
   可选或历史样式；若日志仍完成 decode、Set TileSets、encode 并以
   `Script Completed` 结束，不应将这些警告判为配置或 MITM 失败。

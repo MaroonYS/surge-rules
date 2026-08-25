@@ -2,7 +2,7 @@
 
 | 指标 | 当前值 | 来源 |
 | --- | ---: | --- |
-| 主规则条数 | 97 | `surge-main.conf` 的有效规则 |
+| 主规则条数 | 41 | `surge-main.conf` 的有效规则 |
 | 当前 DOMAIN-SET 条目 | 630 | 12 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 0 | 本仓库不再维护远程 `RULE-SET` |
 | 当前活动条目 | 630 | `rules-manifest.json` 的 12 个活动文件 |

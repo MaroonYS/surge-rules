@@ -2,7 +2,7 @@
 
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
-| 1 | 系统时间、Apple 更新、付款、Private Relay、iCloud | 精确内联；付款走 `Res-Frontier`，Relay 走 `United States`，同步与更新直连 |
+| 1 | NTP、MTProto 与模块资源 | NTP 直连、MTProto 新加坡、GitHub 模块资源香港；不含 Apple 自定义例外 |
 | 2 | 地区银行、住宅风控、Crypto、Web3 | 12 个本仓库 `DOMAIN-SET`，按固定地区或业务策略分流 |
 | 3 | Sukka 域名集 | `speedtest` → `cdn` → `apple_cdn` → `download` |
 | 4 | Sukka 非 IP 集 | CDN、Stream、AI、Apple、Microsoft、Download、LAN、Domestic/Direct/Global；窄 Apple CN 先于宽 Apple Services |
@@ -27,6 +27,8 @@
 
 ## 明确不加载
 
+- Apple 自定义更新、付款、Private Relay、iCloud、证书与 APNs 规则；只保留 Sukka
+  `apple_cdn`、`apple_intelligence`、`apple_cn`、`apple_services`。
 - Sukka Reject 与 Adblock4limbo 补集：移动端作者不推荐，且保留模块已负责广告拦截。
 - 全局 `PROTOCOL,STUN,REJECT`：会破坏 Voice、WebRTC 和部分验证流程。
 - `RULE-SET,SYSTEM` 与 APNs 专用覆盖：当前 `include-apns=false`，系统关键链路改由精确规则处理。

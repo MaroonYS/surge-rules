@@ -16,14 +16,12 @@
 旧文件不再活动，但保留在仓库历史中，避免破坏已有链接；主规则与 manifest 只加载
 合并后的 12 个资源。
 
-### 内联
+### Apple 回归 Sukka 公共语义
 
-- `apple-software-update.conf` 的内容与 5 个既有启动主机合并为 21 条精确 `DOMAIN`。
-- `apple-account-payment-rules.conf` 改为 5 个精确主机加一个动态账单分片。
-- `icloud_private_relay.conf` 不再作为未列入 Sukka README 基线的远程依赖，改为 6 个
-  精确入口并前置于 iCloud 直连层。
-- `icloud-sync.conf` 改为精确后缀内联，保证 CloudKit、Photos、iWork 与内容传输不受
-  外部资源刷新影响。
+此前建立的 Software Updates、Apple Account/付款、Private Relay、iCloud 同步、
+证书验证与 APNs 自定义例外全部从主规则移除。Apple 只保留 Sukka README 明确列出的
+`apple_cdn`、`apple_intelligence`、`apple_cn`、`apple_services`；系统更新由 Sukka
+`download` 与 Apple 公共规则共同承接。相关旧文件仍保留历史，但不再活动。
 
 ### 删除的基础规则层
 

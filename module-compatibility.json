@@ -47,28 +47,6 @@
       "-gate.io",
       "-*.gateio.ws",
       "-gateio.ws",
-      "-*.apple.com",
-      "-apple.com",
-      "-*.icloud.com",
-      "-icloud.com",
-      "-*.mzstatic.com",
-      "-mzstatic.com",
-      "-*.apple-cloudkit.com",
-      "-apple-cloudkit.com",
-      "-*.icloud-content.com",
-      "-icloud-content.com",
-      "-*.cdn-apple.com",
-      "-cdn-apple.com",
-      "-*.apple-mapkit.com",
-      "-apple-mapkit.com",
-      "-*.aaplimg.com",
-      "-aaplimg.com",
-      "-*.itunes.com",
-      "-itunes.com",
-      "-*.me.com",
-      "-me.com",
-      "-*.mac.com",
-      "-mac.com",
       "-*.futunn.com",
       "-futunn.com",
       "-*.moomoo.com",
@@ -171,27 +149,9 @@
       "-*.futuhn.com",
       "-futuhn.com",
       "-*.futufin.com",
-      "-futufin.com",
-      "-*.apple-livephotoskit.com",
-      "-apple-livephotoskit.com",
-      "-*.apzones.com",
-      "-apzones.com",
-      "-*.icloud.com.cn",
-      "-icloud.com.cn",
-      "-*.apple-dns.net",
-      "-apple-dns.net"
+      "-futufin.com"
     ]
   },
-  "conditional_mitm_disables": [
-    {
-      "id": "wloc-ios27-client-pinning",
-      "requirement": "DEVICE_MODEL BEGINSWITH 'iPhone' AND SYSTEM_VERSION CONTAINS 'Version 27.'",
-      "hosts": [
-        "gs-loc.apple.com",
-        "gs-loc-cn.apple.com"
-      ]
-    }
-  ],
   "modules": [
     {
       "id": "iringo-weatherkit",

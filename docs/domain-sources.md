@@ -8,8 +8,8 @@
 本仓库不再维护或加载 Apple 自定义域名集。基础分流只使用 Sukka README 明确列出的
 `apple_cdn`、`apple_intelligence`、`apple_cn` 与 `apple_services`；软件更新由 Sukka
 `download` 与 Apple 公共资源承接。Apple Account、Private Relay、iCloud、证书和
-APNs 不设置个人化路由。保留模块所需的 Apple/iCloud 负向 MITM 边界仍由
-`module-compatibility.json` 管理，但 MITM 排除不等于新增分流规则。
+APNs 不设置个人化路由。主 Profile 也不添加任何 Apple/iCloud MITM 正项、负项或
+条件禁用；相关 hostname 完全由用户保留的模块管理。
 
 ## 监管目录
 

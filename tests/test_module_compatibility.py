@@ -24,20 +24,18 @@ class ModuleCompatibilityTests(unittest.TestCase):
 
     def test_manifest_and_documentation_are_current(self) -> None:
         self.assertEqual(24, len(self.positives))
-        self.assertEqual(151, len(self.negatives))
+        self.assertEqual(121, len(self.negatives))
         self.assertIn("-capitalone.md-apis.medallia.com", self.negatives)
         self.assertIn("-*.myequifax.com", self.negatives)
         self.assertIn("-*.polymarket.com", self.negatives)
         self.assertIn("-*.gate.com", self.negatives)
-        self.assertIn("-*.apple-livephotoskit.com", self.negatives)
-        self.assertIn("-*.icloud.com.cn", self.negatives)
-        self.assertIn("-*.apple-dns.net", self.negatives)
+        self.assertNotIn("-*.apple.com", self.negatives)
+        self.assertNotIn("-*.apple-livephotoskit.com", self.negatives)
+        self.assertNotIn("-*.icloud.com.cn", self.negatives)
+        self.assertNotIn("-*.apple-dns.net", self.negatives)
         self.assertIn("gsp-ssl.ls.apple.com", self.positives)
         self.assertIn("bluedot.is.autonavi.com", self.positives)
-        self.assertEqual(
-            [check_module_compatibility.EXPECTED_CONDITIONAL_DISABLE],
-            self.data["conditional_mitm_disables"],
-        )
+        self.assertNotIn("conditional_mitm_disables", self.data)
         documentation = ROOT / self.data["documentation"]
         self.assertEqual(
             self.positives,
@@ -111,41 +109,33 @@ class ModuleCompatibilityTests(unittest.TestCase):
             problems,
         )
 
-    def test_base_profile_contract_covers_h2_raw_ip_and_ios27_disable(self) -> None:
-        conditional = self.data["conditional_mitm_disables"][0]
+    def test_base_profile_contract_delegates_positive_hosts_to_modules(self) -> None:
         profile = (
             "[MITM]\n"
             "h2 = true\n"
             "hostname = "
-            + ", ".join(self.positives + self.negatives)
-            + "\n"
-            + check_module_compatibility.conditional_disable_line(conditional)
+            + ", ".join(self.negatives)
             + "\n"
         )
         self.assertEqual(
             [],
             check_module_compatibility.validate_base_profile(
                 profile,
-                self.positives,
                 self.negatives,
-                conditional,
             ),
         )
 
         broken = profile.replace("h2 = true", "h2 = false").replace(
-            check_module_compatibility.conditional_disable_line(conditional),
-            "",
+            "hostname = ",
+            f"hostname = {self.positives[0]}, ",
         )
         problems = check_module_compatibility.validate_base_profile(
             broken,
-            self.positives,
             self.negatives,
-            conditional,
         )
         self.assertIn("base MITM must enable h2", problems)
-        self.assertIn(
-            "base profile is missing the exact iPhone iOS 27 WLOC disable",
-            problems,
+        self.assertTrue(
+            any("must not duplicate module-owned" in problem for problem in problems)
         )
 
 

@@ -31,10 +31,9 @@ Sukka 的网络测试端点、UDP 不支持即拒绝和 `exclude-simple-hostname
 Local DNS Mapping、Always Real IP 与 `skip-proxy` 已由保留模块注入，不在主 Profile
 重复声明。
 
-MITM 不照搬 Sukka 的可选广告解密层，而是以现有 iRingo、WLOC 和 DualSubs 的真实依赖
-建立 24 个精确正项；其后保留 Apple、iCloud、银行、券商、Crypto、KYC、风控和原始 IP
-负项。iPhone iOS 27 对两个被系统证书固定的 WLOC 主机使用条件化
-`hostname-disabled`，iPad 与旧系统继续保留模块能力。
+MITM 不照搬 Sukka 的可选广告解密层。主 Profile 不再复制、排除或条件禁用任何
+Apple hostname；iRingo、WLOC 与 DualSubs 所需的 24 个精确正项完全由对应模块声明。
+基础 Profile 只保留银行、券商、Crypto、KYC、风控和原始 IP 的 121 个负项。
 
 这里的严格阶段顺序约束基础 Profile。Surge 会把启用模块的规则置于基础规则之前；
 部分保留的第三方模块内部同时包含域名与 IP 规则。在“保留且不修改模块”的前提下，

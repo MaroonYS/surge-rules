@@ -23,14 +23,6 @@ REQUIRED_MODULE_IDS = {
     "iringo-weatherkit",
     "wloc",
 }
-EXPECTED_CONDITIONAL_DISABLE = {
-    "id": "wloc-ios27-client-pinning",
-    "requirement": (
-        "DEVICE_MODEL BEGINSWITH 'iPhone' AND "
-        "SYSTEM_VERSION CONTAINS 'Version 27.'"
-    ),
-    "hosts": ["gs-loc.apple.com", "gs-loc-cn.apple.com"],
-}
 
 
 def load_manifest(path: Path) -> dict[str, object]:
@@ -68,9 +60,9 @@ def manifest_contract(data: dict[str, object]) -> tuple[list[str], list[str]]:
         raise ValueError("positive_hosts cannot contain exclusions")
     if any(not host.startswith("-") for host in negatives):
         raise ValueError("negative_hosts must contain Surge exclusions")
-    if len(negatives) != 151:
+    if len(negatives) != 121:
         raise ValueError(
-            f"negative_hosts must contain exactly 151 entries, got {len(negatives)}"
+            f"negative_hosts must contain exactly 121 entries, got {len(negatives)}"
         )
 
     modules = data.get("modules")
@@ -106,14 +98,6 @@ def manifest_contract(data: dict[str, object]) -> tuple[list[str], list[str]]:
         missing = sorted(set(positives) - covered_hosts)
         raise ValueError("positive hosts without a module owner: " + ", ".join(missing))
 
-    conditional_disables = data.get("conditional_mitm_disables")
-    if not isinstance(conditional_disables, list) or len(conditional_disables) != 1:
-        raise ValueError("conditional_mitm_disables must contain exactly one entry")
-    conditional = conditional_disables[0]
-    if conditional != EXPECTED_CONDITIONAL_DISABLE:
-        raise ValueError("WLOC iOS 27 conditional MITM disable contract drifted")
-    if not set(conditional["hosts"]).issubset(positives):
-        raise ValueError("conditional MITM disabled hosts must be positive hosts")
     return positives, negatives
 
 
@@ -172,33 +156,18 @@ def mitm_option(profile_text: str, option: str) -> str | None:
     return None
 
 
-def conditional_disable_line(conditional: dict[str, object]) -> str:
-    requirement = conditional["requirement"]
-    hosts = conditional["hosts"]
-    return (
-        f'#!REQUIREMENT "{requirement}" hostname-disabled = '
-        + ", ".join(hosts)
-    )
-
-
 def validate_base_profile(
     profile_text: str,
-    positives: Sequence[str],
     negatives: Sequence[str],
-    conditional: dict[str, object],
 ) -> list[str]:
-    problems = validate_profile_order(profile_text, positives, negatives)
+    problems: list[str] = []
     tokens = mitm_host_tokens(profile_text)
-    if tokens != list(positives) + list(negatives):
+    if tokens != list(negatives):
         problems.append("base MITM hostname list differs from the complete manifest")
-    if tokens[: len(positives)] != list(positives):
-        problems.append("base MITM positive host prefix differs from the manifest")
-    unexpected_positives = [
-        token for token in tokens[len(positives) :] if not token.startswith("-")
-    ]
+    unexpected_positives = [token for token in tokens if not token.startswith("-")]
     if unexpected_positives:
         problems.append(
-            "unexpected positive MITM hosts after the protected prefix: "
+            "base profile must not duplicate module-owned positive MITM hosts: "
             + ", ".join(unexpected_positives)
         )
     if len(tokens) != len(set(tokens)):
@@ -210,9 +179,6 @@ def validate_base_profile(
     skip_verify = mitm_option(profile_text, "skip-server-cert-verify")
     if skip_verify not in {None, "false"}:
         problems.append("base MITM must verify upstream server certificates")
-    expected_line = conditional_disable_line(conditional)
-    if expected_line not in {line.strip() for line in profile_text.splitlines()}:
-        problems.append("base profile is missing the exact iPhone iOS 27 WLOC disable")
     return problems
 
 
@@ -279,14 +245,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 for problem in problems:
                     print(f"ERROR: {problem}", file=sys.stderr)
                 return 1
-        conditional = data["conditional_mitm_disables"][0]
         for profile_path in args.base_profile:
             profile_text = profile_path.read_text(encoding="utf-8")
             problems = validate_base_profile(
                 profile_text,
-                positives,
                 negatives,
-                conditional,
             )
             if problems:
                 for problem in problems:

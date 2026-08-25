@@ -6,8 +6,9 @@
   phishing domain set, while continuing to omit the upstream-discouraged MITM URL-REGEX layer.
 - Added Sukka's Telegram non-IP resource alongside the official CIDR, replaced the built-in
   LAN shortcut with Sukka's current `ip/lan.conf`, and documented the daily MTProto DC source.
-- Expanded and enforced the retained-module MITM boundary at 24 exact positive hosts, with
-  a shared-profile iPhone/iOS 27 WLOC disable and base/effective-profile regression checks.
+- Delegated all Apple MITM handling to the retained modules: removed the 24 duplicated base
+  positives, 30 Apple/iCloud exclusions and the profile-level iOS 27 WLOC disable. Effective
+  profile checks still verify module-owned hosts; base checks retain 121 non-Apple protections.
 - Removed the Adblock4limbo external ruleset after measuring 253 Sukka-covered rules out of
   543 active source rules and only 224 normalized unique additions; deleted the derivative,
   generator and scheduled publisher while preserving the user-retained module script.

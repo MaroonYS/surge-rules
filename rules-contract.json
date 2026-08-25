@@ -5,11 +5,23 @@
       "title": "协议和局域网",
       "rules": [
         "DEST-PORT,123,DIRECT",
-        "DOMAIN,appldnld.apple.com,DIRECT",
-        "DOMAIN,gdmf.apple.com,DIRECT",
-        "DOMAIN,gg.apple.com,DIRECT",
-        "DOMAIN,gs.apple.com,DIRECT",
-        "DOMAIN,mesu.apple.com,DIRECT",
+        "DOMAIN,appldnld.apple.com,DIRECT,extended-matching",
+        "DOMAIN,gdmf.apple.com,DIRECT,extended-matching",
+        "DOMAIN,gg.apple.com,DIRECT,extended-matching",
+        "DOMAIN,gs.apple.com,DIRECT,extended-matching",
+        "DOMAIN,mesu.apple.com,DIRECT,extended-matching",
+        "DOMAIN,bpapi.apple.com,DIRECT,extended-matching",
+        "DOMAIN,certs.apple.com,DIRECT,extended-matching",
+        "DOMAIN,crl.apple.com,DIRECT,extended-matching",
+        "DOMAIN,crl3.digicert.com,DIRECT,extended-matching",
+        "DOMAIN,crl4.digicert.com,DIRECT,extended-matching",
+        "DOMAIN,ocsp.apple.com,DIRECT,extended-matching",
+        "DOMAIN,ocsp.digicert.com,DIRECT,extended-matching",
+        "DOMAIN,ocsp2.apple.com,DIRECT,extended-matching",
+        "DOMAIN,valid.apple.com,DIRECT,extended-matching",
+        "DOMAIN,ocsp.digicert.cn,DIRECT,extended-matching",
+        "DOMAIN,github.com,Res-Frontier,extended-matching",
+        "DOMAIN-SUFFIX,githubusercontent.com,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/x-residential.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-account.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/google-voice.conf,Res-Frontier,extended-matching",
@@ -37,9 +49,13 @@
     },
     {
       "number": 3,
-      "title": "iCloud Private Relay",
+      "title": "Apple Account / iCloud Private Relay / iCloud 同步",
       "rules": [
-        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,\"United States\",extended-matching"
+        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,\"United States\",extended-matching",
+        "DOMAIN-SUFFIX,cdn-apple.com,DIRECT,extended-matching",
+        "DOMAIN-SUFFIX,icloud.com,DIRECT,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/icloud-sync.conf,DIRECT,extended-matching"
       ]
     },
     {
@@ -72,7 +88,6 @@
       "number": 7,
       "title": "美国住宅出口",
       "rules": [
-        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/us-residential.conf,Res-Frontier,extended-matching"
       ]
     },

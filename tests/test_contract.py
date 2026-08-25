@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -110,25 +111,107 @@ class RuleContractTests(unittest.TestCase):
         self.assertLess(main.index(google_account), main.index(voice))
         self.assertLess(main.index(ntp), main.index(stun))
 
-    def test_watchos_update_chain_is_exact_direct_and_early(self) -> None:
+    def test_watchos_update_and_validation_chain_is_exact_direct_and_early(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         ntp = "DEST-PORT,123,DIRECT"
         watchos_rules = [
-            "DOMAIN,appldnld.apple.com,DIRECT",
-            "DOMAIN,gdmf.apple.com,DIRECT",
-            "DOMAIN,gg.apple.com,DIRECT",
-            "DOMAIN,gs.apple.com,DIRECT",
-            "DOMAIN,mesu.apple.com,DIRECT",
+            "DOMAIN,appldnld.apple.com,DIRECT,extended-matching",
+            "DOMAIN,gdmf.apple.com,DIRECT,extended-matching",
+            "DOMAIN,gg.apple.com,DIRECT,extended-matching",
+            "DOMAIN,gs.apple.com,DIRECT,extended-matching",
+            "DOMAIN,mesu.apple.com,DIRECT,extended-matching",
+            "DOMAIN,bpapi.apple.com,DIRECT,extended-matching",
+            "DOMAIN,certs.apple.com,DIRECT,extended-matching",
+            "DOMAIN,crl.apple.com,DIRECT,extended-matching",
+            "DOMAIN,crl3.digicert.com,DIRECT,extended-matching",
+            "DOMAIN,crl4.digicert.com,DIRECT,extended-matching",
+            "DOMAIN,ocsp.apple.com,DIRECT,extended-matching",
+            "DOMAIN,ocsp.digicert.com,DIRECT,extended-matching",
+            "DOMAIN,ocsp2.apple.com,DIRECT,extended-matching",
+            "DOMAIN,valid.apple.com,DIRECT,extended-matching",
+            "DOMAIN,ocsp.digicert.cn,DIRECT,extended-matching",
+        ]
+        github_rules = [
+            "DOMAIN,github.com,Res-Frontier,extended-matching",
+            "DOMAIN-SUFFIX,githubusercontent.com,Res-Frontier,extended-matching",
         ]
         x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
-        positions = [main.index(rule) for rule in watchos_rules]
+        protected_rules = watchos_rules + github_rules
+        positions = [main.index(rule) for rule in protected_rules]
 
         self.assertEqual(sorted(positions), positions)
-        self.assertTrue(all(main.count(rule) == 1 for rule in watchos_rules))
+        self.assertTrue(all(main.count(rule) == 1 for rule in protected_rules))
         self.assertTrue(all(main.index(ntp) < position for position in positions))
         self.assertTrue(all(position < main.index(x_residential) for position in positions))
         self.assertNotIn("DOMAIN-SUFFIX,apple.com,DIRECT", main)
         self.assertNotIn("DOMAIN-KEYWORD,apple,DIRECT", main)
+
+    def test_weatherkit_country_fallback_is_coordinate_scoped(self) -> None:
+        snippet = (
+            ROOT / "snippets" / "weatherkit-country-fallback.conf"
+        ).read_text(encoding="utf-8")
+        rule = next(
+            line
+            for line in snippet.splitlines()
+            if line and not line.startswith(("#", "["))
+        )
+        pattern, replacement, mode = rule.split()
+        replacement = re.sub(r"\$(\d+)", r"\\g<\1>", replacement)
+        missing_country = (
+            "https://weatherkit.apple.com/api/v2/weather/zh-Hans-US/"
+            "22.544577/113.94114?timezone=Asia/Shanghai&dataSets=airQuality"
+        )
+        existing_country = missing_country + "&country=CN"
+        other_location = missing_country.replace("22.544577/113.94114", "40.7/-74.0")
+
+        self.assertEqual("header", mode)
+        self.assertRegex(missing_country, pattern)
+        self.assertIn("country=CN", re.sub(pattern, replacement, missing_country))
+        self.assertNotRegex(existing_country, pattern)
+        self.assertNotRegex(other_location, pattern)
+
+    def test_icloud_layers_are_complete_and_ordered_before_reject(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        account = (
+            "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/"
+            "apple-account-payment-rules.conf,Res-Frontier"
+        )
+        relay = (
+            "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/"
+            'icloud_private_relay.conf,"United States",extended-matching'
+        )
+        sync = (
+            "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/"
+            "icloud-sync.conf,DIRECT,extended-matching"
+        )
+        cdn = "DOMAIN-SUFFIX,cdn-apple.com,DIRECT,extended-matching"
+        icloud = "DOMAIN-SUFFIX,icloud.com,DIRECT,extended-matching"
+        reject = "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT"
+        domains = {
+            line
+            for line in (ROOT / "icloud-sync.conf").read_text(encoding="utf-8").splitlines()
+            if line and not line.startswith("#")
+        }
+        required = {
+            ".apple-cloudkit.com",
+            ".apple-livephotoskit.com",
+            ".apzones.com",
+            ".gc.apple.com",
+            ".icloud.com.cn",
+            ".icloud.apple.com",
+            ".icloud-content.com",
+            ".iwork.apple.com",
+            ".apple-dns.net",
+        }
+
+        self.assertEqual(required, domains)
+        self.assertLess(main.index(account), main.index(relay))
+        self.assertLess(main.index(relay), main.index(cdn))
+        self.assertLess(main.index(cdn), main.index(icloud))
+        self.assertLess(main.index(icloud), main.index(sync))
+        self.assertLess(main.index(sync), main.index(reject))
+        self.assertEqual(1, main.count(account))
+        self.assertEqual(1, main.count(sync))
 
     def test_x_first_party_surface_uses_early_residential_route(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

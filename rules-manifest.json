@@ -59,6 +59,19 @@
       "description": "Polymarket US product namespace"
     },
     {
+      "file": "apple-account-payment-rules.conf",
+      "type": "RULE-SET",
+      "policy": "Res-Frontier",
+      "semantic_role": "Apple-Account-Payment",
+      "description": "Apple Account sign-in and App Store billing control-plane hosts"
+    },
+    {
+      "file": "icloud-sync.conf",
+      "policy": "DIRECT",
+      "semantic_role": "iCloud-Sync",
+      "description": "Apple-documented iCloud, CloudKit, Photos, iWork, content-transfer and diagnostics domains"
+    },
+    {
       "file": "apple-ai.conf",
       "policy": "United States",
       "semantic_role": "AIGC",
@@ -104,13 +117,6 @@
       "policy": "United Kingdom",
       "semantic_role": "UK-FINANCE",
       "description": "United Kingdom financial services"
-    },
-    {
-      "file": "apple-account-payment-rules.conf",
-      "type": "RULE-SET",
-      "policy": "Res-Frontier",
-      "semantic_role": "Apple-Account-Payment",
-      "description": "Apple Account sign-in and App Store billing control-plane hosts"
     },
     {
       "file": "us-residential.conf",

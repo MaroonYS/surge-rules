@@ -11,7 +11,7 @@ Surge 会把模块规则放到主 Profile 规则之前；模块的启用状态�
 ## 主 Profile 必须保持的边界
 
 - `skip-server-cert-verify = false`，不得为兼容模块而关闭服务器证书校验。
-- 只对实际保留模块的精确 Apple 主机开启 MITM。下列 21 项必须位于
+- 只对实际保留模块的精确 Apple 主机开启 MITM。下列 24 项必须位于
   `-*.apple.com`、`-*.itunes.com` 等负向通配之前：
 
 <!-- module-compatibility:positive-hosts:start -->
@@ -20,6 +20,9 @@ weatherkit.apple.com
 gspe1-ssl.ls.apple.com
 gs-loc.apple.com
 gs-loc-cn.apple.com
+gsp-ssl.ls.apple.com
+bluedot.is.autonavi.com
+bluedot.is.autonavi.com.gds.alibabadns.com
 dispatcher.is.autonavi.com
 configuration.ls.apple.com
 gspe35-ssl.ls.apple.com
@@ -40,14 +43,21 @@ vod-*.tv.apple.com
 ```
 <!-- module-compatibility:positive-hosts:end -->
 
-这 21 项的模块归属和负项顺序同时记录在根目录的
+这 24 项的模块归属和负项顺序同时记录在根目录的
 `module-compatibility.json`。该清单只固化当前实际模块依赖，不从脚本正则或网络请求
 自动猜测新域名。仓库检查器验证清单、本文和可选“修改后配置”三者一致：
 
 ```bash
 python3 scripts/check_module_compatibility.py
 python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
+python3 scripts/check_module_compatibility.py \
+  --base-profile /path/to/iphone.conf \
+  --base-profile /path/to/mac.conf
 ```
+
+`--base-profile` 还会强制检查基础 `hostname` 只有清单中的 24 个正项、无重复、
+保留 `-<ip-address>`、启用 `h2`、不关闭上游证书校验，并存在精确的 iPhone iOS 27
+WLOC 条件禁用；`--profile` 则用于验证模块叠加后的有效配置仍保留全部正项与保护负项。
 
 - 不额外加入 `play.itunes.apple.com` 或 `play-edge.itunes.apple.com`。iRingo TV 先在
   已解密的 `play-cdn` / `play-edge-cdn` 请求上执行 URL Rewrite，DualSubs 再匹配
@@ -55,6 +65,8 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 - Apple 精确正项之后继续保留 Apple 通配负项、金融/KYC/风控负项和
   `-<ip-address>`。`api5.futunn.com` 没有对应的活动处理脚本，不应为了广域 MITM
   清单而解除券商端点保护。
+- 151 个基础负项已全部逐项写入 `module-compatibility.json`；基础配置必须与该清单
+  完全相等、不能多出正项或缺少任一银行、券商、KYC、Apple/iCloud 与原始 IP 保护。
 - NTP/UDP 123 必须先固定 `DIRECT`。基础规则不再使用全局
   `PROTOCOL,STUN,REJECT`；Google Voice 控制面合入 `us-residential.conf`，媒体连接
   按协议正常建立，避免为一个隐私取舍破坏 Voice、WebRTC、游戏和验证流程。
@@ -69,6 +81,12 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 
 - WeatherKit、LocationService、Maps、News、TV 与 WLOC 的上述 MITM 主机必须在
   修改后配置中先于 Apple 负项。
+- WLOC 上游已确认 iOS 27 beta 6 起系统禁止对 `gs-loc.apple.com` 进行 MITM。
+  共享配置在 `iPhone + System Version 27.x` 上使用带 Requirement 的
+  `hostname-disabled`，只禁用 `gs-loc.apple.com` 与 `gs-loc-cn.apple.com`，避免
+  系统定位连接持续出现 `MitM Failed`；iPad 和旧版 iOS 不受影响。模块新增的
+  `gsp-ssl.ls.apple.com`、`bluedot.is.autonavi.com` 及其 AliDNS 别名仍保留为备用
+  入口，但不能承诺 iOS 27 会实际切换到备用入口。
 - iCloud 的非 Apple 根域还必须保留 `icloud.com(.cn)`、`icloud-content.com`、
   `apple-cloudkit.com`、`apple-livephotoskit.com`、`apzones.com`、`cdn-apple.com`
   与 `apple-dns.net` 负项，避免后续模块漂移把官方同步/内容链纳入 SSL inspection。
@@ -123,7 +141,7 @@ python3 scripts/check_module_compatibility.py --profile /path/to/effective.conf
 ## 每台设备的验证顺序
 
 1. 用 Surge 原生检查确认基础 Profile 可加载。
-2. 打开“修改后配置”，确认没有未知策略；核对 21 个 Apple 精确正项均位于 Apple
+2. 打开“修改后配置”，确认没有未知策略；核对 24 个精确正项均位于 Apple
    负项之前，金融负项仍在模块追加的广域正项之前。
 3. 在请求详情中分别验证 WeatherKit、Location/Maps、News、TV、DualSubs、
    BiliUniverse 与 WLOC 的 Script/MITM 命中，而不是只看模块开关。

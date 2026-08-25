@@ -66,6 +66,12 @@ class RuleContractTests(unittest.TestCase):
         self.assertIn("DOMAIN-SET", sections[2]["title"])
         self.assertIn("non_ip", sections[3]["title"])
         self.assertIn("IP", sections[4]["title"])
+        self.assertEqual(7, len(sections[2]["rules"]))
+        self.assertEqual(17, len(sections[3]["rules"]))
+        self.assertEqual(
+            7,
+            sum("/List/ip/" in rule for rule in sections[4]["rules"]),
+        )
         self.assertTrue(sections[4]["rules"][-1].startswith("FINAL,"))
 
     def test_contract_detects_mutation(self) -> None:
@@ -112,12 +118,58 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("icloud_private_relay.conf", main)
         self.assertNotIn("telegram_asn.conf", main)
 
-    def test_mobile_reject_stack_is_not_duplicated(self) -> None:
+    def test_requested_sukka_reject_stack_is_complete_and_scoped(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        self.assertNotIn("/reject", main)
-        self.assertNotIn("adblock4limbo-supplement.conf", main)
+        reject_rules = [
+            line
+            for line in main.splitlines()
+            if line and not line.startswith("#") and "/reject" in line
+        ]
+        self.assertEqual(
+            [
+                "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT,extended-matching",
+                "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject_extra.conf,REJECT",
+                "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject_phishing.conf,REJECT",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,pre-matching",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject.conf,REJECT,extended-matching",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching",
+                "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
+            ],
+            reject_rules,
+        )
+        self.assertNotIn("reject-url-regex.conf", main)
+        self.assertFalse((ROOT / "adblock4limbo-supplement.conf").exists())
+        self.assertNotIn("https://limbopro.com/Adblock4limbo_surge.list", main)
         self.assertNotIn("PROTOCOL,STUN,REJECT", main)
         self.assertNotIn("RULE-SET,SYSTEM", main)
+
+    def test_custom_risk_sets_precede_large_reject_domain_sets(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        reject_index = main.index("/List/domainset/reject.conf,REJECT")
+        for resource in (
+            "us-residential.conf",
+            "finance-context.conf",
+            "identity-context.conf",
+            "risk-context.conf",
+        ):
+            with self.subTest(resource=resource):
+                self.assertLess(main.index(f"/{resource},"), reject_index)
+
+    def test_section_two_has_five_documented_subgroups(self) -> None:
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        headings = [
+            "# 2.1 固定媒体",
+            "# 2.2 中国大陆实体金融",
+            "# 2.3 分地区实体金融",
+            "# 2.4 美国住宅、身份与风控",
+            "# 2.5 Crypto 与 Web3",
+        ]
+        positions = [main.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertLess(
+            positions[-1],
+            main.index("# 3. Sukka DOMAIN-SET"),
+        )
 
     def test_only_sukka_documented_apple_resources_are_active(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
@@ -275,7 +327,13 @@ class RuleContractTests(unittest.TestCase):
         self.assertTrue(ip_rules)
         self.assertTrue(all(",no-resolve" not in line for line in ip_rules))
         self.assertIn("RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Singapore", lines)
-        self.assertNotIn("RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore", lines)
+        self.assertIn("RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore", lines)
+        self.assertIn("RULE-SET,https://ruleset.skk.moe/List/ip/lan.conf,DIRECT", lines)
+        self.assertNotIn("RULE-SET,LAN,DIRECT,no-resolve", lines)
+        self.assertLess(
+            lines.index("RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore"),
+            lines.index("RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Singapore"),
+        )
 
     def test_only_current_ios_mode_snippets_remain_copy_ready(self) -> None:
         complete = (ROOT / "snippets" / "ios-complete-routing.conf").read_text(

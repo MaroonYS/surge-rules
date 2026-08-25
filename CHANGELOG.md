@@ -2,13 +2,16 @@
 
 ## Unreleased
 
+- Moved the narrowly scoped GitHub release/raw module-download path from the currently
+  timing-out US residential chain to the repeatedly verified Hong Kong policy; direct and
+  Hong Kong succeeded while both ordinary-US and residential-US trials timed out.
 - Synchronized the current 29-file rule inventory across README and requirements/source
   documentation, and added a manifest-driven regression test so future rule additions cannot
   silently leave the documented counts or active-file tables stale.
 
 - Completed the watchOS path with Apple's certificate-validation hosts, optional beta
   enrollment, extended hostname matching, and an early direct policy.
-- Routed GitHub module release/content downloads through the verified residential path,
+- Routed GitHub module release/content downloads through an explicit verified path,
   preventing fresh devices from missing scripts when the ordinary US route times out.
 - Added a coordinate-scoped WeatherKit URL fallback for upstream issue #100 so the retained
   module can classify the fixed China WLOC when iPhone/watchOS omits `country`.

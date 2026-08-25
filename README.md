@@ -9,7 +9,8 @@
 - 保留地区第一方金融域名的既有分流语义。
 - 将 Apple 官方列出的 watchOS 更新、可选 Beta 注册及证书验证链精确前置直连，
   并用扩展匹配兼容原始域名的动态 CNAME/SNI。
-- 将保留模块依赖的 GitHub release/raw 下载链固定到已验证可用的住宅出口。
+- 将保留模块依赖的 GitHub release/raw 下载链固定到逐次实测稳定的香港出口，
+  避免普通美国与住宅上游同时失效时阻断脚本更新。
 - 用配置级精确 Rewrite 修复当前 WLOC 下 iPhone/watchOS WeatherKit 请求遗漏
   `country` 的上游兼容问题，不修改 WeatherKit 模块。
 - 将 Apple Account、Private Relay 与 iCloud 内容同步分层：账户/账单保持住宅出口，

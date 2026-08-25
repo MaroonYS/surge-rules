@@ -188,8 +188,8 @@ class RuleContractTests(unittest.TestCase):
             "DOMAIN,ocsp.digicert.cn,DIRECT,extended-matching",
         ]
         github_rules = [
-            "DOMAIN,github.com,Res-Frontier,extended-matching",
-            "DOMAIN-SUFFIX,githubusercontent.com,Res-Frontier,extended-matching",
+            'DOMAIN,github.com,"Hong Kong",extended-matching',
+            'DOMAIN-SUFFIX,githubusercontent.com,"Hong Kong",extended-matching',
         ]
         x_residential = "/x-residential.conf,Res-Frontier,extended-matching"
         protected_rules = watchos_rules + github_rules

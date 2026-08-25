@@ -245,31 +245,68 @@ class RuleContractTests(unittest.TestCase):
         snippet = (
             ROOT / "snippets" / "weatherkit-country-fallback.conf"
         ).read_text(encoding="utf-8")
-        rule = next(
+        rules = [
             line
             for line in snippet.splitlines()
             if line and not line.startswith(("#", "["))
-        )
-        pattern, replacement, mode = rule.split()
-        replacement = re.sub(r"\$(\d+)", r"\\g<\1>", replacement)
-        missing_country = (
+        ]
+        parsed_rules = []
+        for rule in rules:
+            pattern, replacement, mode = rule.split()
+            parsed_rules.append(
+                (pattern, re.sub(r"\$(\d+)", r"\\g<\1>", replacement), mode)
+            )
+
+        shenzhen = (
             "https://weatherkit.apple.com/api/v2/weather/zh-Hans-US/"
             "22.544577/113.94114?timezone=Asia/Shanghai&dataSets=airQuality"
         )
-        current_gps = missing_country.replace("113.94114", "114.0579")
-        shanghai = missing_country.replace("22.544577/113.94114", "31.23/121.47")
-        existing_country = missing_country + "&country=CN"
-        other_location = missing_country.replace("22.544577/113.94114", "40.7/-74.0")
-        non_us_locale = missing_country.replace("zh-Hans-US", "zh-Hans-CN")
+        current_gps = shenzhen.replace("113.94114", "114.0579")
+        shanghai = shenzhen.replace("22.544577/113.94114", "31.23/121.47")
+        encoded_timezone = shanghai.replace("Asia/Shanghai", "Asia%2FShanghai")
+        lowercase_encoded_timezone = shanghai.replace("Asia/Shanghai", "Asia%2fShanghai")
+        no_timezone_shenzhen = shenzhen.replace(
+            "timezone=Asia/Shanghai&", ""
+        )
+        existing_country = shenzhen + "&country=CN"
+        new_york = shenzhen.replace("22.544577/113.94114", "40.7/-74.0")
+        taipei = shenzhen.replace("22.544577/113.94114", "25.03/121.56").replace(
+            "Asia/Shanghai", "Asia/Taipei"
+        )
+        hanoi = shenzhen.replace("22.544577/113.94114", "21.03/105.85").replace(
+            "Asia/Shanghai", "Asia/Bangkok"
+        )
+        non_us_locale = shenzhen.replace("zh-Hans-US", "zh-Hans-CN")
 
-        self.assertEqual("header", mode)
-        self.assertRegex(missing_country, pattern)
-        self.assertRegex(current_gps, pattern)
-        self.assertRegex(shanghai, pattern)
-        self.assertIn("country=CN", re.sub(pattern, replacement, missing_country))
-        self.assertNotRegex(existing_country, pattern)
-        self.assertNotRegex(other_location, pattern)
-        self.assertNotRegex(non_us_locale, pattern)
+        self.assertEqual(2, len(parsed_rules))
+        self.assertTrue(all(mode == "header" for _, _, mode in parsed_rules))
+
+        broad_pattern, broad_replacement, _ = parsed_rules[0]
+        self.assertRegex(shenzhen, broad_pattern)
+        self.assertRegex(current_gps, broad_pattern)
+        self.assertRegex(shanghai, broad_pattern)
+        self.assertRegex(encoded_timezone, broad_pattern)
+        self.assertRegex(lowercase_encoded_timezone, broad_pattern)
+        self.assertIn(
+            "country=CN", re.sub(broad_pattern, broad_replacement, shenzhen)
+        )
+        self.assertNotRegex(no_timezone_shenzhen, broad_pattern)
+        self.assertNotRegex(taipei, broad_pattern)
+        self.assertNotRegex(hanoi, broad_pattern)
+
+        local_pattern, local_replacement, _ = parsed_rules[1]
+        self.assertRegex(no_timezone_shenzhen, local_pattern)
+        self.assertRegex(current_gps, local_pattern)
+        self.assertIn(
+            "country=CN",
+            re.sub(local_pattern, local_replacement, no_timezone_shenzhen),
+        )
+        self.assertNotRegex(shanghai, local_pattern)
+
+        for pattern, _, _ in parsed_rules:
+            self.assertNotRegex(existing_country, pattern)
+            self.assertNotRegex(new_york, pattern)
+            self.assertNotRegex(non_us_locale, pattern)
 
     def test_icloud_layers_are_complete_and_ordered_before_reject(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

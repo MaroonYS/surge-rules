@@ -3,31 +3,13 @@
 本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
-## Apple 软件更新与加密 DNS
+## Apple 边界
 
-Apple 当前 Software Updates 表共有 21 个精确主机。`appldnld.apple.com`、
-`gdmf.apple.com`、`gg.apple.com`、`gs.apple.com` 与 `mesu.apple.com` 直接内联在
-主规则中，确保本仓库外部资源尚未加载时 watchOS 核心检查仍可进行；
-`apple-software-update.conf` 只收录其余 16 个官方主机，覆盖配对 iPhone、附加组件、
-附属设备安装和 Mac 更新，不使用 `.apple.com` 之类宽泛后缀。
-
-`doh.dns.apple.com` 单独精确直连，让 Apple 加密 DNS 与更新目录/下载保持同一出口；
-它不属于更新域集合，也不改变 Private Relay 三个既有端点的美国策略。上述主机均受
-Apple 通配负向 MITM 保护，不进行 HTTPS inspection。来源：
-[Apple 企业网络主机与端口](https://support.apple.com/en-us/101555)。
-
-## Apple iCloud 服务边界
-
-`icloud-sync.conf` 依据 Apple 企业网络清单中的 iCloud 段维护 CloudKit、Live Photos、
-iCloud 内容、iWork、Apple iCloud DNS 及中国大陆条件域；通用 `.icloud.com` 因覆盖动态
-同步主机而保留在主规则中。三个 Private Relay 端点必须先匹配既有 SKK 精确列表，
-Apple Account 的 4 个认证主机及动态 App Store 账单分片则更早固定住宅出口。
-
-`cdn-apple.com` 是 Apple 多项服务共用的 CDN，因此放在 Apple Account 精确例外之后
-统一直连，而不是把它误当成 iCloud 独占域；这也延续仓库既有 Apple CDN 直连语义。
-Apple 官方明确要求其列出的服务免 HTTPS/SSL inspection；当前 Profile 的
-Apple/iCloud 负向 MITM 边界继续保留。
-来源：[Apple 企业网络主机与端口](https://support.apple.com/en-us/101555)。
+本仓库不再维护或加载 Apple 自定义域名集。基础分流只使用 Sukka README 明确列出的
+`apple_cdn`、`apple_intelligence`、`apple_cn` 与 `apple_services`；软件更新由 Sukka
+`download` 与 Apple 公共资源承接。Apple Account、Private Relay、iCloud、证书和
+APNs 不设置个人化路由。保留模块所需的 Apple/iCloud 负向 MITM 边界仍由
+`module-compatibility.json` 管理，但 MITM 排除不等于新增分流规则。
 
 ## 监管目录
 
@@ -91,21 +73,9 @@ Apple/iCloud 负向 MITM 边界继续保留。
 URL 路径选择国家，因此该根域保留在 Finance 语义文件并固定到 `Res-Frontier`，
 而 `.boc.cn` 等大陆专用域继续 `DIRECT`。
 
-Apple Pay 与 PayPal 是跨地区服务。本仓库仅因配置所有者明确使用美国账户而将其
-放入 `Res-Frontier`；其他账户地区不应照搬这一选择。
-
-Apple Account 绑定 PayPal 的登录与账单控制面会使用
-`account.apple.com`、`appleid.cdn-apple.com`、`idmsa.apple.com`、`gsa.apple.com` 以及
-`p*-buy.itunes.apple.com`。配置所有者
-的 Surge 会话在 2026-08-09 与 2026-08-11 观察到
-`p100-buy.itunes.apple.com` 经 `DIRECT` 返回空 DNS 结果，同时 PayPal 主链经
-`Res-Frontier`，形成同一授权流程的出口分裂。由于 `p100-buy` 是完整 DNS 标签，
-普通后缀 `.buy.itunes.apple.com` 无法命中；因此在主规则中内联 5 条精确
-`DOMAIN` 与 `DOMAIN-WILDCARD,*-buy.itunes.apple.com`，使登录与动态分片与 PayPal
-保持同一住宅出口；
-不加入 `.apple.com`、`.itunes.apple.com`、其他 Apple ID 通用域或共享 Braintree
-基础设施。美国 Apple Account 当前支持 PayPal，但账户地区、账单资料和支付服务商
-验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
+PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`；Apple Account
+本身不再随 PayPal 建立联动规则，而是完全交给 Sukka Apple Services。账户地区、
+账单资料和支付服务商验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
 
 当前配置所有者明确使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名已合并到

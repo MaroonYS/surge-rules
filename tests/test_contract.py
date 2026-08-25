@@ -119,74 +119,46 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("PROTOCOL,STUN,REJECT", main)
         self.assertNotIn("RULE-SET,SYSTEM", main)
 
-    def test_apple_software_update_hosts_are_exact_and_inline(self) -> None:
+    def test_only_sukka_documented_apple_resources_are_active(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        expected = {
-            "appldnld.apple.com",
-            "configuration.apple.com",
-            "fcs-keys-pub-prod.cdn-apple.com",
-            "gdmf-ados.apple.com",
-            "gdmf.apple.com",
-            "gg.apple.com",
-            "gs.apple.com",
-            "gsra.apple.com",
-            "ig.apple.com",
-            "mesu.apple.com",
-            "oscdn.apple.com",
-            "osrecovery.apple.com",
-            "skl.apple.com",
-            "swcdn.apple.com",
-            "swdist.apple.com",
-            "swdownload.apple.com",
-            "swscan.apple.com",
-            "updates-http.cdn-apple.com",
-            "updates.cdn-apple.com",
-            "wkms-public.apple.com",
-            "xp.apple.com",
-        }
-        actual = {
-            line.split(",")[1]
+        apple_rules = [
+            line
             for line in main.splitlines()
-            if line.startswith("DOMAIN,") and ",DIRECT,extended-matching" in line
-        }
-        self.assertTrue(expected.issubset(actual))
-        self.assertEqual(21, len(expected))
-        self.assertNotIn("apple-software-update.conf", main)
-        self.assertNotIn("DOMAIN-SUFFIX,apple.com,DIRECT", main)
-
-    def test_private_relay_precedes_icloud_direct(self) -> None:
-        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        relay_hosts = [
+            if line and not line.startswith("#") and "apple" in line.casefold()
+        ]
+        self.assertEqual(
+            [
+                "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_intelligence.conf,\"United States\",extended-matching",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
+                "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,\"United States\"",
+            ],
+            apple_rules,
+        )
+        for removed in (
+            "appldnld.apple.com",
+            "gdmf.apple.com",
+            "account.apple.com",
             "mask.icloud.com",
-            "mask-h2.icloud.com",
-            "mask-api.icloud.com",
-            "mask-canary.icloud.com",
-            "mask.apple-dns.net",
-            "canary.mask.apple-dns.net",
-        ]
-        relay_positions = [
-            main.index(f'DOMAIN,{host},"United States",extended-matching')
-            for host in relay_hosts
-        ]
-        icloud = main.index("DOMAIN-SUFFIX,icloud.com,DIRECT,extended-matching")
-        apple_dns = main.index("DOMAIN-SUFFIX,apple-dns.net,DIRECT,extended-matching")
-        self.assertTrue(all(position < icloud for position in relay_positions[:4]))
-        self.assertTrue(all(position < apple_dns for position in relay_positions[4:]))
-
-    def test_apple_account_payment_is_precise_and_early(self) -> None:
-        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
-        expected = [
-            "DOMAIN,account.apple.com,Res-Frontier,extended-matching",
-            "DOMAIN,appleid.cdn-apple.com,Res-Frontier,extended-matching",
-            "DOMAIN,idmsa.apple.com,Res-Frontier,extended-matching",
-            "DOMAIN,gsa.apple.com,Res-Frontier,extended-matching",
-            "DOMAIN,buy.itunes.apple.com,Res-Frontier,extended-matching",
-            "DOMAIN-WILDCARD,*-buy.itunes.apple.com,Res-Frontier",
-        ]
-        apple_services = main.index("/non_ip/apple_services.conf")
-        self.assertTrue(all(main.count(rule) == 1 for rule in expected))
-        self.assertTrue(all(main.index(rule) < apple_services for rule in expected))
-        self.assertNotIn("apple-account-payment-rules.conf", main)
+            "gateway.icloud.com",
+            "certs.apple.com",
+            "apple-software-update.conf",
+            "apple-account-payment-rules.conf",
+            "icloud_private_relay.conf",
+            "icloud-sync.conf",
+        ):
+            self.assertNotIn(removed, main)
+        for removed_file in (
+            "apple-software-update.conf",
+            "apple-account-payment-rules.conf",
+            "apple-ai.conf",
+            "apple-push.conf",
+            "apple-push-rules.conf",
+            "icloud-sync.conf",
+            "snippets/weatherkit-country-fallback.conf",
+            "snippets/ios-apns-capture.conf",
+        ):
+            self.assertFalse((ROOT / removed_file).exists())
 
     def test_apple_cn_precedes_broad_apple_services(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

@@ -14,7 +14,7 @@
 Sukka 官方要求所有域名规则与 `DOMAIN-SET` 先于全部 `non_ip`，全部 `non_ip`
 再先于任何 IP 类规则，最后才是 `FINAL`。本仓库把这个约束固化为五段契约：
 
-1. 精确系统、Apple 与账户链路；
+1. 协议与模块资源；
 2. 固定地区与高风控业务；
 3. Sukka `DOMAIN-SET`；
 4. Sukka `non_ip`；
@@ -37,14 +37,18 @@ Adblock4limbo 补集、全局 STUN 拒绝或 URL-REGEX 拦截。这样可以避�
 
 ## Apple 与系统链路
 
-- Apple 官方 Software Updates 的 21 个精确主机直接内联为 `DIRECT`，系统更新不再
-  依赖 GitHub 外部资源先刷新成功。
-- Apple Account 与 App Store 账单只固定 5 个精确主机及动态 `*-buy` 分片到
-  `Res-Frontier`，不扩大到整个 Apple/iTunes。
-- Private Relay 的 6 个精确入口固定普通 `United States`，并置于 iCloud 直连层前。
-- iCloud、CloudKit、Photos、iWork 与内容传输域精确直连；Apple CN/CDN 继续直连。
-- GitHub 与 `githubusercontent.com` 固定香港出口，保证保留模块的发布资源可更新。
-- `include-apns=false` 的设备模式保持不变，基础规则不再加载不会生效的 APNs 专用覆盖。
+Apple 不再使用任何本仓库自定义域名、付款、Private Relay、iCloud、证书或系统更新
+例外。基础规则只加载 Sukka README 明确列出的四个 Apple 资源：
+
+- `domainset/apple_cdn.conf` → `DIRECT`；
+- `non_ip/apple_intelligence.conf` → `United States`；
+- `non_ip/apple_cn.conf` → `DIRECT`；
+- `non_ip/apple_services.conf` → `United States`。
+
+软件更新由 Sukka `download` 与上述 Apple 资源承接；Apple Account、Private Relay、
+iCloud 等则按 Sukka Apple Services 的公共语义处理。现有 iRingo、WeatherKit、Maps、
+News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。GitHub 与
+`githubusercontent.com` 固定香港出口，仅用于保留模块的发布资源更新。
 
 ## 本仓库活动资源
 

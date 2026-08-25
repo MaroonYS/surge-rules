@@ -8,9 +8,10 @@
   X/Google/Polymarket, Hong Kong account-context and Bybit layers without dropping domains.
 - Removed duplicate base Reject, global STUN, SYSTEM/APNs and reverse-whitelist stacks while
   leaving all user-retained Surge modules untouched.
-- Inlined the 21 Apple Software Updates hosts, Apple Account payment boundary, six Private
-  Relay endpoints and iCloud sync boundary so core system traffic does not depend on a
-  secondary GitHub resource refresh.
+- Removed every custom Apple update, payment, Private Relay, iCloud, certificate and APNs
+  routing exception; Apple now uses only Sukka's documented `apple_cdn`,
+  `apple_intelligence`, `apple_cn` and `apple_services` resources. This supersedes the
+  earlier unreleased Apple-routing entries retained below as development history.
 - Disabled the scheduled Adblock4limbo supplement publisher because the supplement is no
   longer active; retained its source tooling and history without generating no-op commits.
 - Synchronized the rebuilt iPhone and Mac profiles; Mac keeps only its three VoHive-specific

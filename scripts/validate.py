@@ -1249,7 +1249,7 @@ def validate_main_rules(
     anchors = [
         ("NTP", lambda value: value == "DEST-PORT,123,DIRECT"),
         ("MTProto", lambda value: value.startswith("PROTOCOL,MTProto,")),
-        ("Apple update", lambda value: value.startswith("DOMAIN,gdmf.apple.com,")),
+        ("Module resources", lambda value: value.startswith("DOMAIN,github.com,")),
         ("DIRECT CN", lambda value: "direct-cn.conf" in value),
         ("Sukka DOMAIN-SET", lambda value: "/List/domainset/speedtest.conf" in value),
         ("Sukka non_ip", lambda value: "/List/non_ip/cdn.conf" in value),

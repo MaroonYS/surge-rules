@@ -28,12 +28,19 @@ Apple CN 是有意放在宽泛 `apple_services` 之前的窄规则例外；否�
 `apple_services` 中的 Apple 广义后缀会先命中，Apple CN 的 `DIRECT` 将失效。
 Microsoft CDN 同理位于 Microsoft 广义规则之前。
 
-## 为什么不在基础规则重复广告拦截
+## Reject 边界
 
-Sukka README 明确只建议在 Surge for Mac 使用其大型 Reject 集，移动端建议使用专门
-工具。当前配置已经保留多套广告与 MITM 模块，因此基础规则不再加载 Sukka Reject、
-Adblock4limbo 补集、全局 STUN 拒绝或 URL-REGEX 拦截。这样可以避免同一请求同时经过
-多层拦截、降低误杀与资源开销；这不是删减现有模块。
+基础规则加载 Sukka 的 7 个 Reject 资源：3 个 `domainset`、3 个 `non_ip`
+和 1 个 `ip`。上游对性能的警告针对 MITM 与 `URL-REGEX` 拦截，不等于应删除
+所有 Reject 域名/IP 规则。这里同时启用基础、额外和钓鱼域名集，但不加入
+`reject-url-regex.conf` 或新的 MITM 拦截层；全局 STUN 拒绝与 `RULE-SET,SYSTEM`
+同样不在基础规则中激活。设备上已保留的模块不会被
+这次规则更改删除或改写。
+
+不再加载 Adblock4limbo 外部规则集：当前源 543 条活动规则中有 253 条已被 Sukka
+覆盖，剔除 Keyword、重复、无效和内部冗余后仅剩 224 条增量。相对已启用的 Sukka 基础、Extra
+与 Phishing 大型域集，收益不足以抵消额外第三方供应链和维护复杂度。已保留模块中的
+同名网页处理脚本不属于基础分流规则，按“模块不改”约束继续保留。
 
 ## Apple 与系统链路
 
@@ -69,6 +76,11 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 | `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 
+主规则的第 2 段按“固定媒体 → 中国大陆实体金融 → 分地区实体金融 →
+美国住宅、身份与风控 → Crypto 与 Web3”细分。这 12 个定向性强的自定义
+`DOMAIN-SET` 全部早于 Sukka 的大型 Reject `DOMAIN-SET`，避免宽泛拦截先抢走
+金融、身份和风控业务的固定出口。
+
 同一策略下原有的小文件已经合并：X、Google Account/Voice、Polymarket 合入
 `us-residential.conf`；香港账户上下文合入 `hk-finance.conf`；Bybit 合入
 `crypto.conf`。旧文件仍保留在仓库供历史追踪，但不再被主规则引用。
@@ -82,18 +94,26 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 当前使用的官方资源均来自统一基址 `https://ruleset.skk.moe/List/`：
 
+- `domainset/reject`、`reject_extra` 与 `reject_phishing` → `REJECT`；
+- `non_ip/reject-drop` → `REJECT-DROP` + `pre-matching`，`reject` → `REJECT`，
+  `reject-no-drop` → `REJECT-NO-DROP`；
+- `ip/reject` → `REJECT-DROP`；
 - `speedtest`、`cdn` → `PROXY`；
 - `stream`、`ai`、`apple_intelligence` → `United States`；
-- `apple_cdn`、`apple_cn`、`microsoft_cdn`、`lan`、`domestic`、`direct` → `DIRECT`；
+- Telegram 域名、MTProto 协议与官方 CIDR → `Singapore`；
+- `apple_cdn`、`apple_cn`、`microsoft_cdn`、`non_ip/lan`、`ip/lan`、`domestic`、
+  `direct` → `DIRECT`；
 - `apple_services`、`microsoft` → `United States`；
 - `download` → `Hong Kong`；
-- Telegram 官方 CIDR → `Singapore`；
 - `global` 与 `FINAL` → `PROXY`；
 - 中国 IP → `DIRECT`。
 
-Telegram 仅加载作者推荐的官方 CIDR，不加载可选 ASN 或重复的域名列表。IPv6 当前未
-启用，因此不加载 China IPv6 资源。`nano.cr18.eu.org` 是唯一保留的 Emby 精确例外，
-固定新加坡，不再加载整个第三方 Emby 总表。
+Telegram 同时加载 Sukka 的域名规则和作者推荐的官方 CIDR，并由 `PROTOCOL,MTProto`
+补足 MTProto 识别；不加载可选 ASN。设备 Profile 的 `[MTProto]` 使用 Sukka 每日构建的
+DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.eu.org` 是唯一保留
+的 Emby 精确例外，固定新加坡，不再加载整个第三方 Emby 总表。
+
+完整的上游资源取舍与覆盖状态见 [Sukka 覆盖矩阵](docs/sukka-parity.md)。
 
 ## 接入与校验
 
@@ -127,6 +147,9 @@ python3 scripts/check_module_compatibility.py
 - 不使用 `DOMAIN-KEYWORD` 或公共云、KYC、CDN 的宽泛根域做“兜底”。
 - 模块顺序与 MITM 保护边界分别见 [module-order](docs/module-order.md) 和
   [module-baseline](docs/module-baseline.md)，规则重建不会删除或改写模块。
+- 严格的 `domainset → non_ip → ip` 保证针对基础 Profile。Surge 会把保留模块的
+  规则前置；若第三方模块内部混合域名与 IP 规则，在“不改模块”的约束下不能把整个
+  修改后配置重新排序，但不会改变本仓库基础规则自身的阶段正确性。
 
 迁移详情见 [migration-notes](docs/migration-notes.md)，需求映射见
 [requirements-matrix](docs/requirements-matrix.md)，数量对账见

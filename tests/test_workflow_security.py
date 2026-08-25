@@ -10,12 +10,7 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 DEPENDABOT = ROOT / ".github" / "dependabot.yml"
 
 
-class WorkflowTests(unittest.TestCase):
-    def test_inactive_adblock_supplement_has_no_scheduled_publisher(self) -> None:
-        self.assertFalse((WORKFLOWS / "sync-adblock4limbo.yml").exists())
-        upstream = (WORKFLOWS / "upstream-health.yml").read_text(encoding="utf-8")
-        self.assertNotIn("sync_adblock4limbo.py", upstream)
-
+class WorkflowSecurityTests(unittest.TestCase):
     def test_all_actions_are_immutable_and_dependabot_tracks_them(self) -> None:
         action_refs: list[str] = []
         for workflow in WORKFLOWS.glob("*.yml"):

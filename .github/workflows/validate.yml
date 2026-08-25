@@ -39,12 +39,6 @@ jobs:
           --github-annotations
           --json-out validation-report.json
 
-      - name: Check generated Adblock supplement
-        run: >
-          python scripts/sync_adblock4limbo.py
-          --check
-          --timeout 30
-
       - name: Check BiliUniverse Global compatibility
         run: >
           python scripts/check_biliuniverse.py

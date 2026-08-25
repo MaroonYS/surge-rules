@@ -2,18 +2,25 @@
 
 ## Unreleased
 
+- Restored the complete requested Sukka Reject stack, including the explicitly enabled
+  phishing domain set, while continuing to omit the upstream-discouraged MITM URL-REGEX layer.
+- Added Sukka's Telegram non-IP resource alongside the official CIDR, replaced the built-in
+  LAN shortcut with Sukka's current `ip/lan.conf`, and documented the daily MTProto DC source.
+- Expanded and enforced the retained-module MITM boundary at 24 exact positive hosts, with
+  a shared-profile iPhone/iOS 27 WLOC disable and base/effective-profile regression checks.
+- Removed the Adblock4limbo external ruleset after measuring 253 Sukka-covered rules out of
+  543 active source rules and only 224 normalized unique additions; deleted the derivative,
+  generator and scheduled publisher while preserving the user-retained module script.
 - Rebuilt the base Rule layer around Sukka's strict `domainset -> non_ip -> ip -> FINAL`
   ordering and added an independent validator guard against later phase regressions.
-- Reduced active repository resources from 30 to 12 DOMAIN-SET files by merging same-policy
+- Reduced the 30 historical business resources to 12 DOMAIN-SET files by merging same-policy
   X/Google/Polymarket, Hong Kong account-context and Bybit layers without dropping domains.
-- Removed duplicate base Reject, global STUN, SYSTEM/APNs and reverse-whitelist stacks while
-  leaving all user-retained Surge modules untouched.
+- Removed global STUN, SYSTEM/APNs and reverse-whitelist stacks while leaving all user-retained
+  Surge modules untouched; the canonical Sukka Reject stack is active once in the base Rule layer.
 - Removed every custom Apple update, payment, Private Relay, iCloud, certificate and APNs
   routing exception; Apple now uses only Sukka's documented `apple_cdn`,
   `apple_intelligence`, `apple_cn` and `apple_services` resources. This supersedes the
   earlier unreleased Apple-routing entries retained below as development history.
-- Disabled the scheduled Adblock4limbo supplement publisher because the supplement is no
-  longer active; retained its source tooling and history without generating no-op commits.
 - Synchronized the rebuilt iPhone and Mac profiles; Mac keeps only its three VoHive-specific
   exceptions, with the IP-CIDR moved into the final IP phase.
 - Completed Apple's current 21-host Software Updates boundary while retaining the five
@@ -94,7 +101,7 @@
 - Made the daily Adblock synchronization semantic-only: volatile source hashes are reported
   in the Actions summary and no longer rewrite or commit an unchanged effective supplement.
 - Added a machine-readable retained-module compatibility manifest and checker for the exact
-  21 Apple MITM hosts used by iRingo, WLOC and DualSubs Apple TV handling.
+  24 MITM hosts used by iRingo, WLOC and DualSubs Apple TV handling.
 - Documented separate evidence-based Mac and iPhone module orders while preserving all
   retained modules and their device-specific DNS winner.
 - Hardened synchronization CI with the full validation, module-compatibility, BiliUniverse,
@@ -112,8 +119,8 @@
 - Fixed quoting of policy names containing whitespace in generated expanded rules.
 - Taught the profile policy checker to parse modified/effective profiles, nested logical
   rules, regular-expression commas, rule options and module provenance annotations.
-- Moved Telegram non-IP routing next to MTProto, before the shared reject stack, while
-  retaining Telegram IP routing before the general IP rejection set.
+- Kept Telegram domain and IP routing in Sukka's `non_ip` and `ip` phases while retaining
+  `PROTOCOL,MTProto` as the earlier protocol-specific path.
 - Added a per-device, all-modules-retained compatibility baseline with the exact Apple MITM
   allowlist required by iRingo, WLOC and DualSubs, without weakening financial/KYC or raw-IP
   exclusions.

@@ -33,6 +33,9 @@
       "number": 3,
       "title": "Sukka DOMAIN-SET 阶段（必须完整位于 non_ip / ip 之前）",
       "rules": [
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject.conf,REJECT,extended-matching",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject_extra.conf,REJECT",
+        "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/reject_phishing.conf,REJECT",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/speedtest.conf,PROXY,extended-matching",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
@@ -43,10 +46,14 @@
       "number": 4,
       "title": "Sukka non_ip 阶段（窄规则优先于宽规则）",
       "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-drop.conf,REJECT-DROP,pre-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject.conf,REJECT,extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/reject-no-drop.conf,REJECT-NO-DROP,extended-matching",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/cdn.conf,PROXY",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/stream.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/ai.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_intelligence.conf,\"United States\",extended-matching",
+        "RULE-SET,https://ruleset.skk.moe/List/non_ip/telegram.conf,Singapore",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_services.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/non_ip/microsoft_cdn.conf,DIRECT",
@@ -62,10 +69,11 @@
       "number": 5,
       "title": "Sukka IP 阶段与最终策略（此处之后不得再出现域名规则）",
       "rules": [
+        "RULE-SET,https://ruleset.skk.moe/List/ip/reject.conf,REJECT-DROP",
         "RULE-SET,https://ruleset.skk.moe/List/ip/stream.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/ip/ai.conf,\"United States\"",
         "RULE-SET,https://ruleset.skk.moe/List/ip/telegram.conf,Singapore",
-        "RULE-SET,LAN,DIRECT,no-resolve",
+        "RULE-SET,https://ruleset.skk.moe/List/ip/lan.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/ip/domestic.conf,DIRECT",
         "RULE-SET,https://ruleset.skk.moe/List/ip/china_ip.conf,DIRECT",
         "FINAL,PROXY,dns-failed"

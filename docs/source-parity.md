@@ -2,16 +2,16 @@
 
 | 指标 | 当前值 | 来源 |
 | --- | ---: | --- |
-| 主规则条数 | 49 | `surge-main.conf` 的有效规则 |
-| 当前 DOMAIN-SET 条目 | 630 | 12 个本仓库 `DOMAIN-SET` |
+| 主规则条数 | 50 | `surge-main.conf` 的有效规则 |
+| 当前 DOMAIN-SET 条目 | 668 | 13 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 0 | 本仓库不再维护远程 `RULE-SET` |
-| 当前活动条目 | 630 | `rules-manifest.json` 的 12 个活动文件 |
-| 活动本仓库资源 | 12 | 地区金融、住宅风控、Crypto 与 Web3 |
+| 当前活动条目 | 668 | `rules-manifest.json` 的 13 个活动文件 |
+| 活动本仓库资源 | 13 | 地区金融、住宅风控、Crypto、Web3 与 Microsoft CDN/download 精确交集 |
 | Sukka DOMAIN-SET | 7 | Reject 基础/额外/钓鱼、speedtest、cdn、apple_cdn、download |
 | Sukka non_ip | 17 | Reject Drop/Reject/No Drop、CDN、Stream、AI、Telegram、Apple、Microsoft、Download、LAN、Misc |
 | Sukka ip | 7 | Reject、Stream、AI、Telegram、LAN、Domestic、China IP |
 
-`surge-expanded.conf` 仅展开上述 630 条本仓库域名，Sukka 官方远程资源保持远程引用，
+`surge-expanded.conf` 仅展开上述 668 条本仓库域名，Sukka 官方远程资源保持远程引用，
 以避免复制其大型规则和制造重复真相层。
 三个自定义高风控子层及其他定向业务 `DOMAIN-SET` 全部早于三个 Sukka
 Reject `DOMAIN-SET`；随后才进入 `non_ip` 和 `ip` Reject，保持严格阶段顺序。

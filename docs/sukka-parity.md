@@ -16,7 +16,7 @@
 | AI（non_ip + ip）与 Apple Intelligence | 全部活动 | 使用 `United States` |
 | Telegram（non_ip + 官方 IP CIDR） | 全部活动 | 使用 `Singapore`；不加载上游仅建议作为补充的 ASN |
 | Apple CDN / Apple Services / Apple CN | 全部活动 | CDN/CN 直连，其他 Apple 服务使用 `United States`；窄 Apple CN 先于宽 Apple Services |
-| Microsoft CDN / Microsoft | 全部活动 | CDN 直连，其他服务使用 `United States` |
+| Microsoft CDN / Microsoft | 全部活动 | CDN 直连，其他服务使用 `United States`；另以 38 条交集 DOMAIN-SET 防止中国 CDN 被更早的香港下载集合抢先 |
 | 网易云音乐 | 不加载 | 专项功能，不属于当前需求；普通流量仍由 Domestic/China IP 承接 |
 | Download（domainset + non_ip） | 全部活动 | 放在 Apple/Microsoft CDN 之后并使用 `Hong Kong` |
 | LAN（non_ip + ip） | 全部活动 | 两层均使用 Sukka 官方资源并直连 |
@@ -33,7 +33,8 @@ Local DNS Mapping、Always Real IP 与 `skip-proxy` 已由保留模块注入，�
 
 MITM 不照搬 Sukka 的可选广告解密层。主 Profile 不再复制、排除或条件禁用任何
 Apple hostname；iRingo、WLOC 与 DualSubs 所需的 24 个精确正项完全由对应模块声明。
-基础 Profile 只保留银行、券商、Crypto、KYC、风控和原始 IP 的 121 个负项。
+基础 Profile 只保留仍在使用的银行、券商、Crypto、KYC 与风控的 114 个负项；
+不再保留已废弃的 Gate 项或会压住模块显式 IP hostname 的全局 IP 排除。
 
 这里的严格阶段顺序约束基础 Profile。Surge 会把启用模块的规则置于基础规则之前；
 部分保留的第三方模块内部同时包含域名与 IP 规则。在“保留且不修改模块”的前提下，

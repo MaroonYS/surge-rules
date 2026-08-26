@@ -45,11 +45,11 @@ class RuleContractTests(unittest.TestCase):
         )
         parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
 
-        self.assertEqual(12, len(active))
-        self.assertIn("12 个远程本仓库 `DOMAIN-SET`", readme)
-        self.assertIn("确认 12 个本仓库规则文件均成功加载", readme)
+        self.assertEqual(13, len(active))
+        self.assertIn("13 个远程本仓库 `DOMAIN-SET`", readme)
+        self.assertIn("确认 13 个本仓库规则文件均成功加载", readme)
         self.assertIn(
-            f"| 当前 DOMAIN-SET 条目 | {total_entries} | 12 个本仓库 `DOMAIN-SET` |",
+            f"| 当前 DOMAIN-SET 条目 | {total_entries} | 13 个本仓库 `DOMAIN-SET` |",
             parity,
         )
         for item in active:
@@ -66,7 +66,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertIn("DOMAIN-SET", sections[2]["title"])
         self.assertIn("non_ip", sections[3]["title"])
         self.assertIn("IP", sections[4]["title"])
-        self.assertEqual(7, len(sections[2]["rules"]))
+        self.assertEqual(8, len(sections[2]["rules"]))
         self.assertEqual(17, len(sections[3]["rules"]))
         self.assertEqual(
             7,
@@ -238,6 +238,7 @@ class RuleContractTests(unittest.TestCase):
                 "risk-context.conf": "Res-Frontier",
                 "crypto.conf": "Crypto",
                 "web3.conf": "Web3",
+                "microsoft-cdn-download-overlap.conf": "DIRECT",
             },
             policies,
         )

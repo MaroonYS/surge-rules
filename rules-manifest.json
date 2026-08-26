@@ -6,6 +6,12 @@
   "contract": "rules-contract.json",
   "active": [
     {
+      "file": "supercell-direct.conf",
+      "policy": "DIRECT",
+      "semantic_role": "SUPERCELL-DIRECT",
+      "description": "Supercell first-party account and game domains on one direct path"
+    },
+    {
       "file": "direct-cn.conf",
       "policy": "DIRECT",
       "semantic_role": "CN-FINANCE",

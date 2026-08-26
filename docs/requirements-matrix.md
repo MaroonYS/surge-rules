@@ -3,15 +3,16 @@
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
 | 1 | NTP、MTProto 与模块资源 | NTP 直连、MTProto 新加坡、GitHub 模块资源香港；不含 Apple 自定义例外 |
-| 2 | 固定地区与高风控业务 | 固定媒体 → 中国大陆实体金融 → 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3；13 个本仓库 `DOMAIN-SET` 先于大型 Reject 域名集 |
+| 2 | 固定地区与高风控业务 | Supercell 域名直连 → 固定媒体 → 中国大陆实体金融 → 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3；本仓库域名资源先于大型 Reject 域名集 |
 | 3 | 域名集 | Sukka Reject 基础 → Reject Extra → Reject Phishing → `speedtest` → `cdn` → `apple_cdn` → Microsoft CDN/download 交集直连 → `download` |
 | 4 | Sukka 非 IP 集 | Reject Drop → Reject → Reject No Drop → CDN、Stream、AI、Telegram、Apple、Microsoft、Download、LAN、Domestic/Direct/Global；窄 Apple CN 先于宽 Apple Services |
-| 5 | Sukka IP 与最终规则 | Reject → Stream → AI → Telegram 官方 CIDR → Sukka LAN → Domestic → China IP → `FINAL` |
+| 5 | Sukka IP 与最终规则 | Blackmatrix7 Supercell 混合兼容层（`no-resolve`）→ Reject → Stream → AI → Telegram 官方 CIDR → Sukka LAN → Domestic → China IP → `FINAL` |
 
 ## 活动资源
 
 | 文件 | 类型 | 固定策略 | 保留理由 |
 | --- | --- | --- | --- |
+| `supercell-direct.conf` | `DOMAIN-SET` | `DIRECT` | Supercell 登录、账户服务与各款游戏首方域统一直连 |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` | 中国大陆实体银行与银联 |
 | `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文 |
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |

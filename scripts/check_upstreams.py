@@ -48,6 +48,14 @@ ALLOWED_CONTENT_TYPES = {
     "binary/octet-stream",
     "text/plain",
 }
+SUPERCELL_UPSTREAM_URL = (
+    "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/"
+    "master/rule/Surge/Supercell/Supercell.list"
+)
+SUPERCELL_DOMAIN_RULES = {
+    "DOMAIN-SUFFIX,brawlstars.com",
+    "DOMAIN-SUFFIX,brawlstarsgame.com",
+}
 
 
 @dataclass(frozen=True, order=True)
@@ -233,6 +241,31 @@ def validate_rule_set(lines: Sequence[str]) -> str | None:
     return None
 
 
+def validate_supercell_upstream(lines: Sequence[str]) -> str | None:
+    """Keep the mutable third-party Supercell list narrow and auditable."""
+    domain_rules = {line for line in lines if line.startswith("DOMAIN")}
+    if domain_rules != SUPERCELL_DOMAIN_RULES:
+        return "Supercell upstream changed its two allowed domain rules"
+
+    ip_rules = [line for line in lines if line.startswith("IP-")]
+    if len(ip_rules) < 1 or len(ip_rules) > 64:
+        return "Supercell upstream must contain between 1 and 64 IP rules"
+    if len(lines) != len(domain_rules) + len(ip_rules):
+        return "Supercell upstream contains an unsupported rule type"
+
+    for line in ip_rules:
+        fields = [field.strip() for field in line.split(",")]
+        if len(fields) != 3 or fields[0] != "IP-CIDR" or fields[2] != "no-resolve":
+            return "Supercell upstream IP rules must be IPv4 CIDR with no-resolve"
+        try:
+            network = ipaddress.ip_network(fields[1], strict=True)
+        except ValueError:
+            return f"Supercell upstream contains an invalid network: {fields[1]!r}"
+        if network.version != 4 or network.prefixlen != 32:
+            return "Supercell upstream IP rules must remain precise IPv4 /32 entries"
+    return None
+
+
 def validate_payload(
     resource: Resource,
     text: str,
@@ -271,6 +304,8 @@ def validate_payload(
         problem = validate_domain_set(business_lines)
     else:
         problem = validate_rule_set(business_lines)
+        if problem is None and resource.url == SUPERCELL_UPSTREAM_URL:
+            problem = validate_supercell_upstream(business_lines)
         if problem is None and strict_local_rule_set:
             for line_number, line in enumerate(business_lines, 1):
                 _, local_problem = repository_validator.validate_policy_free_rule(

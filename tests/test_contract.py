@@ -38,18 +38,31 @@ class RuleContractTests(unittest.TestCase):
             (ROOT / "rules-manifest.json").read_text(encoding="utf-8")
         )
         active = manifest["active"]
-        total_entries = sum(len(self.active_entries(item["file"])) for item in active)
+        domain_entries = sum(
+            len(self.active_entries(item["file"]))
+            for item in active
+            if item.get("type", "DOMAIN-SET") == "DOMAIN-SET"
+        )
+        rule_entries = sum(
+            len(self.active_entries(item["file"]))
+            for item in active
+            if item.get("type", "DOMAIN-SET") == "RULE-SET"
+        )
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         matrix = (ROOT / "docs" / "requirements-matrix.md").read_text(
             encoding="utf-8"
         )
         parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
 
-        self.assertEqual(13, len(active))
-        self.assertIn("13 个远程本仓库 `DOMAIN-SET`", readme)
-        self.assertIn("确认 13 个本仓库规则文件均成功加载", readme)
+        self.assertEqual(14, len(active))
+        self.assertIn("14 个远程本仓库资源", readme)
+        self.assertIn("确认 14 个本仓库规则文件与 Supercell 外部混合集均成功加载", readme)
         self.assertIn(
-            f"| 当前 DOMAIN-SET 条目 | {total_entries} | 13 个本仓库 `DOMAIN-SET` |",
+            f"| 当前 DOMAIN-SET 条目 | {domain_entries} | 14 个本仓库 `DOMAIN-SET` |",
+            parity,
+        )
+        self.assertIn(
+            f"| 当前 RULE-SET 条目 | {rule_entries} | 本仓库不复制第三方 IP 规则 |",
             parity,
         )
         for item in active:
@@ -155,14 +168,15 @@ class RuleContractTests(unittest.TestCase):
             with self.subTest(resource=resource):
                 self.assertLess(main.index(f"/{resource},"), reject_index)
 
-    def test_section_two_has_five_documented_subgroups(self) -> None:
+    def test_section_two_has_six_documented_subgroups(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         headings = [
-            "# 2.1 固定媒体",
-            "# 2.2 中国大陆实体金融",
-            "# 2.3 分地区实体金融",
-            "# 2.4 美国住宅、身份与风控",
-            "# 2.5 Crypto 与 Web3",
+            "# 2.1 Supercell 账户、游戏域与已确认战斗服务器统一直连",
+            "# 2.2 固定媒体",
+            "# 2.3 中国大陆实体金融",
+            "# 2.4 分地区实体金融",
+            "# 2.5 美国住宅、身份与风控",
+            "# 2.6 Crypto 与 Web3",
         ]
         positions = [main.index(heading) for heading in headings]
         self.assertEqual(positions, sorted(positions))
@@ -239,6 +253,7 @@ class RuleContractTests(unittest.TestCase):
                 "crypto.conf": "Crypto",
                 "web3.conf": "Web3",
                 "microsoft-cdn-download-overlap.conf": "DIRECT",
+                "supercell-direct.conf": "DIRECT",
             },
             policies,
         )
@@ -314,6 +329,40 @@ class RuleContractTests(unittest.TestCase):
                 ".walletconnect.org",
             }.issubset(web3)
         )
+
+    def test_supercell_direct_domain_and_upstream_ip_layers_are_complete_and_ordered(self) -> None:
+        domains = self.active_entries("supercell-direct.conf")
+        self.assertTrue(
+            {
+                ".brawlstars.com",
+                ".brawlstarsgame.com",
+                ".accounts.supercell.com",
+                ".id.supercell.com",
+                ".supercellid.com",
+                ".supercellgames.com",
+                ".clashroyale.com",
+                ".clashofclans.com",
+                ".boombeach.com",
+                ".hayday.com",
+                ".squadbusters.com",
+            }.issubset(domains)
+        )
+        self.assertNotIn(".supercell.net", domains)
+        self.assertNotIn(".amazonaws.com", domains)
+        self.assertNotIn(".supercell.com", domains)
+        self.assertNotIn(".supercellstore.com", domains)
+        self.assertNotIn(".supercellcreators.com", domains)
+        self.assertNotIn(".seeurlpcl.com", domains)
+
+        main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
+        domain_ref = "/supercell-direct.conf,DIRECT,extended-matching"
+        first_sukka_domain = "/List/domainset/reject.conf,REJECT"
+        last_non_ip = "/List/non_ip/global.conf,PROXY"
+        upstream_ref = "/rule/Surge/Supercell/Supercell.list,DIRECT,no-resolve"
+        first_sukka_ip = "/List/ip/reject.conf,REJECT-DROP"
+        self.assertLess(main.index(domain_ref), main.index(first_sukka_domain))
+        self.assertLess(main.index(last_non_ip), main.index(upstream_ref))
+        self.assertLess(main.index(upstream_ref), main.index(first_sukka_ip))
 
     def test_gate_override_is_not_reintroduced(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")

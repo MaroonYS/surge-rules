@@ -26,7 +26,9 @@ IP 阶段之后的修改。
 
 Apple CN 是有意放在宽泛 `apple_services` 之前的窄规则例外；否则
 `apple_services` 中的 Apple 广义后缀会先命中，Apple CN 的 `DIRECT` 将失效。
-Microsoft CDN 同理位于 Microsoft 广义规则之前。
+Microsoft CDN 同理位于 Microsoft 广义规则之前。Supercell 首方域名位于域名阶段，
+Blackmatrix7 现成混合集在 IP 阶段以 `no-resolve` 加载；两者统一使用
+`DIRECT`，避免登录、资源与对战混用出口。
 
 ## Reject 边界
 
@@ -59,12 +61,20 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 13 个远程本仓库 `DOMAIN-SET` 加载 668 条当前活动域名：
+主规则通过 14 个远程本仓库资源加载 683 条域名，另外直接引用
+Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
+
+该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
+不扩大为 AWS、Tencent Cloud 或其他共享云 CIDR。上游健康检查会锁定两个
+Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`；出现宽域名、宽 CIDR
+或其他规则类型时 CI 直接失败。主站、商店、创作者和跳转追踪域不是游戏联网必需，
+故未加入直连集。
 
 其中 `microsoft-cdn-download-overlap.conf` 精确承接 Microsoft 中国 CDN 与香港下载集合的 38 条交集。
 
 | 文件 | 策略 | 作用 |
 | --- | --- | --- |
+| `supercell-direct.conf` | `DIRECT` | Supercell ID、账户服务与各款游戏首方域 |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `hk-finance.conf` | `Hong Kong` | 香港银行、券商及当前香港账户共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
@@ -78,10 +88,12 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 | `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 
-主规则的第 2 段按“固定媒体 → 中国大陆实体金融 → 分地区实体金融 →
-美国住宅、身份与风控 → Crypto 与 Web3”细分。这 13 个定向性强的自定义
-`DOMAIN-SET` 全部早于 Sukka 的大型 Reject `DOMAIN-SET`，避免宽泛拦截先抢走
-金融、身份和风控业务的固定出口。
+主规则的第 2 段按“Supercell 直连 → 固定媒体 → 中国大陆实体金融 →
+分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3”细分。
+所有定向域名资源都早于 Sukka 的大型 Reject `DOMAIN-SET`。Blackmatrix7 混合集
+则位于所有 non_ip 之后、Sukka IP 资源之前；其两条域名已由前置自有集覆盖，
+该兼容层主要承接 `no-resolve` 的 IP 匹配。Sukka 公共资源仍严格保持
+`domainset → non_ip → ip` 的作者顺序。
 
 同一策略下原有的小文件已经合并：X、Google Account/Voice、Polymarket 合入
 `us-residential.conf`；香港账户上下文合入 `hk-finance.conf`；Bybit 合入
@@ -124,7 +136,7 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 `Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
-在 Surge 的外部资源页面刷新，并确认 13 个本仓库规则文件均成功加载。随后执行：
+在 Surge 的外部资源页面刷新，并确认 14 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict

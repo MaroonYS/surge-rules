@@ -33,6 +33,13 @@ class PayloadTests(unittest.TestCase):
             1,
         )
 
+    def supercell_resource(self) -> check_upstreams.Resource:
+        return check_upstreams.Resource(
+            check_upstreams.SUPERCELL_UPSTREAM_URL,
+            "RULE-SET",
+            1,
+        )
+
     def test_deprecated_header_is_rejected(self) -> None:
         count, problem = check_upstreams.validate_payload(
             self.resource(),
@@ -154,6 +161,32 @@ class PayloadTests(unittest.TestCase):
         )
         self.assertEqual(1, count)
         self.assertEqual("", problem)
+
+    def test_supercell_upstream_contract_accepts_only_narrow_mixed_rules(self) -> None:
+        valid = (
+            "DOMAIN-SUFFIX,brawlstars.com\n"
+            "DOMAIN-SUFFIX,brawlstarsgame.com\n"
+            "IP-CIDR,192.0.2.1/32,no-resolve\n"
+        )
+        count, problem = check_upstreams.validate_payload(
+            self.supercell_resource(),
+            valid,
+        )
+        self.assertEqual(3, count)
+        self.assertEqual("", problem)
+
+        invalid_payloads = (
+            valid + "DOMAIN-SUFFIX,example.com\n",
+            valid.replace("192.0.2.1/32", "192.0.2.0/24"),
+            valid + "IP-ASN,13335\n",
+        )
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                _, problem = check_upstreams.validate_payload(
+                    self.supercell_resource(),
+                    payload,
+                )
+                self.assertTrue(problem)
 
     def test_local_logical_rules_use_strict_policy_free_validation(self) -> None:
         valid = (

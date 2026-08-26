@@ -59,7 +59,9 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 12 个远程本仓库 `DOMAIN-SET` 加载 630 条当前活动域名：
+主规则通过 13 个远程本仓库 `DOMAIN-SET` 加载 668 条当前活动域名：
+
+其中 `microsoft-cdn-download-overlap.conf` 精确承接 Microsoft 中国 CDN 与香港下载集合的 38 条交集。
 
 | 文件 | 策略 | 作用 |
 | --- | --- | --- |
@@ -77,7 +79,7 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 
 主规则的第 2 段按“固定媒体 → 中国大陆实体金融 → 分地区实体金融 →
-美国住宅、身份与风控 → Crypto 与 Web3”细分。这 12 个定向性强的自定义
+美国住宅、身份与风控 → Crypto 与 Web3”细分。这 13 个定向性强的自定义
 `DOMAIN-SET` 全部早于 Sukka 的大型 Reject `DOMAIN-SET`，避免宽泛拦截先抢走
 金融、身份和风控业务的固定出口。
 
@@ -122,7 +124,7 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 `Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
-在 Surge 的外部资源页面刷新，并确认 12 个本仓库规则文件均成功加载。随后执行：
+在 Surge 的外部资源页面刷新，并确认 13 个本仓库规则文件均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict

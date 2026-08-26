@@ -60,9 +60,9 @@ def manifest_contract(data: dict[str, object]) -> tuple[list[str], list[str]]:
         raise ValueError("positive_hosts cannot contain exclusions")
     if any(not host.startswith("-") for host in negatives):
         raise ValueError("negative_hosts must contain Surge exclusions")
-    if len(negatives) != 121:
+    if len(negatives) != 114:
         raise ValueError(
-            f"negative_hosts must contain exactly 121 entries, got {len(negatives)}"
+            f"negative_hosts must contain exactly 114 entries, got {len(negatives)}"
         )
 
     modules = data.get("modules")
@@ -172,8 +172,6 @@ def validate_base_profile(
         )
     if len(tokens) != len(set(tokens)):
         problems.append("base MITM hostname list contains duplicate tokens")
-    if "-<ip-address>" not in tokens:
-        problems.append("base MITM hostname list must exclude raw IP hosts")
     if mitm_option(profile_text, "h2") != "true":
         problems.append("base MITM must enable h2")
     skip_verify = mitm_option(profile_text, "skip-server-cert-verify")

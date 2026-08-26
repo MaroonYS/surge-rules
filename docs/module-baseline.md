@@ -56,17 +56,18 @@ python3 scripts/check_module_compatibility.py \
 ```
 
 `--base-profile` 强制检查基础 `hostname` 不含任何模块所有的 Apple 正项、保留
-121 个金融/KYC/风控负项与 `-<ip-address>`、启用 `h2` 且不关闭上游证书校验；
+114 个金融/KYC/风控负项、启用 `h2` 且不关闭上游证书校验；
 `--profile` 则用于验证模块叠加后的有效配置包含全部模块正项与非 Apple 保护负项。
 
 - 不额外加入 `play.itunes.apple.com` 或 `play-edge.itunes.apple.com`。iRingo TV 先在
   已解密的 `play-cdn` / `play-edge-cdn` 请求上执行 URL Rewrite，DualSubs 再匹配
   改写后的 URL；目标主机不是新的 TLS 握手入口。
 - 主 Profile 不再添加 Apple 通配负项，也不再添加 WLOC 的条件禁用；Apple 的正向
-  hostname、兼容性和失效行为完全跟随对应模块。金融/KYC/风控负项与
-  `-<ip-address>` 继续保留。
-- 121 个非 Apple 基础负项已全部逐项写入 `module-compatibility.json`；基础配置必须
-  与该清单完全相等，不能多出正项或缺少任一银行、券商、KYC 与原始 IP 保护。
+  hostname、兼容性和失效行为完全跟随对应模块。金融/KYC/风控负项继续保留。
+- 114 个非 Apple 基础负项已全部逐项写入 `module-compatibility.json`；基础配置必须
+  与该清单完全相等，不能多出正项或缺少任一仍在使用的银行、券商与 KYC 保护。
+  已删除不再分流的 Gate 负项；也不再全局排除 `<ip-address>`，避免压住模块明确声明
+  的 IP MITM 目标。未知 IP 不会在没有正向 hostname 的情况下自动进入 MITM。
 - NTP/UDP 123 必须先固定 `DIRECT`。基础规则不再使用全局
   `PROTOCOL,STUN,REJECT`；Google Voice 控制面合入 `us-residential.conf`，媒体连接
   按协议正常建立，避免为一个隐私取舍破坏 Voice、WebRTC、游戏和验证流程。
@@ -136,7 +137,7 @@ python3 scripts/check_module_compatibility.py \
 
 1. 用 Surge 原生检查确认基础 Profile 可加载。
 2. 基础 Profile 中确认没有 Apple MITM hostname；打开“修改后配置”，确认 24 个
-   精确正项仅由相应模块提供，且 121 个金融/KYC/风控负项仍然存在。
+   精确正项仅由相应模块提供，且 114 个金融/KYC/风控负项仍然存在。
 3. 在请求详情中分别验证 WeatherKit、Location/Maps、News、TV、DualSubs、
    BiliUniverse 与 WLOC 的 Script/MITM 命中，而不是只看模块开关。
 4. 用真实 App 功能测试最终效果；重复规则以首个实际结果为准。

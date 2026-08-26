@@ -39,6 +39,7 @@
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/speedtest.conf,PROXY,extended-matching",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/cdn.conf,PROXY",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/microsoft-cdn-download-overlap.conf,DIRECT,extended-matching",
         "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/download.conf,\"Hong Kong\""
       ]
     },

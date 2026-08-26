@@ -76,6 +76,12 @@
       "policy": "Web3",
       "semantic_role": "Web3",
       "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
+    },
+    {
+      "file": "microsoft-cdn-download-overlap.conf",
+      "policy": "DIRECT",
+      "semantic_role": "MICROSOFT-CDN-OVERLAP",
+      "description": "Microsoft China CDN entries that would otherwise be captured by Sukka's Hong Kong download DOMAIN-SET"
     }
   ]
 }

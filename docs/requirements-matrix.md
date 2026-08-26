@@ -3,8 +3,8 @@
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
 | 1 | NTP、MTProto 与模块资源 | NTP 直连、MTProto 新加坡、GitHub 模块资源香港；不含 Apple 自定义例外 |
-| 2 | 固定地区与高风控业务 | 固定媒体 → 中国大陆实体金融 → 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3；12 个本仓库 `DOMAIN-SET` 先于大型 Reject 域名集 |
-| 3 | 域名集 | Sukka Reject 基础 → Reject Extra → Reject Phishing → `speedtest` → `cdn` → `apple_cdn` → `download` |
+| 2 | 固定地区与高风控业务 | 固定媒体 → 中国大陆实体金融 → 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3；13 个本仓库 `DOMAIN-SET` 先于大型 Reject 域名集 |
+| 3 | 域名集 | Sukka Reject 基础 → Reject Extra → Reject Phishing → `speedtest` → `cdn` → `apple_cdn` → Microsoft CDN/download 交集直连 → `download` |
 | 4 | Sukka 非 IP 集 | Reject Drop → Reject → Reject No Drop → CDN、Stream、AI、Telegram、Apple、Microsoft、Download、LAN、Domestic/Direct/Global；窄 Apple CN 先于宽 Apple Services |
 | 5 | Sukka IP 与最终规则 | Reject → Stream → AI → Telegram 官方 CIDR → Sukka LAN → Domestic → China IP → `FINAL` |
 
@@ -24,6 +24,7 @@
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
 | `crypto.conf` | `DOMAIN-SET` | `Crypto` | Bybit 与其余中心化交易所 |
 | `web3.conf` | `DOMAIN-SET` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
+| `microsoft-cdn-download-overlap.conf` | `DOMAIN-SET` | `DIRECT` | 修复 38 个 Microsoft 中国 CDN 下载域被香港下载集合抢先的问题 |
 
 ## 明确不加载
 

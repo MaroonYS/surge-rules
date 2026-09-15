@@ -64,7 +64,7 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 16 个远程本仓库资源加载 725 条域名与 6 条窄范围规则，另外直接引用
+主规则通过 16 个远程本仓库资源加载 732 条域名与 6 条窄范围规则，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -85,7 +85,7 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
-| `us-residential.conf` | `Res-Frontier` | 美国金融、X、Google Account/Voice 与 Polymarket |
+| `us-residential.conf` | `Res-Frontier` | 美国金融、LemFi 及已确认专属资源、X、Google Account/Voice 与 Polymarket |
 | `apple-account-payment-rules.conf` | `Res-Frontier` | Apple 账户/账单与 PayPal 关联的窄范围 RULE-SET |
 | `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
@@ -104,6 +104,11 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 金融主顺序为中国大陆 → CH → UK → HK → SG → JP → KR → 美国住宅。
 UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；校验只允许这对具体记录在
 正确策略及顺序下重叠，不豁免其他跨地区重叠。MEXC 的 15 条记录只归瑞士，不回落 Crypto。
+
+LemFi 按配置所有者选择固定美国家宽 `Res-Frontier`：覆盖 `.lemfi.com`、
+`.lemonade.finance` 的根域与子域，以及五个已确认的精确深链、CDN、帮助中心租户。
+不将共享云/认证后缀整体改为美国，也不包含无关保险品牌 `lemonade.com`。
+官方归属证据、遥测边界及设备验收限制见 [LemFi 来源记录](docs/domain-sources.md#lemfi-美国住宅归属)。
 
 同一策略下原有的小文件已经合并：X、Google Account/Voice、Polymarket 合入
 `us-residential.conf`；香港账户上下文合入 `hk-finance.conf`；Bybit 合入

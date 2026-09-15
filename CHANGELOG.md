@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 2026-09-15: Pinned LemFi's current and legacy first-party namespaces and five
+  verified exact deep-link/CDN/support tenants to the owner's US residential
+  policy, Res-Frontier. Added independent boundary/ownership regressions;
+  unrelated regional apps, shared identity providers and modules are unchanged.
 - 2026-09-15: Registered the deployed CH/MEXC list in the manifest, canonical profile and
   generator; aligned UK before HK and constrained the HSBC Expat overlap to the exact
   entries, policies and order. Regenerated stale expanded rules and inventory documentation.

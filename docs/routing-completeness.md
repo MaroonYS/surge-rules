@@ -10,13 +10,17 @@
 | --- | --- | --- |
 | Switzerland | MEXC 的 15 条既有第一方/专属资源 | 旧 UK 或 Crypto、模板遗漏 CH |
 | United Kingdom | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat | Expat 被 HK 的 `.hsbc.com` 抢先、未登记窄辅助域 |
-| Res-Frontier | Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 业务域回落普通 PROXY、Apple 账户/账单与 PayPal 分离 |
+| Res-Frontier | LemFi、Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 业务域回落普通 PROXY、Apple 账户/账单与 PayPal 分离 |
 | Hong Kong | 已指定的香港银行、Futu/Moomoo、Longbridge | 将共享香港账户基础设施重新推断为 SG |
 | Singapore | 已有新加坡专属域，如 Futu SG、Longbridge SG、Moomoo Trustee | 被香港宽泛归属吞并 |
 | Crypto / Web3 | 既有 Bybit 等交易所、钱包和链上业务 | 擅自更改手动选择，或把 MEXC 再塞回 Crypto |
 
 N26 的英国出口是现有用户选择，不代表银行所在地。域名路由也不改变各平台对
 实际居住地、身份、账户或产品的资格要求。
+
+LemFi 的两条首方后缀及五个精确租户单独纳入首命中、子域覆盖、反例和唯一归属回归。
+官网/API/邮箱验证入口/支持与已确认深链同走美国住宅；公开资源证据不等于原生 App
+完整登录、KYC 或支付链路实测，也不要求为了验证路由而新触发任何交易或开户。
 
 ## 共享认证明确待验收
 

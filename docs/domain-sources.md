@@ -10,6 +10,39 @@
 其余服务仍使用 Sukka 公共资源，设备已有 Private Relay 选择保留。主 Profile 不添加
 Apple/iCloud MITM 正项、负项或条件禁用；相关 hostname 仍由保留模块管理。
 
+## LemFi 美国住宅归属
+
+2026-09-15，配置所有者要求 LemFi 相关流量使用美国家宽。此前本仓库活动/历史
+域名清单和两份设备 Profile 的显式域名规则没有 LemFi 专项；本次在既有
+`us-residential.conf` 增加以下 7 条，以现有 `Res-Frontier,extended-matching`
+绑定早于通用 CDN/地区兜底。不改主配置策略、节点、模块或其他 App 的归属。
+
+| 条目 | 匹配边界 | 一手证据 |
+| --- | --- | --- |
+| `.lemfi.com` | 当前官网及其 API、mobile、asset、support 等子域 | [官网联系页](https://lemfi.com/en-us/contact-us)、[官方 App Store 页面](https://apps.apple.com/us/app/lemfi/id1533066809) |
+| `.lemonade.finance` | 历史首方命名空间，包括生产应用/邮箱验证入口与 referral | [官网当前 JS](https://lemfi.com/_nuxt/3oCc-B_K.js) 使用 `referral.lemonade.finance`；[mobile.lemfi.com](https://mobile.lemfi.com/) 的公开源码将生产邮箱验证跳转至 `app.lemonade.finance` |
+| `lemfi.onelink.me` | 仅此精确深链租户 | 官网联系页直接链接；[Apple App Site Association](https://lemfi.onelink.me/.well-known/apple-app-site-association) |
+| `lemonadefi.app.link` | 仅此精确历史深链租户 | [Apple App Site Association](https://lemonadefi.app.link/.well-known/apple-app-site-association) |
+| `lemonadefi-alternate.app.link` | 仅此精确历史深链备用租户 | [Apple App Site Association](https://lemonadefi-alternate.app.link/.well-known/apple-app-site-association) |
+| `d1c5a9xrl5sbk8.cloudfront.net` | 仅此精确静态资源分发主机 | 官网联系页 HTML 和当前 JS 直接加载此主机 |
+| `lemonadefinancehelp.zendesk.com` | 仅此精确帮助中心租户 | [官方公开帮助中心接口](https://support.lemfi.com/api/v2/help_center/en-us/articles.json?page=1&per_page=100) 中文章 API URL 指向此租户，而页面 URL 指向 `support.lemfi.com` |
+
+三个深链主机的 AASA 均包含同一 iOS App ID
+`5NMXKR499R.com.limefinance.Lemonade.ios`；OneLink 同时包含其 App Clip。
+只读取公开页面与关联文件，没有访问带验证码/令牌的验证链接或登录账户。
+两个后缀会覆盖其现有及未来子域；五个共享服务租户只精确匹配，不覆盖更深子域、
+其他租户或整个 `app.link`、`onelink.me`、`cloudfront.net`、`zendesk.com`。
+无关保险品牌 `lemonade.com` 明确不在 LemFi 集合。
+
+官网代码也出现 `o4509826029518848.ingest.de.sentry.io`，但目前证据只说明它是网页
+错误遥测，不能证明该组织主机只服务 LemFi 或是原生登录/支付必需；本次不为其新增
+放行，不改任何共享 Sentry 或 KYC 后缀及既有拒绝规则。原生 App 实际使用的共享
+认证/风控主机仍需设备记录，不能把“已确认专属域覆盖”说成运行时全部请求已穷尽。
+
+LemFi 的[官方登录排查说明](https://support.lemfi.com/hc/en-us/articles/45742225517073-I-can-t-log-in-to-my-account)
+建议遇到登录问题时确认没有使用 VPN；固定住宅出口只执行用户的路由选择，
+不保证平台接受代理，不改变真实居住地、账户资格或安全审查。
+
 ## 监管目录
 
 - 香港：[HKMA 认可机构登记册](https://vpr.hkma.gov.hk/eng/regulatory-resources/registers/register-of-ais-and-lros/)

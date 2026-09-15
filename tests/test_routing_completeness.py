@@ -45,6 +45,7 @@ REQUIRED_CASES = {
     "HSBC Hong Kong and shared parent": ("Hong Kong", "hk-finance.conf", {"hsbc.com", "hsbc.com.hk"}),
     "Coinbase and Base App": ("Res-Frontier", "us-residential.conf", {"coinbase.com", "base.app"}),
     "ether.fi": ("Res-Frontier", "us-residential.conf", {"ether.fi", "etherfi.gitbook.io"}),
+    "LemFi": ("Res-Frontier", "us-residential.conf", {"lemfi.com", "mobile.lemfi.com", "asset.lemfi.com", "support.lemfi.com", "lemonade.finance", "app.lemonade.finance", "referral.lemonade.finance", "lemfi.onelink.me", "lemonadefi.app.link", "lemonadefi-alternate.app.link", "d1c5a9xrl5sbk8.cloudfront.net", "lemonadefinancehelp.zendesk.com"}),
     "OnePay": ("Res-Frontier", "us-residential.conf", {"onepay.com", "onefinance.com"}),
     "Capital One and Equifax": ("Res-Frontier", "us-residential.conf", {"capitalone.com", "equifax.com"}),
     "PayPal": ("Res-Frontier", "us-residential.conf", {"paypal.com", "api.paypal.com"}),

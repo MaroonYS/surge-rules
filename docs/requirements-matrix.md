@@ -20,7 +20,7 @@
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |
 | `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |
 | `kr-finance.conf` | `DOMAIN-SET` | `Korea` | 韩国实体银行 |
-| `us-residential.conf` | `DOMAIN-SET` | `Res-Frontier` | 美国金融、信用、X Money、Google Account/Voice、Polymarket |
+| `us-residential.conf` | `DOMAIN-SET` | `Res-Frontier` | 美国金融、LemFi 的首方及精确专属资源、信用、X Money、Google Account/Voice、Polymarket |
 | `apple-account-payment-rules.conf` | `RULE-SET` | `Res-Frontier` | 六条 Apple 账户/账单窄规则，与 PayPal 同出口；不扩大 Apple 后缀 |
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |

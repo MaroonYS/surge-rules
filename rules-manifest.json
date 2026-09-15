@@ -57,7 +57,7 @@
       "file": "us-residential.conf",
       "policy": "Res-Frontier",
       "semantic_role": "US-RESIDENTIAL",
-      "description": "US finance, X, Google account and Voice, and Polymarket on one stable residential egress"
+      "description": "US finance, LemFi and verified tenants, X, Google account and Voice, and Polymarket on one stable residential egress"
     },
     {
       "file": "apple-account-payment-rules.conf",

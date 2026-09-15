@@ -18,6 +18,18 @@
       "description": "Mainland China banks and UnionPay"
     },
     {
+      "file": "ch-finance.conf",
+      "policy": "Switzerland",
+      "semantic_role": "CH-FINANCE",
+      "description": "MEXC first-party and verified tenant hosts on the existing Switzerland policy"
+    },
+    {
+      "file": "uk-finance.conf",
+      "policy": "United Kingdom",
+      "semantic_role": "UK-FINANCE",
+      "description": "United Kingdom financial services, including the narrow HSBC Expat override before Hong Kong"
+    },
+    {
       "file": "hk-finance.conf",
       "policy": "Hong Kong",
       "semantic_role": "HK-FINANCE",
@@ -42,16 +54,17 @@
       "description": "Korea financial services"
     },
     {
-      "file": "uk-finance.conf",
-      "policy": "United Kingdom",
-      "semantic_role": "UK-FINANCE",
-      "description": "United Kingdom financial services"
-    },
-    {
       "file": "us-residential.conf",
       "policy": "Res-Frontier",
       "semantic_role": "US-RESIDENTIAL",
       "description": "US finance, X, Google account and Voice, and Polymarket on one stable residential egress"
+    },
+    {
+      "file": "apple-account-payment-rules.conf",
+      "type": "RULE-SET",
+      "policy": "Res-Frontier",
+      "semantic_role": "APPLE-ACCOUNT-PAYMENT",
+      "description": "Narrow Apple account and billing endpoints on the same residential egress as PayPal"
     },
     {
       "file": "finance-context.conf",

@@ -43,6 +43,16 @@ class ExpandedRuleTests(unittest.TestCase):
             rendered,
         )
 
+    def test_apple_rule_options_are_preserved_inside_expansion(self) -> None:
+        rendered = build_expanded.render_expanded(ROOT)
+        for record in build_expanded.read_rule_entries(ROOT / "apple-account-payment-rules.conf"):
+            fields = record.split(",")
+            self.assertEqual("extended-matching", fields[-1])
+            self.assertIn(
+                ",".join((*fields[:2], "Res-Frontier", "extended-matching")),
+                rendered,
+            )
+
     def test_mixed_binding_types_expand_in_place(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -225,7 +225,10 @@ def validate_rule_set(lines: Sequence[str]) -> str | None:
                 f"RULE-SET record {line_number} contains an embedded policy "
                 f"{fields[-1]!r}"
             )
-        if rule_type in DOMAIN_RULE_TYPES and len(fields) != 2:
+        if rule_type in DOMAIN_RULE_TYPES and not (
+            len(fields) == 2
+            or (len(fields) == 3 and fields[2].casefold() == "extended-matching")
+        ):
             return (
                 f"RULE-SET record {line_number} has unsupported DOMAIN options: "
                 f"{line!r}"

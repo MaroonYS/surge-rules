@@ -14,12 +14,14 @@
 | --- | --- | --- | --- |
 | `supercell-direct.conf` | `DOMAIN-SET` | `DIRECT` | Supercell 登录、账户服务与各款游戏首方域统一直连 |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` | 中国大陆实体银行与银联 |
+| `ch-finance.conf` | `DOMAIN-SET` | `Switzerland` | MEXC 的 15 条第一方/已确认资源规则，仅绑定现有瑞士策略 |
+| `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定英国出口，先于 HK |
 | `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文 |
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |
 | `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |
 | `kr-finance.conf` | `DOMAIN-SET` | `Korea` | 韩国实体银行 |
-| `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | 英国实体银行与券商 |
 | `us-residential.conf` | `DOMAIN-SET` | `Res-Frontier` | 美国金融、信用、X Money、Google Account/Voice、Polymarket |
+| `apple-account-payment-rules.conf` | `RULE-SET` | `Res-Frontier` | 六条 Apple 账户/账单窄规则，与 PayPal 同出口；不扩大 Apple 后缀 |
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
@@ -29,8 +31,8 @@
 
 ## 明确不加载
 
-- Apple 自定义更新、付款、Private Relay、iCloud、证书与 APNs 规则；只保留 Sukka
-  `apple_cdn`、`apple_intelligence`、`apple_cn`、`apple_services`。
+- Apple 全域、系统更新、iCloud、证书与 APNs 的新增自定义覆盖；账户/付款只使用上述
+  六条窄规则。现有设备 Private Relay 选择保留，模板不借本轮强制重置。
 - Sukka `reject-url-regex.conf` 与新的 MITM 拦截层：上游已警告此类匹配的性能开销；
   域名、非 IP 与 IP Reject 资源（包括 Phishing）仍全部加载。
 - Adblock4limbo 外部规则集：当前源近半数规则已被 Sukka 覆盖，规范化后仅剩 224 条
@@ -44,6 +46,14 @@
 
 ## 模块边界
 
-所有现有模块继续保留；本次只重建基础 `[Rule]`。模块所需 MITM 正向主机和金融、
+所有现有模块继续保留；只在广告平台模块的两条抢先拦截规则中排除原有五个短信主机，
+不扩大白名单或改其他模块。模块所需 MITM 正向主机和金融、
 iCloud、Polymarket 等保护性排除仍由 `module-compatibility.json` 与
 `docs/module-baseline.md` 校验。
+
+## 认证与运行验收
+
+共享身份清单保持原样；N26/Loqbox/MEXC 的新增共享认证地区绑定未部署。
+不能把 SDK 默认地址当成实际会话主机，也不能用供应商重合证明跨 App 主机冲突。
+静态测试重点覆盖已点名的第一方业务、窄例外和反例；登录、验证码、KYC、支付与
+iPhone 原生链路仍需只含域名和策略的实际记录，见 [验收说明](routing-completeness.md)。

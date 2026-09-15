@@ -6,8 +6,9 @@
 1. Sukka 官方公开 `List` 资源及其严格顺序；
 2. 无法由公共规则表达的固定地区银行、住宅风控、Crypto、Web3 与少量系统例外。
 
-模块、节点、策略组、MITM、Rewrite 和订阅不属于本仓库的规则重建范围；现有模块继续
-保留并由 Surge 在各设备上独立叠加。
+节点、策略组、MITM、Rewrite 和订阅不属于本次规则修复范围；现有模块继续
+保留并由 Surge 在各设备上独立叠加。唯一模块补丁是广告平台拦截器原有五个短信白名单的
+抢先拦截冲突，见 [短信补丁说明](docs/advertiser-sms-patch.md)，不改其他模块行为。
 
 ## 核心原则
 
@@ -36,8 +37,8 @@ Blackmatrix7 现成混合集在 IP 阶段以 `no-resolve` 加载；两者统一�
 和 1 个 `ip`。上游对性能的警告针对 MITM 与 `URL-REGEX` 拦截，不等于应删除
 所有 Reject 域名/IP 规则。这里同时启用基础、额外和钓鱼域名集，但不加入
 `reject-url-regex.conf` 或新的 MITM 拦截层；全局 STUN 拒绝与 `RULE-SET,SYSTEM`
-同样不在基础规则中激活。设备上已保留的模块不会被
-这次规则更改删除或改写。
+同样不在基础规则中激活。设备上已保留的模块不删除；本轮只修复广告平台模块
+两条短信抢先拦截冲突，不改变其他模块内容。
 
 不再加载 Adblock4limbo 外部规则集：当前源 543 条活动规则中有 253 条已被 Sukka
 覆盖，剔除 Keyword、重复、无效和内部冗余后仅剩 224 条增量。相对已启用的 Sukka 基础、Extra
@@ -46,22 +47,24 @@ Blackmatrix7 现成混合集在 IP 阶段以 `no-resolve` 加载；两者统一�
 
 ## Apple 与系统链路
 
-Apple 不再使用任何本仓库自定义域名、付款、Private Relay、iCloud、证书或系统更新
-例外。基础规则只加载 Sukka README 明确列出的四个 Apple 资源：
+Apple Account / PayPal 绑定使用 `apple-account-payment-rules.conf` 的六条窄规则，
+固定 `Res-Frontier` 并先于 Apple CDN/services。其余基础规则继续加载四个 Apple 资源：
 
 - `domainset/apple_cdn.conf` → `DIRECT`；
 - `non_ip/apple_intelligence.conf` → `United States`；
 - `non_ip/apple_cn.conf` → `DIRECT`；
 - `non_ip/apple_services.conf` → `United States`。
 
-软件更新由 Sukka `download` 与上述 Apple 资源承接；Apple Account、Private Relay、
-iCloud 等则按 Sukka Apple Services 的公共语义处理。现有 iRingo、WeatherKit、Maps、
+六条规则只覆盖账户登录控制面、`buy.itunes.apple.com` 及其 `*-buy` 账单主机，不扩大
+到整个 `apple.com`、`itunes.apple.com` 或第三方支付供应商。软件更新与 iCloud 仍由
+原有公共规则承接；设备已有的 Private Relay 住宅选择保留，不借模板修复重置。
+现有 iRingo、WeatherKit、Maps、
 News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。GitHub 与
 `githubusercontent.com` 固定香港出口，仅用于保留模块的发布资源更新。
 
 ## 本仓库活动资源
 
-主规则通过 14 个远程本仓库资源加载 683 条域名，另外直接引用
+主规则通过 16 个远程本仓库资源加载 725 条域名与 6 条窄范围规则，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -76,17 +79,20 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | --- | --- | --- |
 | `supercell-direct.conf` | `DIRECT` | Supercell ID、账户服务与各款游戏首方域 |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
+| `ch-finance.conf` | `Switzerland` | MEXC 第一方与已确认专属资源，沿用既有瑞士策略 |
+| `uk-finance.conf` | `United Kingdom` | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定 UK 业务 |
 | `hk-finance.conf` | `Hong Kong` | 香港银行、券商及当前香港账户共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
-| `uk-finance.conf` | `United Kingdom` | 英国金融 |
 | `us-residential.conf` | `Res-Frontier` | 美国金融、X、Google Account/Voice 与 Polymarket |
+| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple 账户/账单与 PayPal 关联的窄范围 RULE-SET |
 | `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
 | `risk-context.conf` | `Res-Frontier` | 设备情报、指纹与反欺诈基础设施 |
 | `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
+| `microsoft-cdn-download-overlap.conf` | `DIRECT` | Microsoft 中国 CDN/download 的精确交集 |
 
 主规则的第 2 段按“Supercell 直连 → 固定媒体 → 中国大陆实体金融 →
 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3”细分。
@@ -94,6 +100,10 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 则位于所有 non_ip 之后、Sukka IP 资源之前；其两条域名已由前置自有集覆盖，
 该兼容层主要承接 `no-resolve` 的 IP 匹配。Sukka 公共资源仍严格保持
 `domainset → non_ip → ip` 的作者顺序。
+
+金融主顺序为中国大陆 → CH → UK → HK → SG → JP → KR → 美国住宅。
+UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；校验只允许这对具体记录在
+正确策略及顺序下重叠，不豁免其他跨地区重叠。MEXC 的 15 条记录只归瑞士，不回落 Crypto。
 
 同一策略下原有的小文件已经合并：X、Google Account/Voice、Polymarket 合入
 `us-residential.conf`；香港账户上下文合入 `hk-finance.conf`；Bybit 合入
@@ -103,6 +113,11 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 请求来源 App 为同一共享域名动态选择地区。因此这两层只保留经过审计的窄后缀，并按
 当前账户使用场景固定住宅出口，不加入 `.auth0.com`、`.cloudflare.com`、
 `.medallia.com` 等宽泛共享后缀。
+
+2026-09-15 本轮保持 `identity-context.conf` 原样：Keyless、Veriff 和 Sumsub 的
+新增/改地区规则暂不部署。供应商共用不等于实际请求主机相同；代码中的 SDK 默认地址
+也不等于用户会话地址。N26 的 Keyless 精确 UK 规则仍为候选，Loqbox/MEXC/ether.fi
+核验链路等待设备主机证据。详见 [认证验收边界](docs/routing-completeness.md)。
 
 ## Sukka 公共分流
 
@@ -133,10 +148,10 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 
 `surge-main.conf` 是远程资源版；`surge-expanded.conf` 仅用于审计和整段复制，
 由生成器维护。接入前应确认策略组存在：`Res-Frontier`、`PROXY`、`Hong Kong`、
-`Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
+`Singapore`、`Japan`、`Korea`、`Switzerland`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
-在 Surge 的外部资源页面刷新，并确认 14 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
+在 Surge 的外部资源页面刷新，并确认 16 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict
@@ -160,9 +175,9 @@ python3 scripts/check_module_compatibility.py
 - 不添加 Gate 专用覆盖；Gate 未命中自定义 Crypto 时按 Sukka/最终规则正常分流。
 - 不使用 `DOMAIN-KEYWORD` 或公共云、KYC、CDN 的宽泛根域做“兜底”。
 - 模块顺序与 MITM 保护边界分别见 [module-order](docs/module-order.md) 和
-  [module-baseline](docs/module-baseline.md)，规则重建不会删除或改写模块。
+  [module-baseline](docs/module-baseline.md)；除经过核对的五主机短信补丁外，不删除或改写模块。
 - 严格的 `domainset → non_ip → ip` 保证针对基础 Profile。Surge 会把保留模块的
-  规则前置；若第三方模块内部混合域名与 IP 规则，在“不改模块”的约束下不能把整个
+  规则前置；若第三方模块内部混合域名与 IP 规则，在仅修复两条短信冲突的范围内不能把整个
   修改后配置重新排序，但不会改变本仓库基础规则自身的阶段正确性。
 
 迁移详情见 [migration-notes](docs/migration-notes.md)，需求映射见

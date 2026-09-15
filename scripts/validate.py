@@ -160,6 +160,15 @@ LOGICAL_LEAF_TYPES = {
     "PROTOCOL",
 }
 LOCAL_PROTOCOLS = {"TCP", "UDP"}
+# Each exception identifies exact records, semantic owners and runtime policies. It is valid
+# only when the narrow resource occurs exactly once before the broad resource in
+# the actual main profile, not merely in manifest order.
+ORDERED_OVERLAP_EXCEPTIONS = (
+    (
+        ("uk-finance.conf", ".expat.hsbc.com", "UK-FINANCE", "United Kingdom"),
+        ("hk-finance.conf", ".hsbc.com", "HK-FINANCE", "Hong Kong"),
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -639,6 +648,11 @@ def validate_policy_free_rule(raw: str) -> tuple[str | None, str | None]:
             pass
         elif len(fields) != 2:
             return _invalid_rule_fields(rule_type)
+    elif rule_type in {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-WILDCARD"}:
+        if len(fields) == 3 and fields[2] == "extended-matching":
+            pass
+        elif len(fields) != 2:
+            return _invalid_rule_fields(rule_type)
     elif len(fields) != 2:
         return _invalid_rule_fields(rule_type)
 
@@ -824,8 +838,11 @@ def detect_internal_redundancy(
 
 
 def detect_active_overlaps(
-    entries: Sequence[DomainEntry], diagnostics: list[Diagnostic]
+    entries: Sequence[DomainEntry],
+    diagnostics: list[Diagnostic],
+    references: Sequence[tuple[str, str]] = (),
 ) -> None:
+    reference_order = [file_name for file_name, _ in references]
     exact_index: dict[str, list[DomainEntry]] = {}
     suffix_index: dict[str, list[DomainEntry]] = {}
     for entry in entries:
@@ -837,6 +854,23 @@ def detect_active_overlaps(
     def report(left: DomainEntry, right: DomainEntry, code: str) -> None:
         if left.path == right.path:
             return
+        pair = {
+            (left.path, left.raw, left.policy),
+            (right.path, right.raw, right.policy),
+        }
+        if code == "CROSS_FILE_OVERLAP":
+            for narrow, broad in ORDERED_OVERLAP_EXCEPTIONS:
+                if pair != {narrow[:3], broad[:3]}:
+                    continue
+                if (
+                    reference_order.count(narrow[0]) == 1
+                    and reference_order.count(broad[0]) == 1
+                    and reference_order.index(narrow[0])
+                    < reference_order.index(broad[0])
+                    and (narrow[0], narrow[3]) in references
+                    and (broad[0], broad[3]) in references
+                ):
+                    return
         ordered = sorted(
             (left, right), key=lambda item: (item.path, item.line, item.raw)
         )
@@ -1408,7 +1442,19 @@ def validate_repository(root: Path, main_override: str | None = None) -> Validat
             )
 
     semantic_entries = active_entries + rule_set_domain_entries(active_rule_entries)
-    detect_active_overlaps(semantic_entries, diagnostics)
+    canonical_base = f"https://raw.githubusercontent.com/{repository}/{branch}/"
+    references: list[tuple[str, str]] = []
+    for _, rule in _read_main_rules(root, main, []):
+        fields = [field.strip() for field in rule.split(",")]
+        if (
+            len(fields) >= 3
+            and fields[0] in {"DOMAIN-SET", "RULE-SET"}
+            and fields[1].startswith(canonical_base)
+        ):
+            references.append(
+                (fields[1][len(canonical_base):], normalize_policy_name(fields[2]))
+            )
+    detect_active_overlaps(semantic_entries, diagnostics, references)
     detect_shared_infrastructure(semantic_entries, diagnostics)
     main_rule_count, references = validate_main_rules(
         root,

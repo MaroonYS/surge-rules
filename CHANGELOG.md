@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- 2026-09-15: Registered the deployed CH/MEXC list in the manifest, canonical profile and
+  generator; aligned UK before HK and constrained the HSBC Expat overlap to the exact
+  entries, policies and order. Regenerated stale expanded rules and inventory documentation.
+- Restored only six narrow Apple account/billing records for PayPal residential consistency;
+  this supersedes the older all-Apple-routing-removal note below, not the MITM boundary.
+- Added explicit first-party routing regressions and pending shared-authentication boundaries.
+  Shared KYC lists and device network-compatibility settings remain unchanged.
+- Added a fail-closed, minimal SMS whitelist patch and tests for the advertiser module;
+  no broad provider whitelist or unrelated module change is included.
+
 - Restored the complete requested Sukka Reject stack, including the explicitly enabled
   phishing domain set, while continuing to omit the upstream-discouraged MITM URL-REGEX layer.
 - Added Sukka's Telegram non-IP resource alongside the official CIDR, replaced the built-in

@@ -162,6 +162,30 @@ class PayloadTests(unittest.TestCase):
         self.assertEqual(1, count)
         self.assertEqual("", problem)
 
+    def test_domain_extended_matching_agrees_with_local_rule_validator(self) -> None:
+        for kind, host in (
+            ("DOMAIN", "account.apple.com"),
+            ("DOMAIN-SUFFIX", "example.com"),
+            ("DOMAIN-WILDCARD", "*-buy.itunes.apple.com"),
+        ):
+            for strict in (False, True):
+                with self.subTest(kind=kind, strict=strict):
+                    count, problem = check_upstreams.validate_payload(
+                        self.resource(), f"{kind},{host},extended-matching\n",
+                        strict_local_rule_set=strict,
+                    )
+                    self.assertEqual((1, ""), (count, problem))
+                for option in (
+                    "DIRECT", "no-resolve", "pre-matching",
+                    "extended-matching,DIRECT", "extended-matching,extended-matching",
+                ):
+                    with self.subTest(kind=kind, strict=strict, option=option):
+                        _, problem = check_upstreams.validate_payload(
+                            self.resource(), f"{kind},{host},{option}\n",
+                            strict_local_rule_set=strict,
+                        )
+                        self.assertTrue(problem)
+
     def test_supercell_upstream_contract_accepts_only_narrow_mixed_rules(self) -> None:
         valid = (
             "DOMAIN-SUFFIX,brawlstars.com\n"

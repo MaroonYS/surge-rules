@@ -38,6 +38,8 @@ class RuleContractTests(unittest.TestCase):
             (ROOT / "rules-manifest.json").read_text(encoding="utf-8")
         )
         active = manifest["active"]
+        domain_sets = sum(item.get("type", "DOMAIN-SET") == "DOMAIN-SET" for item in active)
+        rule_sets = sum(item.get("type", "DOMAIN-SET") == "RULE-SET" for item in active)
         domain_entries = sum(
             len(self.active_entries(item["file"]))
             for item in active
@@ -54,15 +56,15 @@ class RuleContractTests(unittest.TestCase):
         )
         parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
 
-        self.assertEqual(14, len(active))
-        self.assertIn("14 个远程本仓库资源", readme)
-        self.assertIn("确认 14 个本仓库规则文件与 Supercell 外部混合集均成功加载", readme)
+        self.assertEqual(16, len(active))
+        self.assertIn(f"{len(active)} 个远程本仓库资源", readme)
+        self.assertIn(f"确认 {len(active)} 个本仓库规则文件与 Supercell 外部混合集均成功加载", readme)
         self.assertIn(
-            f"| 当前 DOMAIN-SET 条目 | {domain_entries} | 14 个本仓库 `DOMAIN-SET` |",
+            f"| 当前 DOMAIN-SET 条目 | {domain_entries} | {domain_sets} 个本仓库 `DOMAIN-SET` |",
             parity,
         )
         self.assertIn(
-            f"| 当前 RULE-SET 条目 | {rule_entries} | 本仓库不复制第三方 IP 规则 |",
+            f"| 当前 RULE-SET 条目 | {rule_entries} | {rule_sets} 个本仓库 `RULE-SET`，不复制第三方 IP 规则 |",
             parity,
         )
         for item in active:
@@ -185,7 +187,7 @@ class RuleContractTests(unittest.TestCase):
             main.index("# 3. Sukka DOMAIN-SET"),
         )
 
-    def test_only_sukka_documented_apple_resources_are_active(self) -> None:
+    def test_narrow_apple_account_rules_preserve_sukka_resources(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         apple_rules = [
             line
@@ -194,6 +196,7 @@ class RuleContractTests(unittest.TestCase):
         ]
         self.assertEqual(
             [
+                "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
                 "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
                 "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_intelligence.conf,\"United States\",extended-matching",
                 "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
@@ -209,14 +212,12 @@ class RuleContractTests(unittest.TestCase):
             "gateway.icloud.com",
             "certs.apple.com",
             "apple-software-update.conf",
-            "apple-account-payment-rules.conf",
             "icloud_private_relay.conf",
             "icloud-sync.conf",
         ):
             self.assertNotIn(removed, main)
         for removed_file in (
             "apple-software-update.conf",
-            "apple-account-payment-rules.conf",
             "apple-ai.conf",
             "apple-push.conf",
             "apple-push-rules.conf",
@@ -241,12 +242,14 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(
             {
                 "direct-cn.conf": "DIRECT",
+                "ch-finance.conf": "Switzerland",
                 "hk-finance.conf": "Hong Kong",
                 "sg-finance.conf": "Singapore",
                 "jp-finance.conf": "Japan",
                 "kr-finance.conf": "Korea",
                 "uk-finance.conf": "United Kingdom",
                 "us-residential.conf": "Res-Frontier",
+                "apple-account-payment-rules.conf": "Res-Frontier",
                 "finance-context.conf": "Res-Frontier",
                 "identity-context.conf": "Res-Frontier",
                 "risk-context.conf": "Res-Frontier",

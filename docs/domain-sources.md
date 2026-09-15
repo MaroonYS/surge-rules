@@ -1,15 +1,14 @@
 # Domain source notes
 
-本页记录 1.3.0 新增或调整的金融域名。活动规则只收录机构第一方域名；
+本页记录新增或调整的金融域名。活动规则优先收录机构第一方域名及有证据的专属资源；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
 ## Apple 边界
 
-本仓库不再维护或加载 Apple 自定义域名集。基础分流只使用 Sukka README 明确列出的
-`apple_cdn`、`apple_intelligence`、`apple_cn` 与 `apple_services`；软件更新由 Sukka
-`download` 与 Apple 公共资源承接。Apple Account、Private Relay、iCloud、证书和
-APNs 不设置个人化路由。主 Profile 也不添加任何 Apple/iCloud MITM 正项、负项或
-条件禁用；相关 hostname 完全由用户保留的模块管理。
+2026-09-15 恢复 `apple-account-payment-rules.conf` 六条账户/账单窄规则，与 PayPal
+统一 `Res-Frontier`；不恢复 Apple 全域、系统更新、iCloud、证书或 APNs 的自定义覆盖。
+其余服务仍使用 Sukka 公共资源，设备已有 Private Relay 选择保留。主 Profile 不添加
+Apple/iCloud MITM 正项、负项或条件禁用；相关 hostname 仍由保留模块管理。
 
 ## 监管目录
 
@@ -74,8 +73,16 @@ URL 路径选择国家，因此该根域保留在 Finance 语义文件并固定�
 而 `.boc.cn` 等大陆专用域继续 `DIRECT`。
 
 PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`；Apple Account
-本身不再随 PayPal 建立联动规则，而是完全交给 Sukka Apple Services。账户地区、
+仅以六条窄规则建立账户/账单出口关联，其余 Apple 流量保留公共语义。账户地区、
 账单资料和支付服务商验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
+
+## 2026-09 重点业务与共享身份边界
+
+MEXC 的 15 条第一方/专属资源已从 UK 移至 `ch-finance.conf`，现统一将 CH 登记到
+manifest、主骨架、契约与展开版；本轮不新增 MEXC 共享 KYC 或遥测放行。
+N26、Loqbox、Kraken/Krak、Monzo、Lloyds 沿用现有 UK 归属；Coinbase/Base、ether.fi、
+OnePay、Capital One、Equifax、PayPal、Google Account/Voice、X 与 Polymarket 沿用
+美国住宅。重点回归与证据边界见 [完整性验收](routing-completeness.md)。
 
 当前配置所有者明确使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名已合并到

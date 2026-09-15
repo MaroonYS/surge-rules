@@ -235,6 +235,29 @@ class SemanticTests(unittest.TestCase):
 
 
 class RuleSetSyntaxTests(unittest.TestCase):
+    def test_domain_extended_matching_is_narrowly_supported(self) -> None:
+        for rule_type, matcher in (
+            ("DOMAIN", "account.apple.com"),
+            ("DOMAIN-SUFFIX", "example.com"),
+            ("DOMAIN-WILDCARD", "*-buy.itunes.apple.com"),
+        ):
+            with self.subTest(rule_type=rule_type):
+                self.assertEqual(
+                    (rule_type, None),
+                    validate.validate_policy_free_rule(
+                        f"{rule_type},{matcher},extended-matching"
+                    ),
+                )
+                for options in (
+                    "DIRECT", "no-resolve", "pre-matching",
+                    "extended-matching,DIRECT", "extended-matching,extended-matching",
+                ):
+                    parsed_type, problem = validate.validate_policy_free_rule(
+                        f"{rule_type},{matcher},{options}"
+                    )
+                    self.assertIsNone(parsed_type)
+                    self.assertIn("embedded policy or unsupported option", problem or "")
+
     def test_policy_free_simple_and_logical_rules_are_accepted(self) -> None:
         diagnostics: list[validate.Diagnostic] = []
         with tempfile.TemporaryDirectory() as directory:
@@ -345,14 +368,14 @@ class RepositoryTests(unittest.TestCase):
             report["files"]["domain_set"] + report["files"]["rule_set"],
         )
         self.assertEqual(
-            set(),
+            {"apple-account-payment-rules.conf"},
             {
                 binding.file
                 for binding in result.bindings
                 if binding.type == "RULE-SET"
             },
         )
-        self.assertEqual(len(result.active_rule_entries), 0)
+        self.assertEqual(len(result.active_rule_entries), 6)
         self.assertEqual(
             len(result.active_rule_entries),
             report["entries"]["rule_set"],

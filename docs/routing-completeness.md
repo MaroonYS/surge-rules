@@ -12,11 +12,15 @@
 | United Kingdom | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat | Expat 被 HK 的 `.hsbc.com` 抢先、未登记窄辅助域 |
 | Res-Frontier | LemFi、Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 业务域回落普通 PROXY、Apple 账户/账单与 PayPal 分离 |
 | Hong Kong | 已指定的香港银行、Futu/Moomoo、Longbridge | 将共享香港账户基础设施重新推断为 SG |
-| Singapore | 已有新加坡专属域，如 Futu SG、Longbridge SG、Moomoo Trustee | 被香港宽泛归属吞并 |
+| Singapore | 其他新加坡专属域，如 Futu SG、Moomoo Trustee；Longbridge/IBKR 以最新个人清单为准 | 未经要求改变其他 App 的归属 |
 | Crypto / Web3 | 既有 Bybit 等交易所、钱包和链上业务 | 擅自更改手动选择，或把 MEXC 再塞回 Crypto |
 
 N26 的英国出口是现有用户选择，不代表银行所在地。域名路由也不改变各平台对
 实际居住地、身份、账户或产品的资格要求。
+
+2026-09-16 新增的 [24 App 清单](finance-app-matrix.md)是这些业务的最新要求；
+IBKR 区域域统一美国住宅、Longbridge SG 域统一 HK、中国银行全球域直连，
+并补齐新点名 App 的已证实缺失记录。共享银行/WAF/银联主机的边界仍明确待验收。
 
 LemFi 的两条首方后缀及五个精确租户单独纳入首命中、子域覆盖、反例和唯一归属回归。
 官网/API/邮箱验证入口/支持与已确认深链同走美国住宅；公开资源证据不等于原生 App

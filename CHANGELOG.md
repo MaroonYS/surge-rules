@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- 2026-09-16: Applied the owner's explicit 24-app HK/US-residential/CN/UK matrix.
+  Consolidated 21 existing IBKR entries, moved Bank of China's shared root to DIRECT
+  and Longbridge's SG root to HK, and added only 13 verified missing namespaces/hosts.
+  Existing Wise/Revolut roots retain their correct residential binding without duplicates.
+  Added independent owner-matrix/boundary tests; shared identity, modules and profiles unchanged.
 - 2026-09-15: Pinned LemFi's current and legacy first-party namespaces and five
   verified exact deep-link/CDN/support tenants to the owner's US residential
   policy, Res-Frontier. Added independent boundary/ownership regressions;

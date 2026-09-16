@@ -1,5 +1,7 @@
 # Requirements Matrix
 
+最新个人 App 地区要求及迁移/去重证据见 [2026-09-16 的 24 App 清单](finance-app-matrix.md)。
+
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
 | 1 | NTP、MTProto 与模块资源 | NTP 直连、MTProto 新加坡、GitHub 模块资源香港；不含 Apple 自定义例外 |

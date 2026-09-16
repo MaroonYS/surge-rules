@@ -34,6 +34,15 @@ MEXC_ENTRIES = {
 # from the editable JSON fixture being checked. Route + fixture changes together
 # must not silently bless a new policy, owner, or missing requested application.
 REQUIRED_CASES = {
+    "BOCHK": ("Hong Kong", "hk-finance.conf", {"bochk.com", "mb.bochk.com"}),
+    "ZA Bank": ("Hong Kong", "hk-finance.conf", {"bank.za.group", "za.onelink.me", "cdn.zaticdn.com", "alicdn.zaticdn.com"}),
+    "Reward+": ("Hong Kong", "hk-finance.conf", {"www.hsbc.com.hk", "redhotoffers.hsbc.com.hk"}),
+    "HSBC UK": ("United Kingdom", "uk-finance.conf", {"hsbc.co.uk", "forms.hsbc.gb"}),
+    "IBKR owner US context": ("Res-Frontier", "us-residential.conf", {"ibkr.com", "ibkr.co.uk", "ibkr.com.hk", "ibkr.com.sg", "interactivebrokers.co.jp", "mcgw1.ibllc.com.cn"}),
+    "Kalshi": ("Res-Frontier", "us-residential.conf", {"kalshi.com", "external-api.kalshi.com"}),
+    "SoFi": ("Res-Frontier", "us-residential.conf", {"sofi.com", "sofi.app.link", "sofi-alternate.app.link"}),
+    "Wise existing and legacy first-party": ("Res-Frontier", "finance-context.conf", {"wise.com", "api.wise.com"}),
+    "Wise and Revolut auxiliary domains": ("Res-Frontier", "us-residential.conf", {"api-mtls.transferwise.com", "wise-app.sng.link", "revolut.me"}),
     "Mainland China finance": ("DIRECT", "direct-cn.conf", {"boc.cn", "icbc.com.cn", "unionpay.com"}),
     "MEXC": ("Switzerland", "ch-finance.conf", {"mexc.com", "static.mocortech.com"}),
     "N26": ("United Kingdom", "uk-finance.conf", {"n26.com", "app.n26.com", "cdn.number26.de"}),
@@ -53,7 +62,7 @@ REQUIRED_CASES = {
     "Google Account and Voice control plane": ("Res-Frontier", "us-residential.conf", {"accounts.google.com", "voice.google.com"}),
     "Polymarket international and US": ("Res-Frontier", "us-residential.conf", {"polymarket.com", "polymarket.us"}),
     "Hong Kong brokerage context": ("Hong Kong", "hk-finance.conf", {"futuhk.com", "moomoo.com", "longbridge.hk"}),
-    "Singapore brokerage exceptions": ("Singapore", "sg-finance.conf", {"futusg.com", "moomootrustee.com", "longbridge.sg"}),
+    "Singapore brokerage exceptions": ("Singapore", "sg-finance.conf", {"futusg.com", "moomootrustee.com", "webull.com.sg"}),
     "Japan finance": ("Japan", "jp-finance.conf", {"mufg.jp", "smbc.co.jp", "sonybank.net"}),
     "Korea finance": ("Korea", "kr-finance.conf", {"kakaobank.com", "shinhan.com", "tossbank.com"}),
     "Revolut preserved financial context": ("Res-Frontier", "finance-context.conf", {"revolut.com", "api.revolut.com"}),

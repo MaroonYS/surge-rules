@@ -102,8 +102,10 @@ LemFi 的[官方登录排查说明](https://support.lemfi.com/hc/en-us/articles/
 ## 无法靠域名自动判断的边界
 
 `bankofchina.com` 的不同国家页面共用一个根域并按路径分区，Surge 域名规则无法按
-URL 路径选择国家，因此该根域保留在 Finance 语义文件并固定到 `Res-Frontier`，
-而 `.boc.cn` 等大陆专用域继续 `DIRECT`。
+URL 路径选择国家。2026-09-16 配置所有者明确要求中国银行整体直连，因此该根域从
+Finance 迁至 `direct-cn.conf`，连同 `.boc.cn` 固定 `DIRECT`；全球共用站点也受此
+个人选择影响，独立的中银香港 `.bochk.com` 仍为 HK。本次新增来源与 24 App 归属见
+[个人地区清单](finance-app-matrix.md)。
 
 PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`；Apple Account
 仅以六条窄规则建立账户/账单出口关联，其余 Apple 流量保留公共语义。账户地区、

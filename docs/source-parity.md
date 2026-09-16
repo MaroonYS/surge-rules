@@ -2,15 +2,16 @@
 
 | 指标 | 当前值 | 来源 |
 | --- | ---: | --- |
-| 主规则条数 | 53 | `surge-main.conf` 的有效规则 |
+| 主规则条数 | 54 | `surge-main.conf` 的有效规则 |
 | 当前 DOMAIN-SET 条目 | 741 | 15 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 0 | 0 个本仓库 `RULE-SET`，不复制第三方 IP 规则 |
 | 当前活动条目 | 741 | `rules-manifest.json` 的 15 个活动文件 |
 | 活动本仓库资源 | 15 | Supercell 域名、地区金融（含 CH）、住宅风控、Crypto、Web3 与 Microsoft CDN/download 精确交集 |
 | Supercell 外部混合集 | 24 | Blackmatrix7 现成 2 域名 + 22 IP，以 `no-resolve` 自动更新 |
-| Sukka DOMAIN-SET | 7 | Reject 基础/额外/钓鱼、speedtest、cdn、apple_cdn、download |
+| Sukka DOMAIN-SET | 8 | Reject 基础/额外/钓鱼、speedtest、cdn、apple_cdn、icloud_private_relay、download |
 | Sukka non_ip | 17 | Reject Drop/Reject/No Drop、CDN、Stream、AI、Telegram、Apple、Microsoft、Download、LAN、Misc |
 | Sukka ip | 7 | Reject、Stream、AI、Telegram、LAN、Domestic、China IP |
+| Sukka 资源合计 | 32 | 保留原先已启用的全部公共资源，不新增无关可选专项 |
 
 `surge-expanded.conf` 仅展开上述 741 条本仓库规则，Sukka 与 Blackmatrix7 远程资源保持远程引用，
 以避免复制其大型规则和制造重复真相层。
@@ -30,5 +31,6 @@ python3 scripts/build_expanded.py --check
 `surge-main.conf` 或展开版加载。
 
 这些是公开参考骨架的计数，不是每台设备的全部有效规则数。设备模块、已有
-Mac 进程例外另行保留；Apple Private Relay 住宅专项已撤销。资源 ready、静态用例通过与原生语法
+Mac 进程例外另行保留；Apple Private Relay 住宅绑定已撤销，但官方订阅已恢复并保留，
+策略为 `United States`。主骨架也登记此资源，防止模板再次遗漏。资源 ready、静态用例通过与原生语法
 通过均不代表登录后链路或 iPhone 同步已验收。

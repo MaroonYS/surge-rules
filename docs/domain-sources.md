@@ -6,8 +6,10 @@
 ## Apple 边界
 
 2026-09-16 按最新要求撤销 Apple Pay/Cash 三条住宅规则和账户/账单六条窄规则，
-同时撤销设备的 Private Relay 住宅专项绑定；Apple 基础层复用既有四个 Sukka 资源。
-这一决定取代 9 月 15 日的恢复操作，见 [Apple 回归 Sukka](apple-sukka-only.md)。主 Profile 不添加
+同时撤销设备的 Private Relay 住宅绑定。用户随后明确原先启用的全部 Sukka 订阅须保留，
+因此误删的 Private Relay 官方资源已恢复并改绑 `United States`，Apple 基础层共保留
+五个 Sukka 资源；不额外启用其他可选专项。这一澄清取代上一版删除订阅和 9 月 15 日恢复
+自定义窄规则的决定，见 [Apple 回归 Sukka](apple-sukka-only.md)。主 Profile 不添加
 Apple/iCloud MITM 正项、负项或条件禁用；相关 hostname 仍由保留模块管理。
 
 ## LemFi 美国住宅归属

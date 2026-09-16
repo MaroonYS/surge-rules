@@ -81,7 +81,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertIn("DOMAIN-SET", sections[2]["title"])
         self.assertIn("non_ip", sections[3]["title"])
         self.assertIn("IP", sections[4]["title"])
-        self.assertEqual(8, len(sections[2]["rules"]))
+        self.assertEqual(9, len(sections[2]["rules"]))
         self.assertEqual(17, len(sections[3]["rules"]))
         self.assertEqual(
             7,
@@ -130,7 +130,7 @@ class RuleContractTests(unittest.TestCase):
         self.assertNotIn("ruleset.skk.moe/Source/", main)
         self.assertNotIn("ruleset.skk.moe/Clash/", main)
         self.assertNotIn("ruleset.skk.moe/sing-box/", main)
-        self.assertNotIn("icloud_private_relay.conf", main)
+        self.assertIn('DOMAIN-SET,https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf,"United States",extended-matching', main)
         self.assertNotIn("telegram_asn.conf", main)
 
     def test_requested_sukka_reject_stack_is_complete_and_scoped(self) -> None:
@@ -211,7 +211,6 @@ class RuleContractTests(unittest.TestCase):
             "gateway.icloud.com",
             "certs.apple.com",
             "apple-software-update.conf",
-            "icloud_private_relay.conf",
             "icloud-sync.conf",
         ):
             self.assertNotIn(removed, main)

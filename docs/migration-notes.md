@@ -1,6 +1,14 @@
 # Migration Notes
 
-## 2026-09-16 Apple 回归 Sukka
+## 2026-09-16 最新澄清：保留原先全部 Sukka 订阅
+
+用户明确“我要的是保留 Sukka 全部”。上轮把 Private Relay 官方订阅与住宅绑定一并
+删除是误解，现已在两份设备 Profile 原位置恢复 `icloud_private_relay.conf`，并改绑
+`United States`；主骨架和契约也登记此资源，防止模板再次遗漏。Apple 共五个 Sukka
+资源，Sukka 总计 32 个；不新增其他无关可选集，不恢复九条自定义住宅规则。
+本节取代下述“仅四个资源”及删除 Private Relay 订阅的决定；旧审计报告不改写。
+
+## 2026-09-16 Apple 回归 Sukka（历史步骤，以上节澄清为准）
 
 按最新要求撤销 Apple 支付三条住宅域和账户/账单六条 RULE-SET，移除设备上的
 Private Relay 住宅专项。复用四个现有 Sukka 资源，非 Apple 金融和模块保持不变。
@@ -15,7 +23,7 @@ Private Relay 住宅专项。复用四个现有 Sukka 资源，非 Apple 金融�
 - 广告平台模块只排除原有五个短信白名单主机，其他内容及模块状态保留；上游更新后必须重新检查补丁是否被覆盖。
 - `identity-context.conf`、General、DNS、MITM、节点、策略组和兼容性开关不变。iPhone 的配置源同步不等于设备已加载，模块也须逐设备检查。
 
-下文为历史迁移记录；Apple 当前状态以上方 2026-09-16 决定为准。
+下文为历史迁移记录；Apple 当前状态以最上方 2026-09-16 最新澄清为准。
 
 ## 2026-08 Sukka-first rebuild
 

@@ -1,13 +1,14 @@
 # Requirements Matrix
 
 最新个人 App 地区要求及迁移/去重证据见 [2026-09-16 的 24 App 清单](finance-app-matrix.md)。
-后续 Apple 支付、账户与 Private Relay 住宅例外已按用户要求撤销，见 [Apple 回归 Sukka](apple-sukka-only.md)。
+后续 Apple 支付、账户与 Private Relay 住宅例外已撤销；用户最新澄清要求保留原先启用的
+全部 Sukka 订阅，误删的 Private Relay 官方集已恢复并改绑 `United States`，见 [Apple 回归 Sukka](apple-sukka-only.md)。
 
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
 | 1 | NTP、MTProto 与模块资源 | NTP 直连、MTProto 新加坡、GitHub 模块资源香港；不含 Apple 自定义例外 |
 | 2 | 固定地区与高风控业务 | Supercell 域名直连 → 固定媒体 → 中国大陆实体金融 → 分地区实体金融 → 美国住宅、身份与风控 → Crypto 与 Web3；本仓库域名资源先于大型 Reject 域名集 |
-| 3 | 域名集 | Sukka Reject 基础 → Reject Extra → Reject Phishing → `speedtest` → `cdn` → `apple_cdn` → Microsoft CDN/download 交集直连 → `download` |
+| 3 | 域名集 | Sukka Reject 基础 → Reject Extra → Reject Phishing → `speedtest` → `cdn` → `apple_cdn`；保留 `icloud_private_relay` 官方订阅；Microsoft CDN/download 交集直连先于 `download` |
 | 4 | Sukka 非 IP 集 | Reject Drop → Reject → Reject No Drop → CDN、Stream、AI、Telegram、Apple、Microsoft、Download、LAN、Domestic/Direct/Global；窄 Apple CN 先于宽 Apple Services |
 | 5 | Sukka IP 与最终规则 | Blackmatrix7 Supercell 混合兼容层（`no-resolve`）→ Reject → Stream → AI → Telegram 官方 CIDR → Sukka LAN → Domestic → China IP → `FINAL` |
 
@@ -34,7 +35,8 @@
 ## 明确不加载
 
 - Apple 全域、系统更新、iCloud、证书与 APNs 的自定义覆盖；支付/账户/账单九条住宅
-  规则和设备 Private Relay 住宅专项均已撤销，基础层复用四个现有 Sukka 资源。
+  规则和设备 Private Relay 住宅绑定均已撤销；Private Relay 官方订阅保留并改绑普通美国，
+  基础层共复用五个 Sukka Apple 资源。不得以去重为由删除原先已启用的 Sukka 订阅。
 - Sukka `reject-url-regex.conf` 与新的 MITM 拦截层：上游已警告此类匹配的性能开销；
   域名、非 IP 与 IP Reject 资源（包括 Phishing）仍全部加载。
 - Adblock4limbo 外部规则集：当前源近半数规则已被 Sukka 覆盖，规范化后仅剩 224 条

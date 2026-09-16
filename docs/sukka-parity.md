@@ -2,7 +2,9 @@
 
 本矩阵以 SukkaW/Surge 当前 README 和《我有特别的 Surge 配置和使用技巧》为基线，
 区分“活动加载”“已被总表覆盖”和“明确不加载”。因此，可选项不会在没有说明的情况下
-消失，也不会为了表面齐全重复加载同一数据。
+消失，也不会为了表面齐全重复加载同一数据。2026-09-16 用户再次明确保留原先已启用的
+全部 Sukka 资源：上轮误删的 Private Relay 官方订阅已恢复，不能因另一个总表也有覆盖
+而将其删除；其他未启用可选专项不因此新增。
 
 | Sukka 类别 | 当前处理 | 原因 |
 | --- | --- | --- |
@@ -23,7 +25,10 @@
 | Misc（domestic / direct / global + domestic IP） | 全部活动 | 保留国内、直连、海外和 Anycast 基础兜底 |
 | China IP IPv4 | 活动 | 直连 |
 | China IP IPv6 | 不加载 | 当前 `ipv6=false`，加载 IPv6 CIDR 不会提供有效收益 |
-| iCloud Private Relay 可选表 | 不加载 | 用户后续要求 Apple 仅保留核心 Sukka 公共分流；不恢复额外 Apple 专项覆盖 |
+| iCloud Private Relay 可选表 | 活动 | 恢复并保留原先启用的官方订阅，策略由住宅改为 `United States`；同时登记主骨架防止模板再次遗漏 |
+
+当前共 32 个 Sukka 资源：8 个 `DOMAIN-SET`、17 个 `non_ip`、7 个 `ip`。
+Apple 四个核心资源与 Private Relay 专表共五个均保留，未启用其他无关可选集。
 
 设备 Profile 另外保留 `DEST-PORT,123,DIRECT`、`PROTOCOL,MTProto,Singapore`，并在
 `[MTProto]` 使用 `https://ruleset.skk.moe/Internal/mtproto-dc-config.json`。General 采用

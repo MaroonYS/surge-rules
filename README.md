@@ -47,15 +47,18 @@ Blackmatrix7 现成混合集在 IP 阶段以 `no-resolve` 加载；两者统一�
 
 ## Apple 与系统链路
 
-按 2026-09-16 最新要求，撤销 Apple Pay/Cash 的三条住宅覆盖以及账户/账单六条窄规则。
-Apple 基础分流仅加载四个已有 Sukka 资源：
+按 2026-09-16 最新澄清，保留原先已启用的全部 Sukka 资源；撤销的是 Apple Pay/Cash
+三条住宅覆盖以及账户/账单六条自定义窄规则，不是 Sukka 订阅。上轮误删的 Private Relay
+订阅已恢复，改绑普通 `United States`，不恢复住宅出口。Apple 基础分流保留五个 Sukka 资源：
 
 - `domainset/apple_cdn.conf` → `DIRECT`；
+- `domainset/icloud_private_relay.conf` → `United States`；
 - `non_ip/apple_intelligence.conf` → `United States`；
 - `non_ip/apple_cn.conf` → `DIRECT`；
 - `non_ip/apple_services.conf` → `United States`。
 
-设备上额外的 Private Relay 住宅绑定也撤销，复用已有公共覆盖，不关闭系统私密转送。
+Private Relay 在两份设备 Profile 恢复原有订阅位置，同时登记到主骨架的 `DOMAIN-SET`
+阶段及契约，防止后续模板再次遗漏；不关闭系统私密转送，也不启用其他无关可选 Sukka 集。
 旧账户规则 URL 仅留无活动规则的兼容空文件。软件更新与 iCloud 由原有公共规则承接。
 此次变更与出口差异见 [Apple 回归 Sukka](docs/apple-sukka-only.md)。现有 iRingo、WeatherKit、Maps、
 News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。GitHub 与
@@ -130,6 +133,9 @@ LemFi 按配置所有者选择固定美国家宽 `Res-Frontier`：覆盖 `.lemfi
 
 当前使用的官方资源均来自统一基址 `https://ruleset.skk.moe/List/`：
 
+共保留 32 个 Sukka 资源（8 个 `DOMAIN-SET`、17 个 `non_ip`、7 个 `ip`）；
+“保留全部”指原先已启用的资源，不是无差别加载上游所有可选专项或重叠地区子集。
+
 - `domainset/reject`、`reject_extra` 与 `reject_phishing` → `REJECT`；
 - `non_ip/reject-drop` → `REJECT-DROP` + `pre-matching`，`reject` → `REJECT`，
   `reject-no-drop` → `REJECT-NO-DROP`；
@@ -139,7 +145,7 @@ LemFi 按配置所有者选择固定美国家宽 `Res-Frontier`：覆盖 `.lemfi
 - Telegram 域名、MTProto 协议与官方 CIDR → `Singapore`；
 - `apple_cdn`、`apple_cn`、`microsoft_cdn`、`non_ip/lan`、`ip/lan`、`domestic`、
   `direct` → `DIRECT`；
-- `apple_services`、`microsoft` → `United States`；
+- `icloud_private_relay`、`apple_services`、`microsoft` → `United States`；
 - `download` → `Hong Kong`；
 - `global` 与 `FINAL` → `PROXY`；
 - 中国 IP → `DIRECT`。

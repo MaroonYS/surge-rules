@@ -27,10 +27,27 @@ from test_routing_completeness import (  # noqa: E402
 RETIRED_RESOURCE = "apple-account-payment-rules.conf"
 SUKKA_APPLE_RULES = (
     ("DOMAIN-SET", "https://ruleset.skk.moe/List/domainset/apple_cdn.conf", "DIRECT"),
+    ("DOMAIN-SET", "https://ruleset.skk.moe/List/domainset/icloud_private_relay.conf", "United States", "extended-matching"),
     ("RULE-SET", "https://ruleset.skk.moe/List/non_ip/apple_intelligence.conf", "United States", "extended-matching"),
     ("RULE-SET", "https://ruleset.skk.moe/List/non_ip/apple_cn.conf", "DIRECT"),
     ("RULE-SET", "https://ruleset.skk.moe/List/non_ip/apple_services.conf", "United States"),
 )
+
+# Frozen minimum inventory: preserve every already-enabled Sukka resource, not
+# just equivalent hostname coverage. Private Relay was previously device-only.
+SUKKA_REQUIRED_RESOURCES = {
+    "domainset": (
+        "reject", "reject_extra", "reject_phishing", "speedtest", "cdn",
+        "apple_cdn", "icloud_private_relay", "download",
+    ),
+    "non_ip": (
+        "reject-drop", "reject", "reject-no-drop", "cdn", "stream", "ai",
+        "apple_intelligence", "telegram", "apple_cn", "apple_services",
+        "microsoft_cdn", "microsoft", "download", "lan", "domestic", "direct",
+        "global",
+    ),
+    "ip": ("reject", "stream", "ai", "telegram", "lan", "domestic", "china_ip"),
+}
 
 # These are namespace boundaries, not newly installed routing suffixes.
 APPLE_NAMESPACES = frozenset({
@@ -147,12 +164,13 @@ class AppleSukkaOnlyTests(unittest.TestCase):
         if compatibility_file.exists():
             self.assertEqual([], entries(compatibility_file))
 
-    def test_exactly_four_existing_sukka_apple_bindings_remain_in_order(self) -> None:
+    def test_exactly_five_existing_sukka_apple_bindings_remain_in_order(self) -> None:
         for label, text in {**self.profile_texts, "contract": self.contract_text}.items():
             rules = parsed_rules(text)
             apple_refs = [
                 rule for rule in rules
-                if rule[0] in {"DOMAIN-SET", "RULE-SET"} and "apple" in rule[1].lower()
+                if rule[0] in {"DOMAIN-SET", "RULE-SET"}
+                and ("apple" in rule[1].lower() or "icloud_private_relay.conf" in rule[1])
             ]
             with self.subTest(source=label):
                 self.assertEqual(list(SUKKA_APPLE_RULES), apple_refs)
@@ -161,6 +179,24 @@ class AppleSukkaOnlyTests(unittest.TestCase):
                     if rule[0] == "RULE-SET" and "/List/ip/" in rule[1]
                 )
                 self.assertLess(max(rules.index(rule) for rule in SUKKA_APPLE_RULES), first_ip)
+
+    def test_all_existing_sukka_resources_are_retained_once(self) -> None:
+        required = {
+            ("DOMAIN-SET" if category == "domainset" else "RULE-SET",
+             f"https://ruleset.skk.moe/List/{category}/{name}.conf")
+            for category, names in SUKKA_REQUIRED_RESOURCES.items()
+            for name in names
+        }
+        self.assertEqual(32, len(required))
+        for label, text in {**self.profile_texts, "contract": self.contract_text}.items():
+            references = [
+                rule[:2] for rule in parsed_rules(text)
+                if rule[0] in {"DOMAIN-SET", "RULE-SET"}
+                and rule[1].startswith("https://ruleset.skk.moe/")
+            ]
+            with self.subTest(source=label):
+                self.assertTrue(required.issubset(set(references)), required - set(references))
+                self.assertEqual(len(references), len(set(references)))
 
     def test_no_active_custom_matcher_targets_known_apple_namespaces(self) -> None:
         for source, rules in self.active_rules.items():

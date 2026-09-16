@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- 2026-09-16 clarification: Preserve all previously enabled Sukka subscriptions.
+  Restored the mistakenly removed icloud_private_relay DOMAIN-SET at its original
+  position in both device profiles, using United States instead of Res-Frontier.
+  Registered it in the canonical DOMAIN-SET phase and contract to prevent template
+  omission. Apple now retains five Sukka resources; canonical totals are 54 rules,
+  32 Sukka resources (8 DOMAIN-SET), and 15 owner resources with 741 domain entries.
+  This supersedes the Private Relay resource deletion/four-resource interpretation
+  below; nine custom Apple residential records remain retired. No unrelated optional
+  Sukka sets were enabled, and previous audit reports remain historical snapshots.
 - 2026-09-16: Returned Apple base routing to the existing Sukka resources. Removed
   three Apple Pay/Cash residential entries and retired the six-rule account/billing
   override; old URL remains an empty compatibility endpoint. Removed device-only

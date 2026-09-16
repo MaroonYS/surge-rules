@@ -10,7 +10,8 @@
 | DIRECT | 中国银行、招商银行、UnionPay／云闪付 |
 | United Kingdom | HSBC UK、Krak／Kraken、Lloyds、Monzo |
 
-Wallet 不在此次清单，不扩大已有 Apple 六条账户/账单规则。MEXC、N26、Loqbox、
+Wallet 不在这 24 App 清单；随后用户明确 Apple 按 Sukka，已有三条支付和六条账户/
+账单住宅覆盖已撤销，见 [后续决定](apple-sukka-only.md)。MEXC、N26、Loqbox、
 OnePay、其他银行/券商及共享身份/风控层保留原策略。
 
 ## 已有覆盖、迁移与去重

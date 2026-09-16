@@ -67,7 +67,6 @@ REQUIRED_CASES = {
     "Korea finance": ("Korea", "kr-finance.conf", {"kakaobank.com", "shinhan.com", "tossbank.com"}),
     "Revolut preserved financial context": ("Res-Frontier", "finance-context.conf", {"revolut.com", "api.revolut.com"}),
     "Bybit preserved Crypto selection": ("Crypto", "crypto.conf", {"bybit.com", "api.bybit.com"}),
-    "Apple account and billing narrow override": ("Res-Frontier", "apple-account-payment-rules.conf", {"account.apple.com", "buy.itunes.apple.com", "p71-buy.itunes.apple.com"}),
     "Preserved shared identity fallback, not per-app session evidence": ("Res-Frontier", "identity-context.conf", {"api.sumsub.com", "api.uae.sumsub.com", "stationapi.veriff.com"}),
 }
 
@@ -260,24 +259,20 @@ class RoutingCompletenessTests(unittest.TestCase):
                 with self.subTest(profile=profile, host=host):
                     self.assertEqual(UNKNOWN, first_match(rules, host)[0])
 
-    def test_apple_rule_set_remains_exactly_six_narrow_matchers(self) -> None:
-        expected = {
-            "DOMAIN,account.apple.com,extended-matching",
-            "DOMAIN,appleid.cdn-apple.com,extended-matching",
-            "DOMAIN,idmsa.apple.com,extended-matching",
-            "DOMAIN,gsa.apple.com,extended-matching",
-            "DOMAIN,buy.itunes.apple.com,extended-matching",
-            "DOMAIN-WILDCARD,*-buy.itunes.apple.com,extended-matching",
-        }
-        actual = entries(ROOT / "apple-account-payment-rules.conf")
-        self.assertEqual(6, len(actual))
-        self.assertEqual(expected, set(actual))
+    def test_apple_compatibility_url_is_retired_without_active_rules(self) -> None:
+        self.assertEqual([], entries(ROOT / "apple-account-payment-rules.conf"))
+        for rules in (self.main, self.expanded):
+            self.assertFalse(any(rule.source == "apple-account-payment-rules.conf" for rule in rules))
+            for host in ("account.apple.com", "appleid.cdn-apple.com", "idmsa.apple.com",
+                         "gsa.apple.com", "buy.itunes.apple.com", "p71-buy.itunes.apple.com",
+                         "applepay.apple.com", "applecash.apple.com", "apple-pay-gateway.apple.com"):
+                self.assertEqual(UNKNOWN, first_match(rules, host)[0])
 
-    def test_financial_order_and_apple_override_precede_unknown_upstreams(self) -> None:
+    def test_financial_order_precedes_unknown_upstreams(self) -> None:
         expected = [
             "direct-cn.conf", "ch-finance.conf", "uk-finance.conf", "hk-finance.conf",
             "sg-finance.conf", "jp-finance.conf", "kr-finance.conf", "us-residential.conf",
-            "apple-account-payment-rules.conf", "finance-context.conf",
+            "finance-context.conf",
             "identity-context.conf", "risk-context.conf", "crypto.conf", "web3.conf",
         ]
         for profile, rules in (("main", self.main), ("expanded", self.expanded)):

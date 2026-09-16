@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- 2026-09-16: Returned Apple base routing to the existing Sukka resources. Removed
+  three Apple Pay/Cash residential entries and retired the six-rule account/billing
+  override; old URL remains an empty compatibility endpoint. Removed device-only
+  Private Relay residential binding without changing system settings or modules.
+  Non-Apple finance routes remain unchanged; independent Apple-only guards added.
 - 2026-09-16: Applied the owner's explicit 24-app HK/US-residential/CN/UK matrix.
   Consolidated 21 existing IBKR entries, moved Bank of China's shared root to DIRECT
   and Longbridge's SG root to HK, and added only 12 verified missing namespaces/hosts.

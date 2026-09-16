@@ -47,24 +47,23 @@ Blackmatrix7 现成混合集在 IP 阶段以 `no-resolve` 加载；两者统一�
 
 ## Apple 与系统链路
 
-Apple Account / PayPal 绑定使用 `apple-account-payment-rules.conf` 的六条窄规则，
-固定 `Res-Frontier` 并先于 Apple CDN/services。其余基础规则继续加载四个 Apple 资源：
+按 2026-09-16 最新要求，撤销 Apple Pay/Cash 的三条住宅覆盖以及账户/账单六条窄规则。
+Apple 基础分流仅加载四个已有 Sukka 资源：
 
 - `domainset/apple_cdn.conf` → `DIRECT`；
 - `non_ip/apple_intelligence.conf` → `United States`；
 - `non_ip/apple_cn.conf` → `DIRECT`；
 - `non_ip/apple_services.conf` → `United States`。
 
-六条规则只覆盖账户登录控制面、`buy.itunes.apple.com` 及其 `*-buy` 账单主机，不扩大
-到整个 `apple.com`、`itunes.apple.com` 或第三方支付供应商。软件更新与 iCloud 仍由
-原有公共规则承接；设备已有的 Private Relay 住宅选择保留，不借模板修复重置。
-现有 iRingo、WeatherKit、Maps、
+设备上额外的 Private Relay 住宅绑定也撤销，复用已有公共覆盖，不关闭系统私密转送。
+旧账户规则 URL 仅留无活动规则的兼容空文件。软件更新与 iCloud 由原有公共规则承接。
+此次变更与出口差异见 [Apple 回归 Sukka](docs/apple-sukka-only.md)。现有 iRingo、WeatherKit、Maps、
 News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。GitHub 与
 `githubusercontent.com` 固定香港出口，仅用于保留模块的发布资源更新。
 
 ## 本仓库活动资源
 
-主规则通过 16 个远程本仓库资源加载 744 条域名与 6 条窄范围规则，另外直接引用
+主规则通过 15 个远程本仓库资源加载 741 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -86,7 +85,6 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | `jp-finance.conf` | `Japan` | 日本金融 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `us-residential.conf` | `Res-Frontier` | 美国金融、LemFi 及已确认专属资源、X、Google Account/Voice 与 Polymarket |
-| `apple-account-payment-rules.conf` | `Res-Frontier` | Apple 账户/账单与 PayPal 关联的窄范围 RULE-SET |
 | `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
 | `risk-context.conf` | `Res-Frontier` | 设备情报、指纹与反欺诈基础设施 |
@@ -160,7 +158,7 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 `Singapore`、`Japan`、`Korea`、`Switzerland`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
-在 Surge 的外部资源页面刷新，并确认 16 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
+在 Surge 的外部资源页面刷新，并确认 15 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict

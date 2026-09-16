@@ -56,7 +56,7 @@ class RuleContractTests(unittest.TestCase):
         )
         parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
 
-        self.assertEqual(16, len(active))
+        self.assertEqual(15, len(active))
         self.assertIn(f"{len(active)} 个远程本仓库资源", readme)
         self.assertIn(f"确认 {len(active)} 个本仓库规则文件与 Supercell 外部混合集均成功加载", readme)
         self.assertIn(
@@ -187,7 +187,7 @@ class RuleContractTests(unittest.TestCase):
             main.index("# 3. Sukka DOMAIN-SET"),
         )
 
-    def test_narrow_apple_account_rules_preserve_sukka_resources(self) -> None:
+    def test_apple_uses_only_existing_sukka_resources(self) -> None:
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         apple_rules = [
             line
@@ -196,7 +196,6 @@ class RuleContractTests(unittest.TestCase):
         ]
         self.assertEqual(
             [
-                "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
                 "DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT",
                 "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_intelligence.conf,\"United States\",extended-matching",
                 "RULE-SET,https://ruleset.skk.moe/List/non_ip/apple_cn.conf,DIRECT",
@@ -249,7 +248,6 @@ class RuleContractTests(unittest.TestCase):
                 "kr-finance.conf": "Korea",
                 "uk-finance.conf": "United Kingdom",
                 "us-residential.conf": "Res-Frontier",
-                "apple-account-payment-rules.conf": "Res-Frontier",
                 "finance-context.conf": "Res-Frontier",
                 "identity-context.conf": "Res-Frontier",
                 "risk-context.conf": "Res-Frontier",

@@ -60,13 +60,6 @@
       "description": "US finance, LemFi and verified tenants, X, Google account and Voice, and Polymarket on one stable residential egress"
     },
     {
-      "file": "apple-account-payment-rules.conf",
-      "type": "RULE-SET",
-      "policy": "Res-Frontier",
-      "semantic_role": "APPLE-ACCOUNT-PAYMENT",
-      "description": "Narrow Apple account and billing endpoints on the same residential egress as PayPal"
-    },
-    {
       "file": "finance-context.conf",
       "policy": "Res-Frontier",
       "semantic_role": "Finance",

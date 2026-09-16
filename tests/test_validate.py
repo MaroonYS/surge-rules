@@ -368,14 +368,14 @@ class RepositoryTests(unittest.TestCase):
             report["files"]["domain_set"] + report["files"]["rule_set"],
         )
         self.assertEqual(
-            {"apple-account-payment-rules.conf"},
+            set(),
             {
                 binding.file
                 for binding in result.bindings
                 if binding.type == "RULE-SET"
             },
         )
-        self.assertEqual(len(result.active_rule_entries), 6)
+        self.assertEqual(len(result.active_rule_entries), 0)
         self.assertEqual(
             len(result.active_rule_entries),
             report["entries"]["rule_set"],

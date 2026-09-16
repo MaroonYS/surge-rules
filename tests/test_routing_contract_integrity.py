@@ -109,20 +109,13 @@ class RoutingContractIntegrityTests(unittest.TestCase):
             codes = {d.code for d in validate.validate_repository(copied).diagnostics}
         self.assertTrue({"CROSS_FILE_OVERLAP", "LOCAL_REFERENCE_ORDER", "RULE_CONTRACT_MISMATCH"}.issubset(codes))
 
-    def test_apple_account_exception_has_only_six_narrow_records(self) -> None:
+    def test_apple_account_exception_is_retired(self) -> None:
         records = set(build_expanded.read_rule_entries(ROOT / "apple-account-payment-rules.conf"))
-        self.assertEqual({
-            "DOMAIN,account.apple.com,extended-matching",
-            "DOMAIN,appleid.cdn-apple.com,extended-matching",
-            "DOMAIN,idmsa.apple.com,extended-matching",
-            "DOMAIN,gsa.apple.com,extended-matching",
-            "DOMAIN,buy.itunes.apple.com,extended-matching",
-            "DOMAIN-WILDCARD,*-buy.itunes.apple.com,extended-matching",
-        }, records)
+        self.assertEqual(set(), records)
         text = build_expanded.render_expanded(ROOT)
-        self.assertEqual("Res-Frontier", first_inline_domain_policy(text, "p71-buy.itunes.apple.com"))
-        self.assertEqual("Res-Frontier", first_inline_domain_policy(text, "account.apple.com"))
-        for host in ("apple.com", "itunes.apple.com", "music.itunes.apple.com", "apple.com.evil.example"):
+        for host in ("apple.com", "itunes.apple.com", "music.itunes.apple.com", "apple.com.evil.example",
+                     "p71-buy.itunes.apple.com", "account.apple.com", "applecash.apple.com",
+                     "applepay.apple.com", "apple-pay-gateway.apple.com"):
             self.assertNotEqual("Res-Frontier", first_inline_domain_policy(text, host))
 
 

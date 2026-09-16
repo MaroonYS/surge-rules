@@ -43,15 +43,12 @@ class ExpandedRuleTests(unittest.TestCase):
             rendered,
         )
 
-    def test_apple_rule_options_are_preserved_inside_expansion(self) -> None:
+    def test_retired_apple_rules_are_not_expanded(self) -> None:
         rendered = build_expanded.render_expanded(ROOT)
-        for record in build_expanded.read_rule_entries(ROOT / "apple-account-payment-rules.conf"):
-            fields = record.split(",")
-            self.assertEqual("extended-matching", fields[-1])
-            self.assertIn(
-                ",".join((*fields[:2], "Res-Frontier", "extended-matching")),
-                rendered,
-            )
+        self.assertEqual([], build_expanded.read_rule_entries(ROOT / "apple-account-payment-rules.conf"))
+        self.assertNotIn("apple-account-payment-rules.conf", rendered)
+        self.assertNotIn("DOMAIN,account.apple.com,Res-Frontier", rendered)
+        self.assertNotIn("DOMAIN-SUFFIX,applepay.apple.com,Res-Frontier", rendered)
 
     def test_mixed_binding_types_expand_in_place(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

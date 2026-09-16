@@ -5,9 +5,9 @@
 
 ## Apple 边界
 
-2026-09-15 恢复 `apple-account-payment-rules.conf` 六条账户/账单窄规则，与 PayPal
-统一 `Res-Frontier`；不恢复 Apple 全域、系统更新、iCloud、证书或 APNs 的自定义覆盖。
-其余服务仍使用 Sukka 公共资源，设备已有 Private Relay 选择保留。主 Profile 不添加
+2026-09-16 按最新要求撤销 Apple Pay/Cash 三条住宅规则和账户/账单六条窄规则，
+同时撤销设备的 Private Relay 住宅专项绑定；Apple 基础层复用既有四个 Sukka 资源。
+这一决定取代 9 月 15 日的恢复操作，见 [Apple 回归 Sukka](apple-sukka-only.md)。主 Profile 不添加
 Apple/iCloud MITM 正项、负项或条件禁用；相关 hostname 仍由保留模块管理。
 
 ## LemFi 美国住宅归属
@@ -108,7 +108,7 @@ Finance 迁至 `direct-cn.conf`，连同 `.boc.cn` 固定 `DIRECT`；全球共�
 [个人地区清单](finance-app-matrix.md)。
 
 PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`；Apple Account
-仅以六条窄规则建立账户/账单出口关联，其余 Apple 流量保留公共语义。账户地区、
+与账单已撤销额外住宅绑定，按 Sukka 公共资源分流，不保证与 PayPal 同一出口。账户地区、
 账单资料和支付服务商验证仍须符合 [Apple 官方要求](https://support.apple.com/en-us/111741)。
 
 ## 2026-09 重点业务与共享身份边界

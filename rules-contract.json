@@ -24,7 +24,6 @@
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,Japan,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/kr-finance.conf,Korea,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/us-residential.conf,Res-Frontier,extended-matching",
-        "RULE-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/apple-account-payment-rules.conf,Res-Frontier",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/identity-context.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/risk-context.conf,Res-Frontier,extended-matching",

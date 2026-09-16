@@ -2,7 +2,7 @@
 
 本轮固定已确认的域名归属、先后顺序和生成契约，不把静态规则通过当成完整登录证据。
 `surge-main.conf` 是规则参考骨架，不是设备完整配置；接入时只合并本次变更，不能覆盖
-设备已有的进程例外、Private Relay 选择、DNS、MITM、节点或策略组。
+设备已有的进程例外、DNS、MITM、节点或策略组；Apple Private Relay 住宅专项已按最新要求撤销。
 
 ## 优先保护的业务
 
@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | Switzerland | MEXC 的 15 条既有第一方/专属资源 | 旧 UK 或 Crypto、模板遗漏 CH |
 | United Kingdom | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat | Expat 被 HK 的 `.hsbc.com` 抢先、未登记窄辅助域 |
-| Res-Frontier | LemFi、Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 业务域回落普通 PROXY、Apple 账户/账单与 PayPal 分离 |
+| Res-Frontier | LemFi、Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 非 Apple 业务域回落普通 PROXY；Apple 后续按 Sukka 分流 |
 | Hong Kong | 已指定的香港银行、Futu/Moomoo、Longbridge | 将共享香港账户基础设施重新推断为 SG |
 | Singapore | 其他新加坡专属域，如 Futu SG、Moomoo Trustee；Longbridge/IBKR 以最新个人清单为准 | 未经要求改变其他 App 的归属 |
 | Crypto / Web3 | 既有 Bybit 等交易所、钱包和链上业务 | 擅自更改手动选择，或把 MEXC 再塞回 Crypto |
@@ -21,6 +21,8 @@ N26 的英国出口是现有用户选择，不代表银行所在地。域名路�
 2026-09-16 新增的 [24 App 清单](finance-app-matrix.md)是这些业务的最新要求；
 IBKR 区域域统一美国住宅、Longbridge SG 域统一 HK、中国银行全球域直连，
 并补齐新点名 App 的已证实缺失记录。共享银行/WAF/银联主机的边界仍明确待验收。
+随后用户要求 [Apple 基础层回归 Sukka](apple-sukka-only.md)，移除支付/账户/账单及
+Private Relay 住宅例外，不再把 Apple 与 PayPal 的出口一致性作为当前要求。
 
 LemFi 的两条首方后缀及五个精确租户单独纳入首命中、子域覆盖、反例和唯一归属回归。
 官网/API/邮箱验证入口/支持与已确认深链同走美国住宅；公开资源证据不等于原生 App
@@ -52,7 +54,7 @@ python3 scripts/check_module_compatibility.py
 ```
 
 测试包括点名业务首命中、主骨架/展开版一致、CH 缺失、MEXC 错投 Crypto、HSBC
-具体重叠的策略/顺序约束、Apple 窄规则边界，以及公共共享后缀不被扩大归属。
+具体重叠的策略/顺序约束、Apple 自定义覆盖不得重新引入，以及公共共享后缀不被扩大归属。
 外部动态资源、模块、IP、DNS、原生 App 和实际会话不是这些离线测试的模拟范围；
 未知外部匹配不得被悄悄跳过后报告为通过。
 
@@ -61,7 +63,7 @@ python3 scripts/check_module_compatibility.py
 
 ## 设备验收
 
-1. 确认设备已重载包含 CH 和 Apple 窄规则引用的配置，目标外部资源下载就绪。
+1. 确认设备已重载包含 CH、移除 Apple 窄规则与 Private Relay 住宅引用的配置，目标外部资源下载就绪。
 2. Mac 检查实际有效规则，而非只检查源文件；iPhone 必须独立确认配置及模块启用状态。
 3. 正常使用时记录登录、验证码、主要 API、支付，以及确有业务需要时的 KYC/人脸流程。
    不为网络测试重新开户或提交证件，不主动触发不必要的安全验证。

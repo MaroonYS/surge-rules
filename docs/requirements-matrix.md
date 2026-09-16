@@ -1,6 +1,7 @@
 # Requirements Matrix
 
 最新个人 App 地区要求及迁移/去重证据见 [2026-09-16 的 24 App 清单](finance-app-matrix.md)。
+后续 Apple 支付、账户与 Private Relay 住宅例外已按用户要求撤销，见 [Apple 回归 Sukka](apple-sukka-only.md)。
 
 | 阶段 | 目标 | 落地规则 |
 | --- | --- | --- |
@@ -23,7 +24,6 @@
 | `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |
 | `kr-finance.conf` | `DOMAIN-SET` | `Korea` | 韩国实体银行 |
 | `us-residential.conf` | `DOMAIN-SET` | `Res-Frontier` | 美国金融、LemFi 的首方及精确专属资源、信用、X Money、Google Account/Voice、Polymarket |
-| `apple-account-payment-rules.conf` | `RULE-SET` | `Res-Frontier` | 六条 Apple 账户/账单窄规则，与 PayPal 同出口；不扩大 Apple 后缀 |
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
@@ -33,8 +33,8 @@
 
 ## 明确不加载
 
-- Apple 全域、系统更新、iCloud、证书与 APNs 的新增自定义覆盖；账户/付款只使用上述
-  六条窄规则。现有设备 Private Relay 选择保留，模板不借本轮强制重置。
+- Apple 全域、系统更新、iCloud、证书与 APNs 的自定义覆盖；支付/账户/账单九条住宅
+  规则和设备 Private Relay 住宅专项均已撤销，基础层复用四个现有 Sukka 资源。
 - Sukka `reject-url-regex.conf` 与新的 MITM 拦截层：上游已警告此类匹配的性能开销；
   域名、非 IP 与 IP Reject 资源（包括 Phishing）仍全部加载。
 - Adblock4limbo 外部规则集：当前源近半数规则已被 Sukka 覆盖，规范化后仅剩 224 条

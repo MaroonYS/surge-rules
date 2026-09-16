@@ -93,7 +93,6 @@ ADDED_ENTRIES = {
     "za.onelink.me": ("Hong Kong", "hk-finance.conf"),
     "cdn.zaticdn.com": ("Hong Kong", "hk-finance.conf"),
     "alicdn.zaticdn.com": ("Hong Kong", "hk-finance.conf"),
-    "s3gw.cmbimg.cn": ("DIRECT", "direct-cn.conf"),
     "cmbt.cn": ("DIRECT", "direct-cn.conf"),
     "forms.hsbc.gb": ("United Kingdom", "uk-finance.conf"),
     ".kalshi.com": ("Res-Frontier", "us-residential.conf"),
@@ -200,8 +199,8 @@ class OwnerFinanceMatrixTests(unittest.TestCase):
                     with self.subTest(host=host, profile=profile):
                         self.assertEqual(UNKNOWN, first_match(rules, host)[0])
 
-    def test_all_13_reviewed_additions_exist_once_with_exact_matcher_type(self) -> None:
-        self.assertEqual(13, len(ADDED_ENTRIES))
+    def test_all_12_reviewed_additions_exist_once_with_exact_matcher_type(self) -> None:
+        self.assertEqual(12, len(ADDED_ENTRIES))
         self.assertEqual(4, sum(entry.startswith(".") for entry in ADDED_ENTRIES))
         for entry, (_, expected_source) in ADDED_ENTRIES.items():
             owners = [

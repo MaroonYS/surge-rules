@@ -27,13 +27,13 @@ OnePay、其他银行/券商及共享身份/风控层保留原策略。
   HSBC HK 网站、云闪付的 `yunshanfu.unionpay.com`/`youhui.95516.com` 已有后缀覆盖，
   不为每个页面另加重复规则。Reward+ 身份见 [HSBC 官方介绍](https://www.hsbc.com.hk/credit-cards/rewards/app/)。
 
-## 仅补 13 条缺失记录
+## 仅补 12 条缺失记录
 
 | 策略 | 新增记录 | 证据与用途 |
 | --- | --- | --- |
 | HK | `za.onelink.me`（精确） | [ZA 官网](https://bank.za.group/en/)应用链接；[AASA](https://za.onelink.me/.well-known/apple-app-site-association)绑定 `F89UW68G76.group.za.bank` |
 | HK | `cdn.zaticdn.com`、`alicdn.zaticdn.com`（精确） | [ZA 官方下载页](https://bank.za.group/en/app-download)实际引用的脚本/样式/图片资源 |
-| DIRECT | `s3gw.cmbimg.cn`、`cmbt.cn`（精确） | [招商银行 App 页](https://www.cmbchina.com/MBankWeb/Products/?submenu=android)与其[前端脚本](https://s3gw.cmbimg.cn/srd-a2549394cd7491f-1255000101/script/app.3c941a81.js)：资源及 Android 下载入口；不将下载入口误称为 iOS API |
+| DIRECT | `cmbt.cn`（精确） | [招商银行 App 页](https://www.cmbchina.com/MBankWeb/Products/?submenu=android)与其[前端脚本](https://s3gw.cmbimg.cn/srd-a2549394cd7491f-1255000101/script/app.3c941a81.js)确认 Android 下载入口；不将下载入口误称为 iOS API |
 | UK | `forms.hsbc.gb`（精确） | [HSBC UK 官网](https://www.hsbc.co.uk/ways-to-bank/mobile/)链接的英国表单入口；主 App 的 `hsbc.co.uk` 已有规则，[AASA](https://www.hsbc.co.uk/.well-known/apple-app-site-association)确认 UK App |
 | US | `.kalshi.com` | [Kalshi API 环境](https://docs.kalshi.com/getting_started/api_environments)的正式 REST/WebSocket，覆盖 `external-api` 与 `api.elections` |
 | US | `.ibllc.com.cn` | [IBKR 官方连接说明](https://www.interactivebrokers.com/docs/third-party-integrations/tws-settings/best-practice-configure-tws-ib-gateway/connected-ib-server-location-in-tws)列出的中国网关；既有 `.ibllc.com` 无法覆盖此独立域 |
@@ -41,6 +41,10 @@ OnePay、其他银行/券商及共享身份/风控层保留原策略。
 | US | `wise-app.sng.link`（精确） | [Wise 官网](https://wise.com/)下载链接；[AASA](https://wise-app.sng.link/.well-known/apple-app-site-association)绑定 `W53MTDV45J.com.transferwise.Transferwise` |
 | US | `.revolut.me` | [Revolut 官方付款条款](https://www.revolut.com/legal/payment-terms-revme/)确认付款/收款链接 |
 | US | `sofi.app.link`、`sofi-alternate.app.link`（精确） | [SoFi 官方客服深链](https://www.sofi.com/press/sofi-invest-launches-the-sofi-enhanced-yield-etf-to-offer-investors-a-new-income-source/)；两者 AASA 均绑定 `2ZBHHJ9456.com.sofi.mobile` |
+
+招商资源 `s3gw.cmbimg.cn` 已由当前 [Sukka domestic](https://ruleset.skk.moe/List/non_ip/domestic.conf)
+中的 `DOMAIN-SUFFIX,cmbimg.cn` 正确直连，公共/模块检查未发现更早的域名冲突，故不再
+重复收录。它的验收属于公共资源检查，不伪装成自有离线矩阵可直接证明的首命中。
 
 已确认但不作为生产 App 必需项加入：Kalshi demo `.kalshi.co`；未取得完整交叉证据的
 `kalshi.onelink.me`；仅猜测的 `kalshicdn.com`；Wise 网页配置中的服务端 `*.envoy.tw.ee`、

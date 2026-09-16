@@ -4,7 +4,8 @@
 
 - 2026-09-16: Applied the owner's explicit 24-app HK/US-residential/CN/UK matrix.
   Consolidated 21 existing IBKR entries, moved Bank of China's shared root to DIRECT
-  and Longbridge's SG root to HK, and added only 13 verified missing namespaces/hosts.
+  and Longbridge's SG root to HK, and added only 12 verified missing namespaces/hosts.
+  CMB assets at s3gw.cmbimg.cn reuse the existing Sukka DIRECT suffix, not a duplicate.
   Existing Wise/Revolut roots retain their correct residential binding without duplicates.
   Added independent owner-matrix/boundary tests; shared identity, modules and profiles unchanged.
 - 2026-09-15: Pinned LemFi's current and legacy first-party namespaces and five

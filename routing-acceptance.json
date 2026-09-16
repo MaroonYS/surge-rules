@@ -3,7 +3,7 @@
   "evidence_scope": "Offline first-match regression for ordinary hostname rules on HTTPS/TCP port 443. Hostnames are static fixtures, not evidence that an app requested them in a logged-in session.",
   "excluded_layers": ["module injection and pre-matching", "remote resource contents", "DNS and IP rules", "actual selected proxy and availability", "iPhone capture and login/KYC/payment sessions"],
   "cases": [
-    {"app": "Mainland China finance", "file": "direct-cn.conf", "policy": "DIRECT", "hosts": ["boc.cn", "www.bankofchina.com", "pic.bankofchina.com", "csv2.bankofchina.com", "icbc.com.cn", "unionpay.com", "yunshanfu.unionpay.com", "youhui.95516.com", "cmbchina.com", "cmbchina.com.cn", "s3gw.cmbimg.cn", "cmbt.cn"]},
+    {"app": "Mainland China finance", "file": "direct-cn.conf", "policy": "DIRECT", "hosts": ["boc.cn", "www.bankofchina.com", "pic.bankofchina.com", "csv2.bankofchina.com", "icbc.com.cn", "unionpay.com", "yunshanfu.unionpay.com", "youhui.95516.com", "cmbchina.com", "cmbchina.com.cn", "cmbt.cn"]},
     {"app": "BOCHK", "file": "hk-finance.conf", "policy": "Hong Kong", "hosts": ["bochk.com", "mb.bochk.com", "mba.bochk.com"]},
     {"app": "ZA Bank", "file": "hk-finance.conf", "policy": "Hong Kong", "hosts": ["zabank.com", "bank.za.group", "athena.za.group", "cdn.za.group", "za.onelink.me", "cdn.zaticdn.com", "alicdn.zaticdn.com"]},
     {"app": "Reward+", "file": "hk-finance.conf", "policy": "Hong Kong", "hosts": ["www.hsbc.com.hk", "redhotoffers.hsbc.com.hk"]},

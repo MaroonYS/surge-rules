@@ -297,10 +297,13 @@ class RuleContractTests(unittest.TestCase):
                 ".hsbc.com.hk",
                 ".hsbc.com",
                 ".futunn.com",
-                ".moomoo.com",
+                ".futustatic.com",
                 ".longbridge.com",
             }.issubset(hk)
         )
+
+        self.assertTrue({".moomoo.com", ".api.moomoobull.com"}.issubset(residential))
+        self.assertTrue({".moomoo.com", ".api.moomoobull.com"}.isdisjoint(hk))
 
         crypto = self.active_entries("crypto.conf")
         self.assertTrue({".bybit.com", ".byapis.com", ".binance.com"}.issubset(crypto))

@@ -78,16 +78,16 @@
       "description": "Conservative device intelligence and fraud-detection infrastructure"
     },
     {
-      "file": "crypto.conf",
-      "policy": "Crypto",
-      "semantic_role": "Crypto",
-      "description": "Bybit and remaining centralized cryptocurrency exchanges"
-    },
-    {
       "file": "web3.conf",
       "policy": "Web3",
       "semantic_role": "Web3",
       "description": "Wallets, RPC, DeFi, NFT and blockchain explorers"
+    },
+    {
+      "file": "crypto.conf",
+      "policy": "Crypto",
+      "semantic_role": "Crypto",
+      "description": "Bybit and remaining centralized cryptocurrency exchanges"
     },
     {
       "file": "microsoft-cdn-download-overlap.conf",

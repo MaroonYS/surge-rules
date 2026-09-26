@@ -1,5 +1,13 @@
 # Changelog
 
+- 2026-09-27: Apply the owner's 29-app photo routing matrix. Add verified HK,
+  SG and UK namespaces and exact tenants; move Moomoo-specific namespaces and
+  Avalanche Card to US residential, add Neverless, preserve shared Futu HK assets.
+  Route Bitget Wallet before the Bitget exchange parent with exact, ordered
+  exceptions; keep Bitget/Bybit on Crypto and pin TenPayGo's verified exact
+  legal/information hosts DIRECT without capturing whole Tencent payment roots.
+  All Sukka references and unrelated app policies remain unchanged.
+
 ## Unreleased
 
 - 2026-09-27: Route Trading 212's verified first-party namespace and official

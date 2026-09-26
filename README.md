@@ -66,7 +66,7 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 15 个远程本仓库资源加载 743 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
+主规则通过 15 个远程本仓库资源加载 773 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -103,8 +103,14 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 `domainset → non_ip → ip` 的作者顺序。
 
 金融主顺序为中国大陆 → CH → UK → HK → SG → JP → KR → 美国住宅。
-UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；校验只允许这对具体记录在
-正确策略及顺序下重叠，不豁免其他跨地区重叠。MEXC 的 15 条记录只归瑞士，不回落 Crypto。
+UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；HK 的精确
+`www.usmartsecurities.com` 先于共享金融父域；Web3 的两个精确 Bitget Wallet
+主机先于 Crypto 的 `.bitget.com`。校验仅允许这些具体记录在正确策略与顺序下重叠，
+不豁免其他跨地区重叠。MEXC 的 15 条记录只归瑞士，不回落 Crypto。
+
+2026-09-27 的 [29 App 照片补充清单](docs/finance-photo-matrix-20260927.md)
+落实 HK 8、美国住宅 10、SG 4、UK 3，以及 Crypto 2、Web3 1、TenPayGo 中国直连。
+Moomoo 专属域从 HK 迁至美国住宅；Futubull 共用静态资源仍保留 HK。
 
 2026-09-16 的 [24 App 个人地区清单](docs/finance-app-matrix.md)明确 HK 6、美国住宅 11、
 大陆直连 3、UK 4。IBKR 全部既有地区域统一住宅、Longbridge SG 域统一 HK、中国银行

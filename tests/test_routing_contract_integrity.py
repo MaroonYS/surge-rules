@@ -123,6 +123,33 @@ class OrderedOverlapExceptionTests(unittest.TestCase):
     def entry(self, path: str, raw: str, policy: str) -> validate.DomainEntry:
         return validate.DomainEntry(path, 1, raw, raw.removeprefix("."), raw.startswith("."), policy)
 
+    def test_photo_app_exact_exceptions_require_order_and_policies(self) -> None:
+        cases = (
+            ("hk-finance.conf", "www.usmartsecurities.com", "HK-FINANCE", "Hong Kong",
+             "finance-context.conf", ".usmartsecurities.com", "Finance", "Res-Frontier"),
+            ("web3.conf", "web3.bitget.com", "Web3", "Web3",
+             "crypto.conf", ".bitget.com", "Crypto", "Crypto"),
+            ("web3.conf", "portal-web3.bitget.com", "Web3", "Web3",
+             "crypto.conf", ".bitget.com", "Crypto", "Crypto"),
+        )
+        for nf, host, ns, np, bf, parent, bs, bp in cases:
+            records = [self.entry(nf, host, ns), self.entry(bf, parent, bs)]
+            refs = [(nf, np), (bf, bp)]
+            with self.subTest(host=host):
+                diagnostics = []
+                validate.detect_active_overlaps(records, diagnostics, refs)
+                self.assertEqual([], diagnostics)
+                for broken in ([], refs[::-1], refs + refs[:1],
+                               [(nf, "DIRECT"), refs[1]], [refs[0], (bf, "DIRECT")]):
+                    diagnostics = []
+                    validate.detect_active_overlaps(records, diagnostics, broken)
+                    self.assertEqual(["CROSS_FILE_OVERLAP"], [d.code for d in diagnostics])
+                for changed in ("." + host, "other." + parent.lstrip(".")):
+                    diagnostics = []
+                    validate.detect_active_overlaps(
+                        [self.entry(nf, changed, ns), records[1]], diagnostics, refs)
+                    self.assertEqual(["CROSS_FILE_OVERLAP"], [d.code for d in diagnostics])
+
     def test_exact_exception_requires_order_and_runtime_policies(self) -> None:
         entries = [
             self.entry("uk-finance.conf", ".expat.hsbc.com", "UK-FINANCE"),

@@ -140,10 +140,14 @@ N26、Loqbox、Kraken/Krak、Monzo、Lloyds 沿用现有 UK 归属；Coinbase/Ba
 OnePay、Capital One、Equifax、PayPal、Google Account/Voice、X 与 Polymarket 沿用
 美国住宅。重点回归与证据边界见 [完整性验收](routing-completeness.md)。
 
-当前配置所有者明确使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
+2026-08 原配置所有者使用 HSBC HK、Futu/Moomoo HK 与 Longbridge HK。它们的部分
 App API 使用无法从域名判断地区的共享基础设施，因此这些既有第一方域名已合并到
 `hk-finance.conf`，并在通用 `finance-context.conf` 之前固定到 `Hong Kong`。
 这是个人账户上下文绑定，不应作为公共香港规则集直接照搬。
+
+2026-09-27 最新要求将 Moomoo 专属域迁至美国住宅，Futubull 与共用 Futu 静态资源仍 HK；
+旧的 Moomoo HK 绑定已被覆盖。新增应用及官方来源见
+[29 App 照片补充清单](finance-photo-matrix-20260927.md)。
 
 FUTU HK 官方下载页当前加载的前端包将 `futuhk8.com`、`futuhongkong.com` 与
 `futunh.com` 列入开户、登录、资金及账户管理兼容域，因此只补入这三个可验证后缀。

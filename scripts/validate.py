@@ -168,6 +168,18 @@ ORDERED_OVERLAP_EXCEPTIONS = (
         ("uk-finance.conf", ".expat.hsbc.com", "UK-FINANCE", "United Kingdom"),
         ("hk-finance.conf", ".hsbc.com", "HK-FINANCE", "Hong Kong"),
     ),
+    (
+        ("hk-finance.conf", "www.usmartsecurities.com", "HK-FINANCE", "Hong Kong"),
+        ("finance-context.conf", ".usmartsecurities.com", "Finance", "Res-Frontier"),
+    ),
+    (
+        ("web3.conf", "web3.bitget.com", "Web3", "Web3"),
+        ("crypto.conf", ".bitget.com", "Crypto", "Crypto"),
+    ),
+    (
+        ("web3.conf", "portal-web3.bitget.com", "Web3", "Web3"),
+        ("crypto.conf", ".bitget.com", "Crypto", "Crypto"),
+    ),
 )
 
 

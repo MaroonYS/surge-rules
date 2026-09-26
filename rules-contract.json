@@ -27,8 +27,8 @@
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/finance-context.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/identity-context.conf,Res-Frontier,extended-matching",
         "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/risk-context.conf,Res-Frontier,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching",
-        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/web3.conf,Web3,extended-matching"
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/web3.conf,Web3,extended-matching",
+        "DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/crypto.conf,Crypto,extended-matching"
       ]
     },
     {

@@ -62,7 +62,7 @@ REQUIRED_CASES = {
     "X": ("Res-Frontier", "us-residential.conf", {"x.com", "twitter.com"}),
     "Google Account and Voice control plane": ("Res-Frontier", "us-residential.conf", {"accounts.google.com", "voice.google.com"}),
     "Polymarket international and US": ("Res-Frontier", "us-residential.conf", {"polymarket.com", "polymarket.us"}),
-    "Hong Kong brokerage context": ("Hong Kong", "hk-finance.conf", {"futuhk.com", "moomoo.com", "longbridge.hk"}),
+    "Hong Kong brokerage context": ("Hong Kong", "hk-finance.conf", {"futuhk.com", "futunn.com", "futustatic.com", "longbridge.hk"}),
     "Singapore brokerage exceptions": ("Singapore", "sg-finance.conf", {"futusg.com", "moomootrustee.com", "webull.com.sg"}),
     "Japan finance": ("Japan", "jp-finance.conf", {"mufg.jp", "smbc.co.jp", "sonybank.net"}),
     "Korea finance": ("Korea", "kr-finance.conf", {"kakaobank.com", "shinhan.com", "tossbank.com"}),
@@ -274,7 +274,7 @@ class RoutingCompletenessTests(unittest.TestCase):
             "direct-cn.conf", "ch-finance.conf", "uk-finance.conf", "hk-finance.conf",
             "sg-finance.conf", "jp-finance.conf", "kr-finance.conf", "us-residential.conf",
             "finance-context.conf",
-            "identity-context.conf", "risk-context.conf", "crypto.conf", "web3.conf",
+            "identity-context.conf", "risk-context.conf", "web3.conf", "crypto.conf",
         ]
         for profile, rules in (("main", self.main), ("expanded", self.expanded)):
             with self.subTest(profile=profile):

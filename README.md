@@ -66,7 +66,7 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 15 个远程本仓库资源加载 741 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
+主规则通过 15 个远程本仓库资源加载 743 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -82,7 +82,7 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | `supercell-direct.conf` | `DIRECT` | Supercell ID、账户服务与各款游戏首方域 |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `ch-finance.conf` | `Switzerland` | MEXC 第一方与已确认专属资源，沿用既有瑞士策略 |
-| `uk-finance.conf` | `United Kingdom` | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定 UK 业务 |
+| `uk-finance.conf` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定 UK 业务 |
 | `hk-finance.conf` | `Hong Kong` | 香港银行、券商及当前香港账户共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
 | `jp-finance.conf` | `Japan` | 日本金融 |

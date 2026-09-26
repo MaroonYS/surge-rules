@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 2026-09-27: Route Trading 212's verified first-party namespace and official
+  support short-link domain through the existing United Kingdom finance list.
+  Added uniqueness, suffix-boundary and first-match regressions. Existing Sukka
+  subscriptions, other app routes and shared identity provider policies are unchanged.
 - 2026-09-16 clarification: Preserve all previously enabled Sukka subscriptions.
   Restored the mistakenly removed icloud_private_relay DOMAIN-SET at its original
   position in both device profiles, using United States instead of Res-Frontier.

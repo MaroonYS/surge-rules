@@ -19,7 +19,7 @@
 | `supercell-direct.conf` | `DOMAIN-SET` | `DIRECT` | Supercell 登录、账户服务与各款游戏首方域统一直连 |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` | 中国大陆实体银行与银联 |
 | `ch-finance.conf` | `DOMAIN-SET` | `Switzerland` | MEXC 的 15 条第一方/已确认资源规则，仅绑定现有瑞士策略 |
-| `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定英国出口，先于 HK |
+| `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定英国出口，先于 HK |
 | `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文 |
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |
 | `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |

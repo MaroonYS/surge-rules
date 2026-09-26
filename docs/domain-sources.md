@@ -3,6 +3,25 @@
 本页记录新增或调整的金融域名。活动规则优先收录机构第一方域名及有证据的专属资源；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
+## Trading 212 英国归属
+
+2026-09-27，按配置所有者要求，将以下两条加入既有 `uk-finance.conf`，复用
+`United Kingdom,extended-matching`，不新增资源引用或策略组。原列表没有 Trading 212
+专项，不从其他金融地区列表复制，也不为已被根域覆盖的子域另加重复条目。
+
+- `.trading212.com`：覆盖官网、App/Web 登录及 API、帮助中心、社区和该命名空间下
+  的资源。官方 [API 文档](https://docs.trading212.com/api/accounts) 明确列出
+  `live.trading212.com` 与 `demo.trading212.com`；
+  [密码帮助](https://helpcentre.trading212.com/hc/en-us/articles/360007430797-How-do-I-change-my-password)
+  同时确认 `info.trading212.com`。
+- `.t212.cc`：Trading 212 官方支持短链接；官方工作人员在
+  [近期社区回复](https://community.trading212.com/t/new-cashback-terms-is-absurd/92518/11)
+  将 `t212.cc/ask` 列为客服入口。
+
+只修改已证实的首方命名空间。不将 Apple/Google 登录、共享身份核验、整个 CDN 或
+深链供应商归入英国。首命中测试是静态规则验收，不等于原生 App 全链路实测；
+英国出口也不保证平台接受代理，见官方 [Access Denied 说明](https://helpcentre.trading212.com/hc/en-us/articles/32239787777437-Why-am-I-seeing-Access-Denied-Message)。
+
 ## Apple 边界
 
 2026-09-16 按最新要求撤销 Apple Pay/Cash 三条住宅规则和账户/账单六条窄规则，

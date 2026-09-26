@@ -51,7 +51,7 @@ Private Relay 的端点虽也被 `.icloud.com`／`.apple-dns.net` 等公共后�
 
 独立回归要求：自有活动域集不能包含 Apple 命名空间；九条旧覆盖不可重新引入；
 五个 Sukka Apple 资源和既有设备顺序保持；24 个非 Apple 金融 App 的锚点与出口不得削弱。
-主骨架为 54 条规则、32 个 Sukka 资源（8 个 DOMAIN-SET），自有活动资源仍为 15 个、741 条域名。
+本次 Apple 变更完成时，主骨架为 54 条规则、32 个 Sukka 资源（8 个 DOMAIN-SET），自有活动资源为 15 个、741 条域名；后续新增业务的当前数量见 [Source Parity](source-parity.md)。
 公共上游覆盖、实际有效规则、资源刷新与设备配置分别验证。iCloud 文件同步不等于
 iPhone 已重载；手机仍需更新配置并刷新外部资源，且无需为验收主动进行付款或绑卡。
 

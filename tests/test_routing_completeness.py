@@ -45,6 +45,7 @@ REQUIRED_CASES = {
     "Wise and Revolut auxiliary domains": ("Res-Frontier", "us-residential.conf", {"api-mtls.transferwise.com", "wise-app.sng.link", "revolut.me"}),
     "Mainland China finance": ("DIRECT", "direct-cn.conf", {"boc.cn", "icbc.com.cn", "unionpay.com"}),
     "MEXC": ("Switzerland", "ch-finance.conf", {"mexc.com", "static.mocortech.com"}),
+    "Trading 212": ("United Kingdom", "uk-finance.conf", {"trading212.com", "live.trading212.com", "demo.trading212.com", "helpcentre.trading212.com", "t212.cc"}),
     "N26": ("United Kingdom", "uk-finance.conf", {"n26.com", "app.n26.com", "cdn.number26.de"}),
     "Loqbox": ("United Kingdom", "uk-finance.conf", {"loqbox.com", "app.uk.loqbox.com"}),
     "Kraken and Krak": ("United Kingdom", "uk-finance.conf", {"kraken.com", "krak.app"}),

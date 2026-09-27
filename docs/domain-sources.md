@@ -134,8 +134,12 @@ PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`
 
 ## 2026-09 重点业务与共享身份边界
 
-MEXC 的 15 条第一方/专属资源已从 UK 移至 `ch-finance.conf`，现统一将 CH 登记到
-manifest、主骨架、契约与展开版；本轮不新增 MEXC 共享 KYC 或遥测放行。
+MEXC 的 15 条既有第一方/专属资源曾从 UK 移至 `ch-finance.conf`；2026-09-27
+配置所有者明确要求按中心化交易所分类，现整体迁入 `crypto.conf`，不重复保留在
+其他活动资源。旧 CH 引用从 manifest、主骨架与契约退休，旧文件仅保留注释兼容入口；
+展开版同步改绑 Crypto。本轮不扩充该 15 条清单、不新增 MEXC 共享 KYC 或遥测放行，
+也不改变 Crypto 组内已选出口。分类不代表平台服务地区/账户资格保证，静态规则验收
+不等于原生 App 的登录、交易或身份核验全链路实测。
 N26、Loqbox、Kraken/Krak、Monzo、Lloyds 沿用现有 UK 归属；Coinbase/Base、ether.fi、
 OnePay、Capital One、Equifax、PayPal、Google Account/Voice、X 与 Polymarket 沿用
 美国住宅。重点回归与证据边界见 [完整性验收](routing-completeness.md)。

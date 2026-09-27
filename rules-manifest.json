@@ -18,12 +18,6 @@
       "description": "Mainland China banks and UnionPay"
     },
     {
-      "file": "ch-finance.conf",
-      "policy": "Switzerland",
-      "semantic_role": "CH-FINANCE",
-      "description": "MEXC first-party and verified tenant hosts on the existing Switzerland policy"
-    },
-    {
       "file": "uk-finance.conf",
       "policy": "United Kingdom",
       "semantic_role": "UK-FINANCE",
@@ -87,7 +81,7 @@
       "file": "crypto.conf",
       "policy": "Crypto",
       "semantic_role": "Crypto",
-      "description": "Bybit and remaining centralized cryptocurrency exchanges"
+      "description": "MEXC, Bybit and remaining centralized cryptocurrency exchanges"
     },
     {
       "file": "microsoft-cdn-download-overlap.conf",

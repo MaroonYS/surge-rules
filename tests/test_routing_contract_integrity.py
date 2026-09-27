@@ -17,7 +17,7 @@ import validate  # noqa: E402
 
 
 FINANCE_ORDER = [
-    "direct-cn.conf", "ch-finance.conf", "uk-finance.conf", "hk-finance.conf",
+    "direct-cn.conf", "uk-finance.conf", "hk-finance.conf",
     "sg-finance.conf", "jp-finance.conf", "kr-finance.conf", "us-residential.conf",
 ]
 MEXC_ENTRIES = {
@@ -52,30 +52,44 @@ class RoutingContractIntegrityTests(unittest.TestCase):
         manifest = json.loads((ROOT / "rules-manifest.json").read_text())
         bindings = manifest["active"]
         self.assertEqual(FINANCE_ORDER, [b["file"] for b in bindings if b["file"] in FINANCE_ORDER])
-        self.assertEqual("Switzerland", next(b["policy"] for b in bindings if b["file"] == "ch-finance.conf"))
+        self.assertEqual("Crypto", next(b["policy"] for b in bindings if b["file"] == "crypto.conf"))
         main = (ROOT / "surge-main.conf").read_text()
         contract = json.loads((ROOT / "rules-contract.json").read_text())
         contract_text = "\n".join(rule for section in contract["sections"] for rule in section["rules"])
         for text in (main, contract_text):
             positions = [text.index("/" + name + ",") for name in FINANCE_ORDER]
             self.assertEqual(positions, sorted(positions))
-            self.assertEqual(1, text.count("/ch-finance.conf,Switzerland,extended-matching"))
+            self.assertNotIn("/ch-finance.conf,", text)
+            self.assertEqual(1, text.count("/crypto.conf,Crypto,extended-matching"))
+            self.assertLess(text.index("/web3.conf,"), text.index("/crypto.conf,"))
 
-    def test_ch_cannot_disappear_from_manifest(self) -> None:
+    def test_crypto_cannot_disappear_from_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             copied = Path(directory) / "repo"
             shutil.copytree(ROOT, copied, ignore=shutil.ignore_patterns(".git", "__pycache__"))
             path = copied / "rules-manifest.json"
             manifest = json.loads(path.read_text())
-            manifest["active"] = [b for b in manifest["active"] if b["file"] != "ch-finance.conf"]
+            manifest["active"] = [b for b in manifest["active"] if b["file"] != "crypto.conf"]
             path.write_text(json.dumps(manifest))
             codes = {d.code for d in validate.validate_repository(copied).diagnostics}
         self.assertIn("UNKNOWN_LOCAL_REFERENCE", codes)
 
-    def test_mexc_routes_to_switzerland_in_generated_and_committed_output(self) -> None:
-        self.assertEqual(MEXC_ENTRIES, set(build_expanded.read_domain_entries(ROOT / "ch-finance.conf")))
-        for name in ("uk-finance.conf", "crypto.conf"):
-            self.assertTrue(MEXC_ENTRIES.isdisjoint(build_expanded.read_domain_entries(ROOT / name)))
+    def test_mexc_inventory_has_one_active_owner_and_retired_ch_is_empty(self) -> None:
+        self.assertEqual(15, len(MEXC_ENTRIES))
+        crypto = build_expanded.read_domain_entries(ROOT / "crypto.conf")
+        self.assertEqual(65, len(crypto))
+        self.assertEqual(len(crypto), len(set(crypto)))
+        self.assertTrue(MEXC_ENTRIES.issubset(crypto))
+        manifest = json.loads((ROOT / "rules-manifest.json").read_text())
+        self.assertNotIn("ch-finance.conf", {item["file"] for item in manifest["active"]})
+        self.assertEqual([], build_expanded.read_domain_entries(ROOT / "ch-finance.conf"))
+        for item in manifest["active"]:
+            if item["file"] != "crypto.conf":
+                with self.subTest(source=item["file"]):
+                    self.assertTrue(MEXC_ENTRIES.isdisjoint(
+                        build_expanded.read_domain_entries(ROOT / item["file"])))
+
+    def test_mexc_routes_to_crypto_in_generated_and_committed_output(self) -> None:
         outputs = {
             "generated": build_expanded.render_expanded(ROOT),
             "committed": (ROOT / "surge-expanded.conf").read_text(),
@@ -87,7 +101,13 @@ class RoutingContractIntegrityTests(unittest.TestCase):
                     hosts.append("api" + entry)
                 for host in hosts:
                     with self.subTest(output=label, host=host):
-                        self.assertEqual("Switzerland", first_inline_domain_policy(text, host))
+                        self.assertEqual("Crypto", first_inline_domain_policy(text, host))
+                if not entry.startswith("."):
+                    with self.subTest(output=label, exact_host=entry):
+                        self.assertIsNone(first_inline_domain_policy(text, "child." + entry))
+                with self.subTest(output=label, unrelated=entry):
+                    self.assertIsNone(first_inline_domain_policy(
+                        text, entry.removeprefix(".") + ".example.net"))
 
     def test_hsbc_expat_precedes_hk_without_capturing_hk_siblings(self) -> None:
         for text in (build_expanded.render_expanded(ROOT), (ROOT / "surge-expanded.conf").read_text()):

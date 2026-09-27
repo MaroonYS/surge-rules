@@ -148,10 +148,10 @@ class AppleSukkaOnlyTests(unittest.TestCase):
             for item in cls.manifest["active"]
         }
 
-    def test_manifest_has_15_domain_sets_and_no_local_apple_ruleset(self) -> None:
+    def test_manifest_has_14_domain_sets_and_no_local_apple_ruleset(self) -> None:
         active = self.manifest["active"]
-        self.assertEqual(15, len(active))
-        self.assertEqual(15, len({item["file"] for item in active}))
+        self.assertEqual(14, len(active))
+        self.assertEqual(14, len({item["file"] for item in active}))
         self.assertTrue(all(item.get("type", "DOMAIN-SET") == "DOMAIN-SET" for item in active))
         self.assertNotIn(RETIRED_RESOURCE, {item["file"] for item in active})
         self.assertFalse(any("APPLE" in item.get("semantic_role", "").upper() for item in active))

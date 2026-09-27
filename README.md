@@ -66,7 +66,7 @@ News、TV 等模块仍保留，模块 MITM 边界不等于基础分流例外。G
 
 ## 本仓库活动资源
 
-主规则通过 15 个远程本仓库资源加载 773 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
+主规则通过 14 个远程本仓库资源加载 773 条域名，不再加载本仓库的 Apple RULE-SET，另外直接引用
 Blackmatrix7 的 Supercell 混合规则（当前 2 条 Brawl Stars 域名与 22 条服务器 IP）：
 
 该上游头部最后更新日期为 2025-06-06，因此 22 个云服务器 `/32` 只作为当前社区基线，
@@ -81,7 +81,6 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | --- | --- | --- |
 | `supercell-direct.conf` | `DIRECT` | Supercell ID、账户服务与各款游戏首方域 |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
-| `ch-finance.conf` | `Switzerland` | MEXC 第一方与已确认专属资源，沿用既有瑞士策略 |
 | `uk-finance.conf` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定 UK 业务 |
 | `hk-finance.conf` | `Hong Kong` | 香港银行、券商及当前香港账户共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
@@ -91,7 +90,7 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
 | `risk-context.conf` | `Res-Frontier` | 设备情报、指纹与反欺诈基础设施 |
-| `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所 |
+| `crypto.conf` | `Crypto` | MEXC、Bybit 与其他中心化交易所，共 65 条域名 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 | `microsoft-cdn-download-overlap.conf` | `DIRECT` | Microsoft 中国 CDN/download 的精确交集 |
 
@@ -102,11 +101,14 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 该兼容层主要承接 `no-resolve` 的 IP 匹配。Sukka 公共资源仍严格保持
 `domainset → non_ip → ip` 的作者顺序。
 
-金融主顺序为中国大陆 → CH → UK → HK → SG → JP → KR → 美国住宅。
+金融主顺序为中国大陆 → UK → HK → SG → JP → KR → 美国住宅。
 UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；HK 的精确
 `www.usmartsecurities.com` 先于共享金融父域；Web3 的两个精确 Bitget Wallet
 主机先于 Crypto 的 `.bitget.com`。校验仅允许这些具体记录在正确策略与顺序下重叠，
-不豁免其他跨地区重叠。MEXC 的 15 条记录只归瑞士，不回落 Crypto。
+不豁免其他跨地区重叠。按 2026-09-27 最新要求，MEXC 的 15 条既有记录整体迁入
+`crypto.conf`，不重复保留在其他活动资源中。旧 `ch-finance.conf` 仅保留无活动规则的
+兼容空文件，不再被主规则引用；Crypto 的已有手动出口选择不变。业务分类并不保证
+服务地区或账户资格，也不表示共享 KYC 与 App 全链路已完成设备验收。
 
 2026-09-27 的 [29 App 照片补充清单](docs/finance-photo-matrix-20260927.md)
 落实 HK 8、美国住宅 10、SG 4、UK 3，以及 Crypto 2、Web3 1、TenPayGo 中国直连。
@@ -167,10 +169,10 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 
 `surge-main.conf` 是远程资源版；`surge-expanded.conf` 仅用于审计和整段复制，
 由生成器维护。接入前应确认策略组存在：`Res-Frontier`、`PROXY`、`Hong Kong`、
-`Singapore`、`Japan`、`Korea`、`Switzerland`、`United Kingdom`、`United States`、`Crypto`、
+`Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
-在 Surge 的外部资源页面刷新，并确认 15 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
+在 Surge 的外部资源页面刷新，并确认 14 个本仓库规则文件与 Supercell 外部混合集均成功加载。随后执行：
 
 ```bash
 python3 scripts/validate.py --strict

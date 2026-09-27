@@ -44,7 +44,7 @@ REQUIRED_CASES = {
     "Wise existing and legacy first-party": ("Res-Frontier", "finance-context.conf", {"wise.com", "api.wise.com"}),
     "Wise and Revolut auxiliary domains": ("Res-Frontier", "us-residential.conf", {"api-mtls.transferwise.com", "wise-app.sng.link", "revolut.me"}),
     "Mainland China finance": ("DIRECT", "direct-cn.conf", {"boc.cn", "icbc.com.cn", "unionpay.com"}),
-    "MEXC": ("Switzerland", "ch-finance.conf", {"mexc.com", "static.mocortech.com"}),
+    "MEXC": ("Crypto", "crypto.conf", {"mexc.com", "static.mocortech.com"}),
     "Trading 212": ("United Kingdom", "uk-finance.conf", {"trading212.com", "live.trading212.com", "demo.trading212.com", "helpcentre.trading212.com", "t212.cc"}),
     "N26": ("United Kingdom", "uk-finance.conf", {"n26.com", "app.n26.com", "cdn.number26.de"}),
     "Loqbox": ("United Kingdom", "uk-finance.conf", {"loqbox.com", "app.uk.loqbox.com"}),
@@ -238,16 +238,17 @@ class RoutingCompletenessTests(unittest.TestCase):
                 validate_acceptance_cases(matrix)
 
     def test_mexc_inventory_and_every_current_record(self) -> None:
-        current = entries(ROOT / "ch-finance.conf")
+        current = entries(ROOT / "crypto.conf")
         self.assertEqual(len(current), len(set(current)))
-        self.assertEqual(MEXC_ENTRIES, set(current))
-        self.assertEqual(15, len(current))
-        for entry in current:
-            # Every current record is exercised, not only the hand-picked matrix.
+        self.assertTrue(MEXC_ENTRIES.issubset(current))
+        self.assertEqual(65, len(current))
+        self.assertEqual(15, len(MEXC_ENTRIES))
+        for entry in MEXC_ENTRIES:
+            # Independent pre-migration inventory, not only the fixture anchors.
             host = entry.removeprefix(".")
-            self.assert_route(host, "Switzerland", "ch-finance.conf")
+            self.assert_route(host, "Crypto", "crypto.conf")
             if entry.startswith("."):
-                self.assert_route("fixture-child." + host, "Switzerland", "ch-finance.conf")
+                self.assert_route("fixture-child." + host, "Crypto", "crypto.conf")
             else:
                 for rules in (self.main, self.expanded):
                     self.assertEqual(UNKNOWN, first_match(rules, "fixture-child." + host)[0])
@@ -271,7 +272,7 @@ class RoutingCompletenessTests(unittest.TestCase):
 
     def test_financial_order_precedes_unknown_upstreams(self) -> None:
         expected = [
-            "direct-cn.conf", "ch-finance.conf", "uk-finance.conf", "hk-finance.conf",
+            "direct-cn.conf", "uk-finance.conf", "hk-finance.conf",
             "sg-finance.conf", "jp-finance.conf", "kr-finance.conf", "us-residential.conf",
             "finance-context.conf",
             "identity-context.conf", "risk-context.conf", "web3.conf", "crypto.conf",
@@ -301,9 +302,9 @@ class RoutingCompletenessTests(unittest.TestCase):
                 self.assertEqual("preserved_identity_fallback", item["static_expectation"])
                 self.assert_route(host, "Res-Frontier", "identity-context.conf")
 
-    def test_shared_identity_roots_cannot_be_assigned_to_uk_or_switzerland(self) -> None:
+    def test_shared_identity_roots_cannot_be_assigned_to_uk_or_crypto(self) -> None:
         providers = ("sumsub.com", "veriff.com", "veriff.me", "keyless.technology")
-        for source in ("uk-finance.conf", "ch-finance.conf"):
+        for source in ("uk-finance.conf", "crypto.conf"):
             for entry in entries(ROOT / source):
                 domain = entry.removeprefix(".")
                 with self.subTest(source=source, entry=entry):
@@ -320,11 +321,11 @@ class RoutingCompletenessTests(unittest.TestCase):
 
     def test_unknown_external_content_is_never_silently_skipped(self) -> None:
         rules = [Rule("EXTERNAL", "https://example.net/rules", UNKNOWN, "remote"),
-                 Rule("DOMAIN", "mexc.com", "Switzerland", "ch-finance.conf")]
+                 Rule("DOMAIN", "mexc.com", "Crypto", "crypto.conf")]
         self.assertEqual((UNKNOWN, "remote"), first_match(rules, "mexc.com"))
 
     def test_suffix_and_exact_match_boundaries(self) -> None:
-        suffix = Rule("DOMAIN-SUFFIX", "mexc.com", "Switzerland", "fixture")
+        suffix = Rule("DOMAIN-SUFFIX", "mexc.com", "Crypto", "fixture")
         exact = Rule("DOMAIN", "cdn.veriff.me", "fixture", "fixture")
         self.assertTrue(suffix.matches("API.MEXC.COM."))
         self.assertFalse(suffix.matches("notmexc.com"))

@@ -1,5 +1,12 @@
 # Changelog
 
+- 2026-09-27: Move all 15 existing MEXC records from CH to the existing Crypto
+  business policy without duplication or changing the group's selected exit.
+  Retire the active CH reference and keep its URL as a comment-only compatibility
+  file. Canonical totals are 53 rules, 14 owner resources, 773 domain entries and
+  32 unchanged Sukka references; Crypto contains 65 entries. Preserve Web3-before-
+  Crypto ordering for Bitget Wallet. This classification does not establish
+  regional service eligibility or verify shared KYC and complete app sessions.
 - 2026-09-27: Apply the owner's 29-app photo routing matrix. Add verified HK,
   SG and UK namespaces and exact tenants; move Moomoo-specific namespaces and
   Avalanche Card to US residential, add Neverless, preserve shared Futu HK assets.

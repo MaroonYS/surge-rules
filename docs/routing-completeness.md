@@ -9,15 +9,18 @@
 
 | 策略 | 点名业务 | 不应发生的回退 |
 | --- | --- | --- |
-| Switzerland | MEXC 的 15 条既有第一方/专属资源 | 旧 UK 或 Crypto、模板遗漏 CH |
 | United Kingdom | N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat | Expat 被 HK 的 `.hsbc.com` 抢先、未登记窄辅助域 |
 | Res-Frontier | LemFi、Coinbase/Base、ether.fi、OnePay、Capital One、Equifax、PayPal、X、Google Account/Voice、Polymarket | 非 Apple 业务域回落普通 PROXY；Apple 后续按 Sukka 分流 |
 | Hong Kong | 已指定的香港银行、Futu/Moomoo、Longbridge | 将共享香港账户基础设施重新推断为 SG |
 | Singapore | 其他新加坡专属域，如 Futu SG、Moomoo Trustee；Longbridge/IBKR 以最新个人清单为准 | 未经要求改变其他 App 的归属 |
-| Crypto / Web3 | 既有 Bybit 等交易所、钱包和链上业务 | 擅自更改手动选择，或把 MEXC 再塞回 Crypto |
+| Crypto / Web3 | MEXC 的 15 条既有记录、Bybit 等交易所归 Crypto；钱包和链上业务归 Web3 | 擅自更改手动选择、MEXC 回落旧 CH/UK 或通用 PROXY、Bitget Wallet 被交易所父域抢先 |
 
 N26 的英国出口是现有用户选择，不代表银行所在地。域名路由也不改变各平台对
 实际居住地、身份、账户或产品的资格要求。
+
+2026-09-27 按最新要求将 MEXC 整体迁入现有 `crypto.conf`，不增加域名或改变
+Crypto 组内已选出口；`ch-finance.conf` 仅保留注释兼容文件，不再作为活动资源。
+这是业务分类更新，不是服务资格保证，也不表示原生 App 或共享 KYC 全链路已验收。
 
 2026-09-16 新增的 [24 App 清单](finance-app-matrix.md)是这些业务的最新要求；
 IBKR 区域域统一美国住宅、Longbridge SG 域统一 HK、中国银行全球域直连，
@@ -40,7 +43,7 @@ LemFi 的两条首方后缀及五个精确租户单独纳入首命中、子域�
 | --- | --- | --- |
 | N26 Keyless 精确主机 | [当前认证代码](https://app.n26.com/build/js/banking-features-auth-biometric-LoginPage.60e488b5.js)配置 N26 认证/登记路径；[官方用途](https://support.n26.com/en-eu/security/account-protection/keyless-authentication)为生物认证、设备关联 | UK 精确规则仍为候选，未部署 |
 | Loqbox Veriff | [公开配置](https://app.uk.loqbox.com/api/config)指定 API，主脚本加载公共 SDK | 共享 API/CDN 不认作 Loqbox 独享；未新增域名或改地区 |
-| MEXC / ether.fi / Bybit Sumsub | 供应商重合，但 [SDK 文档](https://docs.sumsub.com/docs/get-started-with-web-sdk)说明实际地址可由地区令牌决定 | 默认 `api.sumsub.com` 不当成用户已观测会话；不整段改瑞士 |
+| MEXC / ether.fi / Bybit Sumsub | 供应商重合，但 [SDK 文档](https://docs.sumsub.com/docs/get-started-with-web-sdk)说明实际地址可由地区令牌决定 | 默认 `api.sumsub.com` 不当成用户已观测会话；不因 MEXC 迁移而将共享供应商整体改绑 Crypto |
 
 在已核查公开证据中，尚未确认这些不同地区 App 实际共用同一个认证主机的冲突。
 这不等于证明没有冲突；第一方核验页面也可能继续调用第三方 SDK。Surge iOS 的
@@ -56,7 +59,7 @@ python3 scripts/build_expanded.py --check
 python3 scripts/check_module_compatibility.py
 ```
 
-测试包括点名业务首命中、主骨架/展开版一致、CH 缺失、MEXC 错投 Crypto、HSBC
+测试包括点名业务首命中、主骨架/展开版一致、旧 CH 引用不得重新激活、MEXC 唯一归属 Crypto、HSBC
 具体重叠的策略/顺序约束、Apple 自定义覆盖不得重新引入、五个 Sukka Apple 资源不得遗漏，
 以及公共共享后缀不被扩大归属。
 外部动态资源、模块、IP、DNS、原生 App 和实际会话不是这些离线测试的模拟范围；
@@ -67,7 +70,7 @@ python3 scripts/check_module_compatibility.py
 
 ## 设备验收
 
-1. 确认设备已重载包含 CH、移除 Apple 自定义窄规则、保留 Private Relay 官方订阅且绑定 `United States` 的配置，目标外部资源下载就绪。
+1. 确认设备已使用包含 MEXC 的最新 Crypto 资源、不再启用旧 CH 引用；配置保持移除 Apple 自定义窄规则、保留 Private Relay 官方订阅且绑定 `United States`，目标外部资源下载就绪。
 2. Mac 检查实际有效规则，而非只检查源文件；iPhone 必须独立确认配置及模块启用状态。
 3. 正常使用时记录登录、验证码、主要 API、支付，以及确有业务需要时的 KYC/人脸流程。
    不为网络测试重新开户或提交证件，不主动触发不必要的安全验证。

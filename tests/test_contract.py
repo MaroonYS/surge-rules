@@ -56,7 +56,7 @@ class RuleContractTests(unittest.TestCase):
         )
         parity = (ROOT / "docs" / "source-parity.md").read_text(encoding="utf-8")
 
-        self.assertEqual(15, len(active))
+        self.assertEqual(14, len(active))
         self.assertIn(f"{len(active)} 个远程本仓库资源", readme)
         self.assertIn(f"确认 {len(active)} 个本仓库规则文件与 Supercell 外部混合集均成功加载", readme)
         self.assertIn(
@@ -240,7 +240,6 @@ class RuleContractTests(unittest.TestCase):
         self.assertEqual(
             {
                 "direct-cn.conf": "DIRECT",
-                "ch-finance.conf": "Switzerland",
                 "hk-finance.conf": "Hong Kong",
                 "sg-finance.conf": "Singapore",
                 "jp-finance.conf": "Japan",
@@ -259,6 +258,7 @@ class RuleContractTests(unittest.TestCase):
         )
         main = (ROOT / "surge-main.conf").read_text(encoding="utf-8")
         for inactive in (
+            "ch-finance.conf",
             "x-residential.conf",
             "google-account.conf",
             "google-voice.conf",

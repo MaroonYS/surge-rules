@@ -3,6 +3,35 @@
 本页记录新增或调整的金融域名。活动规则优先收录机构第一方域名及有证据的专属资源；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
+## OKX 美国住宅归属
+
+2026-10-01，按所有者要求，OKX 统一使用既有 `us-residential.conf` 的
+`Res-Frontier,extended-matching` 绑定。迁移正式订阅原有的 7 条后缀
+`.okx.com`、`.okex.com`、`.okx-dns.com`、`.okx-dns1.com`、`.okx-dns2.com`、
+`.okx.ac`、`.okx.cab`，从 `crypto.conf` 删除同一批条目，不改变其他交易所。
+旧域和 DNS 备用域为保留原有覆盖范围，不代表本轮证实它们仍是当前 App 必需请求。
+
+- [官方 API 文档](https://app.okx.com/docs-v5/en/) 明确列出美国 REST
+  `us.okx.com`、生产 WebSocket `wsus.okx.com`、模拟 WebSocket `wsuspap.okx.com`。
+  它们与官网、`app.okx.com`、`web3.okx.com` 钱包入口、`static.okx.com`
+  一起被 `.okx.com` 覆盖，无须重复增加子域规则。
+- [官方登录页](https://www.okx.com/account/login) 与
+  [美国站首页](https://www.okx.com/en-us) 的 HTML 启动配置确认
+  `languageCdnUrl` 使用 `static.coinall.ltd`，`cdnBackupList` 使用
+  `static.jingyunyilian.com`，`cdnDomainMap` 包含 `static.okx.reise`。
+  只新增这三个精确主机，不扩大到供应商整个根域。
+- 同一 `cdnDomainMap` 的 `static.okx.ac`、`static.okx.cab` 已由迁入的既有
+  后缀覆盖。美国站默认 CDN 为已覆盖的 `static.okx.com`；其他项是语言、备用
+  或地区资源，并非声称美国出口每次都会访问。
+- [官方改名公告](https://www.okx.com/en-us/learn/okex-rebrands-to-okx) 支持
+  OKEx 的历史品牌关系；未新增缺少一手依据的 `okxcdn.com`、`okxstatic.com`
+  或 `okxwallet.com`。Okcoin 是独立旧平台，不作为 OKX 当前登录依赖添加。
+  OKLink 独立浏览器继续保持 `web3.conf` / `Web3`，不因品牌关系自动迁移。
+
+不增加 Auth0、AWS、Cloudflare、Google 登录或其他共享供应商的整域规则。
+主配置、节点、模块、MITM、DNS 和 Apple/iCloud 参数不变。静态首命中及边界测试
+不等于登录后的原生 App 全链路实测，也不保证平台账号或地区资格。
+
 ## Trading 212 英国归属
 
 2026-09-27，按配置所有者要求，将以下两条加入既有 `uk-finance.conf`，复用

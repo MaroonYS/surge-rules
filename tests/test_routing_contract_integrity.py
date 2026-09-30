@@ -77,7 +77,7 @@ class RoutingContractIntegrityTests(unittest.TestCase):
     def test_mexc_inventory_has_one_active_owner_and_retired_ch_is_empty(self) -> None:
         self.assertEqual(15, len(MEXC_ENTRIES))
         crypto = build_expanded.read_domain_entries(ROOT / "crypto.conf")
-        self.assertEqual(65, len(crypto))
+        self.assertEqual(58, len(crypto))
         self.assertEqual(len(crypto), len(set(crypto)))
         self.assertTrue(MEXC_ENTRIES.issubset(crypto))
         manifest = json.loads((ROOT / "rules-manifest.json").read_text())

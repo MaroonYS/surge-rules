@@ -27,7 +27,7 @@
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
-| `crypto.conf` | `DOMAIN-SET` | `Crypto` | MEXC 的 15 条既有记录、Bybit 与其余中心化交易所，共 65 条域名；沿用组内已选出口 |
+| `crypto.conf` | `DOMAIN-SET` | `Crypto` | MEXC 的 15 条既有记录、Bybit 与其余中心化交易所，共 58 条域名；OKX 已迁至美国住宅，其余沿用组内已选出口 |
 | `web3.conf` | `DOMAIN-SET` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `microsoft-cdn-download-overlap.conf` | `DOMAIN-SET` | `DIRECT` | 修复 38 个 Microsoft 中国 CDN 下载域被香港下载集合抢先的问题 |
 

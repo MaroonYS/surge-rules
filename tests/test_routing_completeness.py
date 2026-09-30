@@ -241,7 +241,7 @@ class RoutingCompletenessTests(unittest.TestCase):
         current = entries(ROOT / "crypto.conf")
         self.assertEqual(len(current), len(set(current)))
         self.assertTrue(MEXC_ENTRIES.issubset(current))
-        self.assertEqual(65, len(current))
+        self.assertEqual(58, len(current))
         self.assertEqual(15, len(MEXC_ENTRIES))
         for entry in MEXC_ENTRIES:
             # Independent pre-migration inventory, not only the fixture anchors.

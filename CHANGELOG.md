@@ -17,6 +17,10 @@
 
 ## Unreleased
 
+- 2026-10-01: Move all seven existing OKX suffixes from Crypto to the owner's
+  US residential policy, Res-Frontier. Add only three exact CDN hosts verified
+  in the official login/US site bootstrap; keep OKLink and other exchanges on
+  their existing policies. Add first-match, uniqueness and boundary regressions.
 - 2026-09-27: Route Trading 212's verified first-party namespace and official
   support short-link domain through the existing United Kingdom finance list.
   Added uniqueness, suffix-boundary and first-match regressions. Existing Sukka

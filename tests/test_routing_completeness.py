@@ -28,7 +28,12 @@ MEXC_ENTRIES = {
     "mexc-front-static.s3.ap-northeast-1.amazonaws.com",
     "mexc-rainbown-activityimages.s3.ap-northeast-1.amazonaws.com",
     "mexc-static-learn.s3.ap-northeast-1.amazonaws.com",
-    "mexc.onelink.me", "mexcdevelop.github.io",
+    "mexc.onelink.me", "mexcdevelop.github.io", "download.mocortech.com",
+    ".mexc.link", ".mexc.cg", ".mexc.ci", ".mexc.sg",
+    ".mexc.me", ".mexc.cc", ".mexc.kr", ".mexc.io", ".mexc.ch",
+    ".mexc.biz.tr", ".mexc.us",
+    "watchman-sdk.gotoda.co", "watchman.gotoda.co",
+    "trochilus-web.gotoda.co", "trochi.gotoda.co", "e.gotoda.co",
 }
 # Independent acceptance expectations: do not derive these from the manifest or
 # from the editable JSON fixture being checked. Route + fixture changes together
@@ -44,7 +49,7 @@ REQUIRED_CASES = {
     "Wise existing and legacy first-party": ("Res-Frontier", "finance-context.conf", {"wise.com", "api.wise.com"}),
     "Wise and Revolut auxiliary domains": ("Res-Frontier", "us-residential.conf", {"api-mtls.transferwise.com", "wise-app.sng.link", "revolut.me"}),
     "Mainland China finance": ("DIRECT", "direct-cn.conf", {"boc.cn", "icbc.com.cn", "unionpay.com"}),
-    "MEXC": ("Crypto", "crypto.conf", {"mexc.com", "static.mocortech.com"}),
+    "MEXC": ("Hong Kong", "hk-finance.conf", {"mexc.com", "static.mocortech.com", "download.mocortech.com", "mexc.link", "mexc.cg", "mexc.ci", "mexc.sg", "watchman.gotoda.co", "trochi.gotoda.co"}),
     "Trading 212": ("United Kingdom", "uk-finance.conf", {"trading212.com", "live.trading212.com", "demo.trading212.com", "helpcentre.trading212.com", "t212.cc"}),
     "N26": ("United Kingdom", "uk-finance.conf", {"n26.com", "app.n26.com", "cdn.number26.de"}),
     "Loqbox": ("United Kingdom", "uk-finance.conf", {"loqbox.com", "app.uk.loqbox.com"}),
@@ -238,22 +243,42 @@ class RoutingCompletenessTests(unittest.TestCase):
                 validate_acceptance_cases(matrix)
 
     def test_mexc_inventory_and_every_current_record(self) -> None:
-        current = entries(ROOT / "crypto.conf")
+        current = entries(ROOT / "hk-finance.conf")
         self.assertEqual(len(current), len(set(current)))
         self.assertTrue(MEXC_ENTRIES.issubset(current))
-        self.assertEqual(58, len(current))
-        self.assertEqual(15, len(MEXC_ENTRIES))
+        self.assertEqual(43, len(entries(ROOT / "crypto.conf")))
+        self.assertEqual(32, len(MEXC_ENTRIES))
         for entry in MEXC_ENTRIES:
-            # Independent pre-migration inventory, not only the fixture anchors.
+            # Independent old inventory plus verified additions, not fixture-only anchors.
             host = entry.removeprefix(".")
-            self.assert_route(host, "Crypto", "crypto.conf")
+            self.assert_route(host, "Hong Kong", "hk-finance.conf")
             if entry.startswith("."):
-                self.assert_route("fixture-child." + host, "Crypto", "crypto.conf")
+                self.assert_route("fixture-child." + host, "Hong Kong", "hk-finance.conf")
+                self.assert_route("deep.fixture-child." + host, "Hong Kong", "hk-finance.conf")
             else:
                 for rules in (self.main, self.expanded):
                     self.assertEqual(UNKNOWN, first_match(rules, "fixture-child." + host)[0])
             for rules in (self.main, self.expanded):
                 self.assertEqual(UNKNOWN, first_match(rules, host + ".example.net")[0])
+
+    def test_mexc_has_one_owner_across_active_and_legacy_local_lists(self) -> None:
+        from test_lemfi_routing import local_hostname_rules
+        lists = {path.name: local_hostname_rules(path) for path in ROOT.glob("*.conf")
+                 if path.name not in {self.manifest["main"], self.manifest["expanded"]}}
+        for entry in MEXC_ENTRIES:
+            hosts = [entry.removeprefix(".")]
+            if entry.startswith("."):
+                hosts.append("deep.fixture-child" + entry)
+            for host in hosts:
+                owners = [source for source, rules in lists.items()
+                          for rule in rules if rule.matches(host)]
+                self.assertEqual(["hk-finance.conf"], owners, host)
+
+    def test_mexc_exact_additions_do_not_capture_shared_or_test_hosts(self) -> None:
+        for host in ("gotoda.co", "other.gotoda.co", "watchman.atomume.com", "e.atomutest.com",
+                     "nel-cf.gotoda.co", "nel-akm.gotoda.co", "alookzone.com"):
+            for rules in (self.main, self.expanded):
+                self.assertEqual(UNKNOWN, first_match(rules, host)[0])
 
     def test_adjacent_domains_and_shared_tenants_not_captured(self) -> None:
         for host in self.matrix["negative_hosts"]:
@@ -302,9 +327,9 @@ class RoutingCompletenessTests(unittest.TestCase):
                 self.assertEqual("preserved_identity_fallback", item["static_expectation"])
                 self.assert_route(host, "Res-Frontier", "identity-context.conf")
 
-    def test_shared_identity_roots_cannot_be_assigned_to_uk_or_crypto(self) -> None:
+    def test_shared_identity_roots_cannot_be_assigned_to_uk_hk_or_crypto(self) -> None:
         providers = ("sumsub.com", "veriff.com", "veriff.me", "keyless.technology")
-        for source in ("uk-finance.conf", "crypto.conf"):
+        for source in ("uk-finance.conf", "hk-finance.conf", "crypto.conf"):
             for entry in entries(ROOT / source):
                 domain = entry.removeprefix(".")
                 with self.subTest(source=source, entry=entry):

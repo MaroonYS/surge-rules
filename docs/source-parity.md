@@ -3,9 +3,9 @@
 | 指标 | 当前值 | 来源 |
 | --- | ---: | --- |
 | 主规则条数 | 53 | `surge-main.conf` 的有效规则 |
-| 当前 DOMAIN-SET 条目 | 776 | 14 个本仓库 `DOMAIN-SET` |
+| 当前 DOMAIN-SET 条目 | 793 | 14 个本仓库 `DOMAIN-SET` |
 | 当前 RULE-SET 条目 | 0 | 0 个本仓库 `RULE-SET`，不复制第三方 IP 规则 |
-| 当前活动条目 | 776 | `rules-manifest.json` 的 14 个活动文件 |
+| 当前活动条目 | 793 | `rules-manifest.json` 的 14 个活动文件 |
 | 活动本仓库资源 | 14 | Supercell 域名、地区金融、住宅风控、Crypto、Web3 与 Microsoft CDN/download 精确交集 |
 | Supercell 外部混合集 | 24 | Blackmatrix7 现成 2 域名 + 22 IP，以 `no-resolve` 自动更新 |
 | Sukka DOMAIN-SET | 8 | Reject 基础/额外/钓鱼、speedtest、cdn、apple_cdn、icloud_private_relay、download |
@@ -13,10 +13,10 @@
 | Sukka ip | 7 | Reject、Stream、AI、Telegram、LAN、Domestic、China IP |
 | Sukka 资源合计 | 32 | 保留原先已启用的全部公共资源，不新增无关可选专项 |
 
-`surge-expanded.conf` 仅展开上述 776 条本仓库规则，Sukka 与 Blackmatrix7 远程资源保持远程引用，
+`surge-expanded.conf` 仅展开上述 793 条本仓库规则，Sukka 与 Blackmatrix7 远程资源保持远程引用，
 以避免复制其大型规则和制造重复真相层。
-MEXC 的 15 条既有记录已由 CH 整体迁入 Crypto；OKX 的 7 条既有记录随后迁入美国住宅，
-并增加 3 个官网已确认的精确 CDN 主机。Crypto 现为 58 条，活动条目总数净增 3。
+MEXC 的 15 条既有记录已于 2026-10-02 从 Crypto 整体迁入香港，补齐 17 条官网已确认记录，
+现共 32 条。OKX 继续使用美国住宅；Crypto 现为 43 条，本轮活动条目总数净增 17。
 `ch-finance.conf` 为无活动规则的兼容空文件，不再占用活动资源或主规则条目。
 外部 Supercell 混合集的上游元数据日期为 2025-06-06；健康检查只允许已知两个域名、
 IPv4 `/32,no-resolve` 且最多 64 条 IP，防止可变上游引入宽域名或宽 CIDR。

@@ -27,7 +27,7 @@
       "file": "hk-finance.conf",
       "policy": "Hong Kong",
       "semantic_role": "HK-FINANCE",
-      "description": "Hong Kong banks, brokers and the owner's shared HK brokerage infrastructure"
+      "description": "Hong Kong banks, brokers, shared HK brokerage infrastructure and the owner's MEXC route"
     },
     {
       "file": "sg-finance.conf",
@@ -81,7 +81,7 @@
       "file": "crypto.conf",
       "policy": "Crypto",
       "semantic_role": "Crypto",
-      "description": "MEXC, Bybit and remaining centralized cryptocurrency exchanges"
+      "description": "Bybit and remaining centralized cryptocurrency exchanges; MEXC uses Hong Kong and OKX uses US residential"
     },
     {
       "file": "microsoft-cdn-download-overlap.conf",

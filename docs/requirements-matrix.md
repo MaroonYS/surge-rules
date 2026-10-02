@@ -19,7 +19,7 @@
 | `supercell-direct.conf` | `DOMAIN-SET` | `DIRECT` | Supercell 登录、账户服务与各款游戏首方域统一直连 |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` | 中国大陆实体银行与银联 |
 | `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定英国出口，先于 HK |
-| `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文 |
+| `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文，以及 MEXC 的 32 条记录 |
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |
 | `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |
 | `kr-finance.conf` | `DOMAIN-SET` | `Korea` | 韩国实体银行 |
@@ -27,13 +27,13 @@
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
-| `crypto.conf` | `DOMAIN-SET` | `Crypto` | MEXC 的 15 条既有记录、Bybit 与其余中心化交易所，共 58 条域名；OKX 已迁至美国住宅，其余沿用组内已选出口 |
+| `crypto.conf` | `DOMAIN-SET` | `Crypto` | Bybit 与其余中心化交易所，共 43 条域名；MEXC 归香港，OKX 归美国住宅，其余沿用组内已选出口 |
 | `web3.conf` | `DOMAIN-SET` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `microsoft-cdn-download-overlap.conf` | `DOMAIN-SET` | `DIRECT` | 修复 38 个 Microsoft 中国 CDN 下载域被香港下载集合抢先的问题 |
 
 ## 明确不加载
 
-- MEXC 的旧 `ch-finance.conf`：按最新要求整体迁入现有 Crypto，旧 URL 仅保留注释空文件。
+- MEXC 的旧 `ch-finance.conf`：按 2026-10-02 最新要求整体迁入现有香港资源，旧 URL 仅保留注释空文件。
   不重复添加 MEXC，不改 Crypto 组的手动选择，也不恢复瑞士专用引用。
 - Apple 全域、系统更新、iCloud、证书与 APNs 的自定义覆盖；支付/账户/账单九条住宅
   规则和设备 Private Relay 住宅绑定均已撤销；Private Relay 官方订阅保留并改绑普通美国，

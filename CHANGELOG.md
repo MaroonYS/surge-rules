@@ -17,6 +17,11 @@
 
 ## Unreleased
 
+- 2026-10-02: Move all 15 existing MEXC records from Crypto to Hong Kong.
+  Add the verified download host, four official notification namespaces,
+  seven brand short-link namespaces and five exact monitoring SDK/collector
+  targets. Update first-match,
+  ownership and boundary checks; Crypto now contains 43 records.
 - 2026-10-01: Move all seven existing OKX suffixes from Crypto to the owner's
   US residential policy, Res-Frontier. Add only three exact CDN hosts verified
   in the official login/US site bootstrap; keep OKLink and other exchanges on

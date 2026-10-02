@@ -94,7 +94,7 @@ class OKXRoutingTests(unittest.TestCase):
             "api.bybit.com": ("Crypto", "crypto.conf"),
             "api.binance.com": ("Crypto", "crypto.conf"),
             "api.bitget.com": ("Crypto", "crypto.conf"),
-            "api.mexc.com": ("Crypto", "crypto.conf"),
+            "api.mexc.com": ("Hong Kong", "hk-finance.conf"),
             "web3.bitget.com": ("Web3", "web3.conf"),
             "oklink.com": ("Web3", "web3.conf"),
             "www.oklink.com": ("Web3", "web3.conf"),

@@ -1,5 +1,12 @@
 # Migration Notes
 
+## 2026-10-02 MEXC 统一香港
+
+MEXC 的 15 条既有记录从 Crypto 迁至 `hk-finance.conf`，补齐 17 条官方品牌/精确
+资源记录。复用现有香港引用与组内选择，旧 CH 兼容 URL 仍为空，不增加订阅。
+本节取代历史步骤中 MEXC 的 CH/Crypto 归属；其他历史记录按各自日期保留。
+当前证据及边界见 [域名来源](domain-sources.md)。
+
 ## 2026-09-16 最新澄清：保留原先全部 Sukka 订阅
 
 用户明确“我要的是保留 Sukka 全部”。上轮把 Private Relay 官方订阅与住宅绑定一并

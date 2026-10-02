@@ -27,7 +27,12 @@ MEXC_ENTRIES = {
     "mexc-front-static.s3.ap-northeast-1.amazonaws.com",
     "mexc-rainbown-activityimages.s3.ap-northeast-1.amazonaws.com",
     "mexc-static-learn.s3.ap-northeast-1.amazonaws.com",
-    "mexc.onelink.me", "mexcdevelop.github.io",
+    "mexc.onelink.me", "mexcdevelop.github.io", "download.mocortech.com",
+    ".mexc.link", ".mexc.cg", ".mexc.ci", ".mexc.sg",
+    ".mexc.me", ".mexc.cc", ".mexc.kr", ".mexc.io", ".mexc.ch",
+    ".mexc.biz.tr", ".mexc.us",
+    "watchman-sdk.gotoda.co", "watchman.gotoda.co",
+    "trochilus-web.gotoda.co", "trochi.gotoda.co", "e.gotoda.co",
 }
 
 
@@ -75,21 +80,23 @@ class RoutingContractIntegrityTests(unittest.TestCase):
         self.assertIn("UNKNOWN_LOCAL_REFERENCE", codes)
 
     def test_mexc_inventory_has_one_active_owner_and_retired_ch_is_empty(self) -> None:
-        self.assertEqual(15, len(MEXC_ENTRIES))
+        self.assertEqual(32, len(MEXC_ENTRIES))
         crypto = build_expanded.read_domain_entries(ROOT / "crypto.conf")
-        self.assertEqual(58, len(crypto))
+        self.assertEqual(43, len(crypto))
         self.assertEqual(len(crypto), len(set(crypto)))
-        self.assertTrue(MEXC_ENTRIES.issubset(crypto))
+        hk = build_expanded.read_domain_entries(ROOT / "hk-finance.conf")
+        self.assertTrue(MEXC_ENTRIES.issubset(hk))
+        self.assertEqual(len(hk), len(set(hk)))
         manifest = json.loads((ROOT / "rules-manifest.json").read_text())
         self.assertNotIn("ch-finance.conf", {item["file"] for item in manifest["active"]})
         self.assertEqual([], build_expanded.read_domain_entries(ROOT / "ch-finance.conf"))
         for item in manifest["active"]:
-            if item["file"] != "crypto.conf":
+            if item["file"] != "hk-finance.conf":
                 with self.subTest(source=item["file"]):
                     self.assertTrue(MEXC_ENTRIES.isdisjoint(
                         build_expanded.read_domain_entries(ROOT / item["file"])))
 
-    def test_mexc_routes_to_crypto_in_generated_and_committed_output(self) -> None:
+    def test_mexc_routes_to_hk_in_generated_and_committed_output(self) -> None:
         outputs = {
             "generated": build_expanded.render_expanded(ROOT),
             "committed": (ROOT / "surge-expanded.conf").read_text(),
@@ -101,7 +108,7 @@ class RoutingContractIntegrityTests(unittest.TestCase):
                     hosts.append("api" + entry)
                 for host in hosts:
                     with self.subTest(output=label, host=host):
-                        self.assertEqual("Crypto", first_inline_domain_policy(text, host))
+                        self.assertEqual("Hong Kong", first_inline_domain_policy(text, host))
                 if not entry.startswith("."):
                     with self.subTest(output=label, exact_host=entry):
                         self.assertIsNone(first_inline_domain_policy(text, "child." + entry))

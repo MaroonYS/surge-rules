@@ -3,6 +3,40 @@
 本页记录新增或调整的金融域名。活动规则优先收录机构第一方域名及有证据的专属资源；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
+## MEXC 香港归属（2026-10-02）
+
+按所有者最新要求，`crypto.conf` 的 15 条既有 MEXC 后缀与精确资源全部迁入
+`hk-finance.conf`，复用现有 `Hong Kong,extended-matching`，不增加订阅或策略组。
+旧 CH 文件继续为空。再补以下 17 条，现共 32 条 MEXC 记录：
+
+- `download.mocortech.com`：官方 [App/Web 帮助](https://www.mexc.com/support/app-web)
+  明确 APK 下载域；[Lite App 安装说明](https://www.mexc.com/announcements/article/how-to-use-mexc-via-lite-app-17827791527902)
+  给出该主机的完整下载路径。保持精确主机匹配。
+- `.mexc.link`、`.mexc.cg`、`.mexc.ci`、`.mexc.sg`：2026-09-21
+  [官方邮件域说明](https://www.mexc.com/learn/article/why-am-i-unable-to-receive-email-notifications-from-mexc-/1)
+  第 2.3 节确认。这是域内链接/资源的覆盖，不改变邮件服务端发送或用户邮箱的接收路线。
+- `.mexc.me`、`.mexc.cc`、`.mexc.kr`、`.mexc.io`、`.mexc.ch`、`.mexc.biz.tr`、
+  `.mexc.us`：[当前官网加载的短链代码](https://static.mocortech.com/production/web-v4-home-seo/65/_next/static/chunks/3eoba6hvcooe6.js)
+  明确将这些品牌命名空间列入 `MEVENT` 短链生成器认可清单。记录其路由归属，
+  未声称各镜像当前都可访问；同一清单中的非品牌域及内网样例未扩大收录。
+- `watchman-sdk.gotoda.co`、`watchman.gotoda.co`：[当前官方下载页](https://www.mexc.co/download)
+  加载 [SDK](https://watchman-sdk.gotoda.co/watchman.umd.js)，初始化为
+  `appid=mxc-web-home-seo-v4`、`env=prod`；SDK 的生产收集端是后者。
+- `trochilus-web.gotoda.co`、`trochi.gotoda.co`：同一页面加载
+  [监测 SDK](https://trochilus-web.gotoda.co/trochilus-web-sdk-integration.js)，代码明确配置
+  后者为收集端，并读取 `mexc_session_uid`。
+- `e.gotoda.co`：[当前官网遥测代码](https://static.mocortech.com/production/web-v4-home-seo/65/_next/static/chunks/2oxkfm83sb7ji.js)
+  定义该精确主机为 `PUBLIC_DEPLOY_STAGE=online` 的目标，应用名同为
+  `mxc-web-home-seo-v4`。作为已确认的生产目标纳入覆盖；本轮未取得页面实际
+  `PUBLIC_DEPLOY_STAGE` 值，也未把它说成已观察到的设备请求。
+
+官网、现货/合约 API、WebSocket、帮助中心和 `app.mexc.com` 等被既有 `.mexc.com`
+覆盖。已迁入的 `static/public/customer-article/learn.mocortech.com`、四个精确 S3
+bucket、OneLink 与 GitHub 文档主机全部保留原边界。
+不扩大到 `mocortech.com`、`gotoda.co`、AWS 等共享根域；测试环境、NEL 错误报告
+候选及通用第三方平台未加入。共享 KYC/身份核验维持现有策略，不能仅靠静态主机名
+按调用 App 自动跟随香港；主机匹配测试不代表登录/交易全链路实测。
+
 ## OKX 美国住宅归属
 
 2026-10-01，按所有者要求，OKX 统一使用既有 `us-residential.conf` 的
@@ -163,12 +197,10 @@ PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`
 
 ## 2026-09 重点业务与共享身份边界
 
-MEXC 的 15 条既有第一方/专属资源曾从 UK 移至 `ch-finance.conf`；2026-09-27
-配置所有者明确要求按中心化交易所分类，现整体迁入 `crypto.conf`，不重复保留在
-其他活动资源。旧 CH 引用从 manifest、主骨架与契约退休，旧文件仅保留注释兼容入口；
-展开版同步改绑 Crypto。本轮不扩充该 15 条清单、不新增 MEXC 共享 KYC 或遥测放行，
-也不改变 Crypto 组内已选出口。分类不代表平台服务地区/账户资格保证，静态规则验收
-不等于原生 App 的登录、交易或身份核验全链路实测。
+MEXC 的历史迁移顺序为 UK → CH → Crypto；2026-10-02 已按最新要求整体迁入香港，
+并补齐有证据的品牌与精确资源，见本页最上方说明。旧 CH 引用继续退休，旧文件
+仅保留注释兼容入口；共享身份核验维持原有策略。静态规则验收不等于原生 App
+登录、交易或身份核验全链路实测。
 N26、Loqbox、Kraken/Krak、Monzo、Lloyds 沿用现有 UK 归属；Coinbase/Base、ether.fi、
 OnePay、Capital One、Equifax、PayPal、Google Account/Voice、X 与 Polymarket 沿用
 美国住宅。重点回归与证据边界见 [完整性验收](routing-completeness.md)。

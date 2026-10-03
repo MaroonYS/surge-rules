@@ -17,6 +17,15 @@
 
 ## Unreleased
 
+- 2026-10-03: Move all 32 MEXC records unchanged from Hong Kong to the existing
+  Japan finance list and Japan policy. Use one country only: no new group,
+  automatic Japan/Korea switching, or changes to other Hong Kong businesses,
+  Crypto selections, shared KYC or risk infrastructure. Update independent
+  first-match and ownership expectations and regenerate the expanded output;
+  resource and domain totals remain unchanged. The official
+  [MEXC User Agreement](https://www.mexc.com/terms) restricts Hong Kong. Routing
+  does not establish residence, account/KYC eligibility, measured latency or
+  successful app sessions. Earlier migration entries remain historical records.
 - 2026-10-02: Move all 15 existing MEXC records from Crypto to Hong Kong.
   Add the verified download host, four official notification namespaces,
   seven brand short-link namespaces and five exact monitoring SDK/collector

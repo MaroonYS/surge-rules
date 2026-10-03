@@ -13,7 +13,8 @@
 Wallet 不在这 24 App 清单；随后用户明确 Apple 按 Sukka，已有三条支付和六条账户/
 账单住宅覆盖已撤销，见 [后续决定](apple-sukka-only.md)。MEXC、N26、Loqbox、
 OnePay、其他银行/券商及共享身份/风控层保留原策略。
-其中 MEXC 已由后续 2026-10-02 明确要求覆盖为香港，见 [最新来源](domain-sources.md)；
+其中 MEXC 于 2026-10-02 曾改为香港，后由 2026-10-03 最新选择改为既有 `Japan`
+单一出口，见 [最新来源](domain-sources.md)；
 不改变本页历史 24 App 清单的成员或计数。
 
 ## 已有覆盖、迁移与去重

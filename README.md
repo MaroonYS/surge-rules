@@ -82,15 +82,15 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 | `supercell-direct.conf` | `DIRECT` | Supercell ID、账户服务与各款游戏首方域 |
 | `direct-cn.conf` | `DIRECT` | 中国大陆银行与银联 |
 | `uk-finance.conf` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定 UK 业务 |
-| `hk-finance.conf` | `Hong Kong` | 香港银行、券商、共享首方基础设施及 MEXC 的 32 条记录 |
+| `hk-finance.conf` | `Hong Kong` | 香港银行、券商及共享首方基础设施 |
 | `sg-finance.conf` | `Singapore` | 新加坡金融 |
-| `jp-finance.conf` | `Japan` | 日本金融 |
+| `jp-finance.conf` | `Japan` | 日本金融及 MEXC 的 32 条记录 |
 | `kr-finance.conf` | `Korea` | 韩国金融 |
 | `us-residential.conf` | `Res-Frontier` | 美国金融、LemFi 及已确认专属资源、X、Google Account/Voice 与 Polymarket |
 | `finance-context.conf` | `Res-Frontier` | 地区无法从主机名可靠判断的金融首方域 |
 | `identity-context.conf` | `Res-Frontier` | KYC 与身份验证共享基础设施 |
 | `risk-context.conf` | `Res-Frontier` | 设备情报、指纹与反欺诈基础设施 |
-| `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所，共 43 条域名；MEXC 已迁至香港，OKX 已迁至美国住宅 |
+| `crypto.conf` | `Crypto` | Bybit 与其他中心化交易所，共 43 条域名；MEXC 使用日本，OKX 使用美国住宅 |
 | `web3.conf` | `Web3` | 钱包、RPC、DeFi、NFT 与区块浏览器 |
 | `microsoft-cdn-download-overlap.conf` | `DIRECT` | Microsoft 中国 CDN/download 的精确交集 |
 
@@ -105,10 +105,15 @@ Brawl Stars 域名、仅 IPv4 `/32`、最多 64 条且必须携带 `no-resolve`�
 UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；HK 的精确
 `www.usmartsecurities.com` 先于共享金融父域；Web3 的两个精确 Bitget Wallet
 主机先于 Crypto 的 `.bitget.com`。校验仅允许这些具体记录在正确策略与顺序下重叠，
-不豁免其他跨地区重叠。按 2026-10-02 最新要求，MEXC 的 15 条既有记录整体迁入
-`hk-finance.conf`，再补 17 条有官网依据的记录，不重复保留在其他活动资源中。旧 `ch-finance.conf` 仅保留无活动规则的
+不豁免其他跨地区重叠。2026-10-02 为 MEXC 补齐后的 32 条记录已按
+2026-10-03 最新选择从香港整体迁入 `jp-finance.conf`，只使用既有 `Japan` 策略，
+不新增策略组或日韩自动切换，不重复保留在其他活动资源中。旧 `ch-finance.conf` 仅保留无活动规则的
 兼容空文件，不再被主规则引用；Crypto 的已有手动出口选择不变。业务分类并不保证
 服务地区或账户资格，也不表示共享 KYC 与 App 全链路已完成设备验收。
+
+本次日本选择不代表已经测得更低延迟。[MEXC 用户协议](https://www.mexc.com/terms)
+将香港列为禁止服务地区；切换网络出口不会改变实际居住地、账户或 KYC 资格，
+也不能作为虚报地区的依据。当前边界见 [域名来源](docs/domain-sources.md)。
 
 2026-09-27 的 [29 App 照片补充清单](docs/finance-photo-matrix-20260927.md)
 落实 HK 8、美国住宅 10、SG 4、UK 3，以及 Crypto 2、Web3 1、TenPayGo 中国直连。

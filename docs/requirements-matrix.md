@@ -19,22 +19,23 @@
 | `supercell-direct.conf` | `DOMAIN-SET` | `DIRECT` | Supercell 登录、账户服务与各款游戏首方域统一直连 |
 | `direct-cn.conf` | `DOMAIN-SET` | `DIRECT` | 中国大陆实体银行与银联 |
 | `uk-finance.conf` | `DOMAIN-SET` | `United Kingdom` | Trading 212、N26、Loqbox、Kraken/Krak、Monzo、Lloyds、HSBC Expat 等既定英国出口，先于 HK |
-| `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文，以及 MEXC 的 32 条记录 |
+| `hk-finance.conf` | `DOMAIN-SET` | `Hong Kong` | 香港银行、Futu/Moomoo、Longbridge 等香港账户上下文 |
 | `sg-finance.conf` | `DOMAIN-SET` | `Singapore` | 新加坡实体银行与券商 |
-| `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商 |
+| `jp-finance.conf` | `DOMAIN-SET` | `Japan` | 日本实体银行与券商，以及 MEXC 的 32 条记录 |
 | `kr-finance.conf` | `DOMAIN-SET` | `Korea` | 韩国实体银行 |
 | `us-residential.conf` | `DOMAIN-SET` | `Res-Frontier` | 美国金融、LemFi 的首方及精确专属资源、信用、X Money、Google Account/Voice、Polymarket |
 | `finance-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 无法仅由主机名判断地区的金融首方域 |
 | `identity-context.conf` | `DOMAIN-SET` | `Res-Frontier` | KYC/身份验证共享基础设施 |
 | `risk-context.conf` | `DOMAIN-SET` | `Res-Frontier` | 指纹、设备情报、反欺诈基础设施 |
-| `crypto.conf` | `DOMAIN-SET` | `Crypto` | Bybit 与其余中心化交易所，共 43 条域名；MEXC 归香港，OKX 归美国住宅，其余沿用组内已选出口 |
+| `crypto.conf` | `DOMAIN-SET` | `Crypto` | Bybit 与其余中心化交易所，共 43 条域名；MEXC 归日本，OKX 归美国住宅，其余沿用组内已选出口 |
 | `web3.conf` | `DOMAIN-SET` | `Web3` | 钱包、RPC、DeFi、NFT、浏览器 |
 | `microsoft-cdn-download-overlap.conf` | `DOMAIN-SET` | `DIRECT` | 修复 38 个 Microsoft 中国 CDN 下载域被香港下载集合抢先的问题 |
 
 ## 明确不加载
 
-- MEXC 的旧 `ch-finance.conf`：按 2026-10-02 最新要求整体迁入现有香港资源，旧 URL 仅保留注释空文件。
-  不重复添加 MEXC，不改 Crypto 组的手动选择，也不恢复瑞士专用引用。
+- MEXC 的旧 `ch-finance.conf`：旧 URL 仅保留注释空文件。2026-10-02 曾迁香港，
+  2026-10-03 最新要求改为只使用既有日本策略，32 条记录整体归 `jp-finance.conf`。
+  不重复添加 MEXC，不改 Crypto 组的手动选择，不恢复瑞士引用或新建日韩自动组。
 - Apple 全域、系统更新、iCloud、证书与 APNs 的自定义覆盖；支付/账户/账单九条住宅
   规则和设备 Private Relay 住宅绑定均已撤销；Private Relay 官方订阅保留并改绑普通美国，
   基础层共复用五个 Sukka Apple 资源。不得以去重为由删除原先已启用的 Sukka 订阅。
@@ -58,6 +59,8 @@ iCloud、Polymarket 等保护性排除仍由 `module-compatibility.json` 与
 
 ## 认证与运行验收
 
+2026-10-03 的日本出口选择不是延迟实测结论。[MEXC 用户协议](https://www.mexc.com/terms)
+明确限制香港，网络路由也不改变实际居住地、账户或 KYC 资格。
 共享身份清单保持原样；N26/Loqbox/MEXC 的新增共享认证地区绑定未部署。
 不能把 SDK 默认地址当成实际会话主机，也不能用供应商重合证明跨 App 主机冲突。
 静态测试重点覆盖已点名的第一方业务、窄例外和反例；登录、验证码、KYC、支付与

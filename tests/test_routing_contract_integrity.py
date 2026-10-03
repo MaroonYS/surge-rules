@@ -84,19 +84,19 @@ class RoutingContractIntegrityTests(unittest.TestCase):
         crypto = build_expanded.read_domain_entries(ROOT / "crypto.conf")
         self.assertEqual(43, len(crypto))
         self.assertEqual(len(crypto), len(set(crypto)))
-        hk = build_expanded.read_domain_entries(ROOT / "hk-finance.conf")
-        self.assertTrue(MEXC_ENTRIES.issubset(hk))
-        self.assertEqual(len(hk), len(set(hk)))
+        jp = build_expanded.read_domain_entries(ROOT / "jp-finance.conf")
+        self.assertTrue(MEXC_ENTRIES.issubset(jp))
+        self.assertEqual(len(jp), len(set(jp)))
         manifest = json.loads((ROOT / "rules-manifest.json").read_text())
         self.assertNotIn("ch-finance.conf", {item["file"] for item in manifest["active"]})
         self.assertEqual([], build_expanded.read_domain_entries(ROOT / "ch-finance.conf"))
         for item in manifest["active"]:
-            if item["file"] != "hk-finance.conf":
+            if item["file"] != "jp-finance.conf":
                 with self.subTest(source=item["file"]):
                     self.assertTrue(MEXC_ENTRIES.isdisjoint(
                         build_expanded.read_domain_entries(ROOT / item["file"])))
 
-    def test_mexc_routes_to_hk_in_generated_and_committed_output(self) -> None:
+    def test_mexc_routes_to_japan_in_generated_and_committed_output(self) -> None:
         outputs = {
             "generated": build_expanded.render_expanded(ROOT),
             "committed": (ROOT / "surge-expanded.conf").read_text(),
@@ -108,7 +108,7 @@ class RoutingContractIntegrityTests(unittest.TestCase):
                     hosts.append("api" + entry)
                 for host in hosts:
                     with self.subTest(output=label, host=host):
-                        self.assertEqual("Hong Kong", first_inline_domain_policy(text, host))
+                        self.assertEqual("Japan", first_inline_domain_policy(text, host))
                 if not entry.startswith("."):
                     with self.subTest(output=label, exact_host=entry):
                         self.assertIsNone(first_inline_domain_policy(text, "child." + entry))

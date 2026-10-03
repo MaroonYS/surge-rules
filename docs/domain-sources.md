@@ -3,11 +3,22 @@
 本页记录新增或调整的金融域名。活动规则优先收录机构第一方域名及有证据的专属资源；
 登记册用于确认机构身份，具体主机以机构官网为最终依据。金融表格核对日期：2026-07-30；Capital One/Equifax 与 Polymarket 补充核对日期：2026-08-20；FUTU/Moomoo 地区复核日期：2026-08-24。
 
-## MEXC 香港归属（2026-10-02）
+## MEXC 当前归属：日本单一出口（2026-10-03）
 
-按所有者最新要求，`crypto.conf` 的 15 条既有 MEXC 后缀与精确资源全部迁入
+按所有者最新选择，MEXC 只使用日本，不创建日韩自动策略组。将下节已确认的
+全部 32 条记录从 `hk-finance.conf` 原样移入现有 `jp-finance.conf`，复用其
+`Japan,extended-matching` 绑定，不改其他香港业务或共享身份/风控资源。
+本次没有可靠的节点延迟对比，不能把日本描述为实测更快；也未验收登录、KYC、
+交易或 iPhone 原生链路。[MEXC 用户协议](https://www.mexc.com/terms)于本次核查时
+将香港列为禁止服务地区。路由选择不改变用户实际居住地或账户/KYC 资格，不保证
+地区提醒消失，也不能作为虚报地区的依据。
+
+## MEXC 域名补齐与历史香港迁移（2026-10-02）
+
+按当时要求，`crypto.conf` 的 15 条既有 MEXC 后缀与精确资源全部迁入
 `hk-finance.conf`，复用现有 `Hong Kong,extended-matching`，不增加订阅或策略组。
-旧 CH 文件继续为空。再补以下 17 条，现共 32 条 MEXC 记录：
+此为历史归属，当前以以上 2026-10-03 日本选择为准。旧 CH 文件继续为空。
+当时再补以下 17 条，现共 32 条 MEXC 记录，来源与精确边界继续保留：
 
 - `download.mocortech.com`：官方 [App/Web 帮助](https://www.mexc.com/support/app-web)
   明确 APK 下载域；[Lite App 安装说明](https://www.mexc.com/announcements/article/how-to-use-mexc-via-lite-app-17827791527902)
@@ -35,7 +46,7 @@
 bucket、OneLink 与 GitHub 文档主机全部保留原边界。
 不扩大到 `mocortech.com`、`gotoda.co`、AWS 等共享根域；测试环境、NEL 错误报告
 候选及通用第三方平台未加入。共享 KYC/身份核验维持现有策略，不能仅靠静态主机名
-按调用 App 自动跟随香港；主机匹配测试不代表登录/交易全链路实测。
+按调用 App 自动跟随 MEXC 的指定地区；主机匹配测试不代表登录/交易全链路实测。
 
 ## OKX 美国住宅归属
 
@@ -197,8 +208,8 @@ PayPal 第一方域仍因当前美国账户场景收录在 `us-residential.conf`
 
 ## 2026-09 重点业务与共享身份边界
 
-MEXC 的历史迁移顺序为 UK → CH → Crypto；2026-10-02 已按最新要求整体迁入香港，
-并补齐有证据的品牌与精确资源，见本页最上方说明。旧 CH 引用继续退休，旧文件
+MEXC 的历史迁移顺序为 UK → CH → Crypto → Hong Kong；2026-10-03 最新选择为日本，
+32 条有证据的品牌与精确资源整体归 `jp-finance.conf`，见本页最上方说明。旧 CH 引用继续退休，旧文件
 仅保留注释兼容入口；共享身份核验维持原有策略。静态规则验收不等于原生 App
 登录、交易或身份核验全链路实测。
 N26、Loqbox、Kraken/Krak、Monzo、Lloyds 沿用现有 UK 归属；Coinbase/Base、ether.fi、

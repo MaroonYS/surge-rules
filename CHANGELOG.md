@@ -17,6 +17,18 @@
 
 ## Unreleased
 
+- 2026-10-21: Establish the MEXC single-source maintenance and duplicate-cleanup
+  contract: keep all 32 records in GitHub's jp-finance.conf, while Mac and iCloud
+  profiles retain only the existing Japan DOMAIN-SET reference, without separate
+  MEXC inline overrides. Keep surge-expanded.conf as generated audit output;
+  do not import it into these device profiles. Require verified resource content
+  and loading before removing duplicate overrides, and diagnose download failures
+  instead of retaining a second inline rule inventory. Removed the exact 32-rule
+  duplicate block from the Mac and iCloud source profiles after checking native
+  cached resource bytes against GitHub; both profiles passed native syntax checks,
+  and the Mac was reloaded with its existing mode, selections and feature flags
+  unchanged. iPhone runtime acceptance remains unverified; this does not change
+  account or regional eligibility.
 - 2026-10-03: Move all 32 MEXC records unchanged from Hong Kong to the existing
   Japan finance list and Japan policy. Use one country only: no new group,
   automatic Japan/Korea switching, or changes to other Hong Kong businesses,

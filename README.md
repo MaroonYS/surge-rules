@@ -111,6 +111,18 @@ UK 的 `.expat.hsbc.com` 必须先于 HK 的 `.hsbc.com`；HK 的精确
 兼容空文件，不再被主规则引用；Crypto 的已有手动出口选择不变。业务分类并不保证
 服务地区或账户资格，也不表示共享 KYC 与 App 全链路已完成设备验收。
 
+2026-10-21 明确集中维护边界：MEXC 的 32 条记录只在 GitHub 的
+`jp-finance.conf` 维护。Mac 与 iCloud 配置保留现有的以下引用，不额外复制
+MEXC 的 `DOMAIN` / `DOMAIN-SUFFIX` 内联覆盖：
+
+```ini
+DOMAIN-SET,https://raw.githubusercontent.com/MaroonYS/surge-rules/main/jp-finance.conf,Japan,extended-matching
+```
+
+`surge-expanded.conf` 是生成的展开核对产物，本次设备配置不导入该展开版。
+远程资源下载失败时应排查下载并确认新内容加载，不能用长期内联副本替代订阅维护。
+移除旧覆盖前须先确认目标资源内容；配置源更新不等于 iPhone 已现场加载或验收。
+
 本次日本选择不代表已经测得更低延迟。[MEXC 用户协议](https://www.mexc.com/terms)
 将香港列为禁止服务地区；切换网络出口不会改变实际居住地、账户或 KYC 资格，
 也不能作为虚报地区的依据。当前边界见 [域名来源](docs/domain-sources.md)。
@@ -172,8 +184,9 @@ DC JSON。IPv6 当前未启用，因此不加载 China IPv6 资源。`nano.cr18.
 
 ## 接入与校验
 
-`surge-main.conf` 是远程资源版；`surge-expanded.conf` 仅用于审计和整段复制，
-由生成器维护。接入前应确认策略组存在：`Res-Frontier`、`PROXY`、`Hong Kong`、
+`surge-main.conf` 是远程资源版；`surge-expanded.conf` 是由生成器维护的展开核对产物，
+本次 Mac 与 iCloud 配置继续使用远程资源引用，不导入展开版。
+接入前应确认策略组存在：`Res-Frontier`、`PROXY`、`Hong Kong`、
 `Singapore`、`Japan`、`Korea`、`United Kingdom`、`United States`、`Crypto`、
 `Web3`。
 
